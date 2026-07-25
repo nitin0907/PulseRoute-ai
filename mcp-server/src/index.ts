@@ -69,17 +69,20 @@ const TRANSPORT = (process.env.TRANSPORT ?? "http").toLowerCase();
 // Orchestrate proxy configuration
 // ---------------------------------------------------------------------------
 
-const ORCHESTRATE_INSTANCE_ID = "61a7cca026674cb69f1c4e32e8c5c982";
-const ORCHESTRATE_HOST        = "ca-tor.watson-orchestrate.cloud.ibm.com";
+const ORCHESTRATE_INSTANCE_ID = "9291f63d-e948-4929-9c62-56eecfb515ad";
+const ORCHESTRATE_HOST        = "api.ca-tor.watson-orchestrate.cloud.ibm.com";
 const ORCHESTRATE_AGENT_ID    = "f5bb4d34-12e0-466b-9858-6304e52bc4b7";
 const IAM_TOKEN_URL           = "https://iam.cloud.ibm.com/identity/token";
 
-// Candidate API paths tried in order until one succeeds (not 301/404).
+// Full confirmed base URL:
+//   https://api.ca-tor.watson-orchestrate.cloud.ibm.com/instances/9291f63d-e948-4929-9c62-56eecfb515ad
+// Candidate API paths tried in order until one succeeds.
 const ORCHESTRATE_API_CANDIDATES = [
   `/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,
   `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
-  `/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,
-  `/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
+  `/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/chat`,
+  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/chat`,
+  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/invoke`,
 ];
 
 // IAM token cache
@@ -224,9 +227,15 @@ async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promis
     sseDone(); return;
   }
 
+  // Build request body — try both Orchestrate v2 schema and v1 schema.
+  // v2: { input: { text: "..." } }
+  // v1: { message: "..." }
+  // We send v2 format; the candidate fallback handles version mismatches.
+  const incidentText = JSON.stringify(payload);
   const orchBody = JSON.stringify({
-    input:  { message: JSON.stringify(payload) },
-    stream: true,
+    input:   { text: incidentText },   // v2 schema
+    message: incidentText,             // v1 schema (ignored by v2, accepted by v1)
+    stream:  true,
   });
 
   // Delegate to the redirect-following multi-candidate function
@@ -304,7 +313,12 @@ function postToOrchestrate(
     if (status >= 400) {
       let errBody = "";
       orchRes.on("data", (c: Buffer) => (errBody += c));
-      orchRes.on("end", () => { sseWrite("error", { ts: now(), message: `Orchestrate ${status}: ${errBody.slice(0, 400)}` }); sseDone(); });
+      orchRes.on("end", () => {
+        // Show full error body so the correct API path is visible in MCP console
+        sseWrite("thought", { ts: now(), content: `Orchestrate ${status} body: ${errBody.slice(0, 800)}` });
+        sseWrite("error",   { ts: now(), message: `Orchestrate ${status} on https://${apiHost}${apiPath}` });
+        sseDone();
+      });
       return;
     }
 
