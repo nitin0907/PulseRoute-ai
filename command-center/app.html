@@ -756,26 +756,54 @@ function injectIntoWidget(message) {
   const WXO_INSTANCE_URL = "https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/9291f63d-e948-4929-9c62-56eecfb515ad";
 
   // Called by ACTIVATE DISPATCH and by the Open Mission Commander button.
-  // Opens Orchestrate in a new tab with the incident pre-typed in the chat.
+  // Opens Orchestrate /chat in a new tab with the incident pre-filled via ?message=
   function openMissionCommander(prefillMessage) {
     const msg = prefillMessage || buildIncidentMessage();
-    // Try the /chat URL first — this is the direct chat interface
-    // ?message= pre-fills the input if Orchestrate supports it
-    const url = WXO_CHAT_URL + '?message=' + encodeURIComponent(msg);
+    const url = WXO_CHAT_URL
+      + '?message=' + encodeURIComponent(msg)
+      + '&agentId=' + encodeURIComponent('f5bb4d34-12e0-466b-9858-6304e52bc4b7');
     window.open(url, 'mission-commander');
     const status = document.getElementById('mc-status');
-    if (status) status.textContent = '✓ Opened in new tab — paste incident if not auto-filled';
-    setTimeout(() => { if (status) status.textContent = ''; }, 5000);
+    if (status) {
+      status.innerHTML =
+        '✓ Mission Commander opened — message pre-filled.<br>' +
+        '<span style="color:#58a6ff;cursor:pointer" onclick="copyIncidentToClipboard()">📋 Copy incident to clipboard</span>';
+    }
+  }
+
+  // Fallback — copies the incident message to clipboard so user can paste manually
+  function copyIncidentToClipboard() {
+    const msg = buildIncidentMessage();
+    navigator.clipboard.writeText(msg).then(() => {
+      const status = document.getElementById('mc-status');
+      if (status) status.textContent = '✓ Copied — paste in the Mission Commander chat tab';
+    });
   }
 
   function buildIncidentMessage() {
     const desc     = document.getElementById('incident-text')?.value || '';
     const itype    = document.getElementById('incident-type')?.value || '';
     const priority = document.getElementById('incident-priority')?.value || '';
+    // Resolve location coordinates from description text
+    const LOCALITY_COORDS = {
+      'silk board':[12.9176,77.6237],'koramangala':[12.9352,77.6245],
+      'whitefield':[12.9698,77.7500],'hebbal':[12.9850,77.5760],
+      'marathahalli':[12.9591,77.6974],'electronic city':[12.8399,77.6770],
+      'yeshwanthpur':[13.0283,77.5524],'indiranagar':[12.9784,77.6408],
+      'jayanagar':[12.9299,77.5826],'rajajinagar':[12.9900,77.5560],
+      'yelahanka':[13.1005,77.5963],'btm layout':[12.9166,77.6101],
+      'bellandur':[12.9279,77.6756],'bommanahalli':[12.9083,77.6476],
+    };
+    const descLow = desc.toLowerCase();
+    let lat = 12.9176, lng = 77.6237, locName = 'Bengaluru';
+    for (const [key, coords] of Object.entries(LOCALITY_COORDS)) {
+      if (descLow.includes(key)) { lat = coords[0]; lng = coords[1]; locName = key; break; }
+    }
     return (
       'EMERGENCY DISPATCH REQUEST\n' +
       'Description: ' + desc + '\n' +
       'Type: ' + itype + ' | Priority: ' + priority + '\n' +
+      'Location: ' + locName + ' (' + lat.toFixed(4) + ', ' + lng.toFixed(4) + ')\n' +
       'Reported: ' + new Date().toISOString() + '\n\n' +
       'Please activate full dispatch: find nearest ambulance, select hospital, ' +
       'assess traffic, calculate route, and activate green corridor.'
