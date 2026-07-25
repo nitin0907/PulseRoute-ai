@@ -244,20 +244,22 @@ function postToOrchestrate(
   sseDone: () => void,
   now: () => string,
   candidateIndex: number,
-  overridePath?: string
+  overridePath?: string,
+  overrideHost?: string        // set when a redirect points to a different hostname
 ): void {
-  const apiPath = overridePath ?? ORCHESTRATE_API_CANDIDATES[candidateIndex];
+  const apiPath  = overridePath ?? ORCHESTRATE_API_CANDIDATES[candidateIndex];
+  const apiHost  = overrideHost ?? ORCHESTRATE_HOST;
   if (!apiPath) {
     sseWrite("error", { ts: now(), message: "All Orchestrate API path candidates exhausted. Check Railway logs for the correct URL." });
     sseDone();
     return;
   }
 
-  console.error(`[Proxy] POST https://${ORCHESTRATE_HOST}${apiPath}`);
-  sseWrite("thought", { ts: now(), content: `[proxy] Calling Orchestrate: ${apiPath}` });
+  console.error(`[Proxy] POST https://${apiHost}${apiPath}`);
+  sseWrite("thought", { ts: now(), content: `[proxy] Calling Orchestrate: https://${apiHost}${apiPath}` });
 
   const orchReq = https.request({
-    hostname: ORCHESTRATE_HOST,
+    hostname: apiHost,
     path:     apiPath,
     method:   "POST",
     headers: {
@@ -271,17 +273,23 @@ function postToOrchestrate(
     const status = orchRes.statusCode ?? 500;
     console.error(`[Proxy] Orchestrate → ${status} ${ct}`);
 
-    // Follow redirects
+    // Follow redirects — extract BOTH host and path from Location header
     if (status === 301 || status === 302 || status === 307 || status === 308) {
       const location = orchRes.headers["location"] ?? "";
       console.error(`[Proxy] Redirect ${status} → ${location}`);
       sseWrite("thought", { ts: now(), content: `[proxy] Redirect ${status} → ${location}` });
       orchRes.on("data", () => {});
       orchRes.on("end", () => {
+        let nextHost: string = apiHost;
         let nextPath: string;
-        try { nextPath = new URL(location).pathname; }
-        catch { nextPath = location; }
-        postToOrchestrate(orchBody, token, sseWrite, sseDone, now, candidateIndex + 1, nextPath);
+        try {
+          const loc = new URL(location);
+          nextHost = loc.hostname;           // ← carry the new host (e.g. dev-wa.watson-orchestrate.ibm.com)
+          nextPath = loc.pathname + loc.search;
+        } catch {
+          nextPath = location;
+        }
+        postToOrchestrate(orchBody, token, sseWrite, sseDone, now, candidateIndex, nextPath, nextHost);
       });
       return;
     }
