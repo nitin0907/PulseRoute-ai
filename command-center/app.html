@@ -694,21 +694,183 @@ function runSimulation() {
     `Reported: ${new Date().toISOString()}\n\n` +
     `Please activate full dispatch: find nearest ambulance, select hospital, assess traffic, calculate route, and activate green corridor.`;
 
-  // ── Open Mission Commander in a new tab with the incident pre-filled ───
+  // ── Clear previous result from server, then open Mission Commander ─────
+  fetch('/api/result', { method: 'DELETE' }).catch(() => {});
+
   openMissionCommander(chatMessage);
 
   setTL('intake', 'done', '✓ Incident sent to Mission Commander');
-  setTL('coordinator', 'running', 'Mission Commander reasoning in new tab...');
+  setTL('coordinator', 'running', 'Mission Commander reasoning...');
   mcpLog('agent', '[mission-commander]',
-    `Incident dispatched to Mission Commander (new tab).\n\n${chatMessage}`, t());
+    `Incident dispatched to Mission Commander.\n\n${chatMessage}`, t());
 
   // Re-enable button
+  btn.disabled = false;
+  document.getElementById('btn-spinner').style.display = 'none';
+  document.getElementById('btn-text').textContent = 'RE-RUN DISPATCH';
+  running = false;
+
+  // ── Start polling /api/result for Mission Commander output ────────────
+  startResultPolling(t);
+}
+
+let _pollInterval = null;
+function startResultPolling(t) {
+  if (_pollInterval) clearInterval(_pollInterval);
+  const status = document.getElementById('mc-status');
+  if (status) status.textContent = '⏳ Waiting for Mission Commander response...';
+
+  _pollInterval = setInterval(async () => {
+    try {
+      const res  = await fetch('/api/result');
+      const json = await res.json();
+      if (!json.has_result || !json.result) return;
+
+      // Result arrived — stop polling and populate dashboard
+      clearInterval(_pollInterval);
+      _pollInterval = null;
+      if (status) status.textContent = '✅ Mission Commander responded';
+
+      const r = json.result;
+      mcpLog('agent', '[mission-commander]',
+        'Response received from Orchestrate workflow:\n' + JSON.stringify(r, null, 2), t());
+
+      applyResultToDashboard(r, t);
+    } catch(e) {
+      // network error — keep polling
+    }
+  }, 2000);
+
+  // Stop polling after 5 minutes regardless
   setTimeout(() => {
-    btn.disabled = false;
-    document.getElementById('btn-spinner').style.display = 'none';
-    document.getElementById('btn-text').textContent = 'RE-RUN DISPATCH';
-    running = false;
-  }, 800);
+    if (_pollInterval) {
+      clearInterval(_pollInterval);
+      _pollInterval = null;
+      const s = document.getElementById('mc-status');
+      if (s && s.textContent.includes('Waiting')) {
+        s.textContent = 'No response received. Check Mission Commander tab.';
+      }
+    }
+  }, 300_000);
+}
+
+function applyResultToDashboard(r, t) {
+  const now = t || (() => new Date().toISOString().slice(11,19));
+
+  // Ambulance
+  if (r.ambulance) {
+    const a = r.ambulance;
+    DATA.ambulances.primary = {
+      id: a.ambulance_id, sign: a.call_sign, type: a.type,
+      lat: a.latitude || a.current_lat, lng: a.longitude || a.current_lng,
+      locality: a.locality || a.current_locality, dist: a.distance_km, eta: a.eta_minutes,
+      crew: a.crew || '', ch: a.comms_channel || ''
+    };
+    mcpLog('resp', '◀ find_nearest_available_ambulance',
+      JSON.stringify(a, null, 2), now());
+    setTL('ambulance', 'done', `✓ ${a.ambulance_id} ${a.type} · ${a.eta_minutes} min`);
+  }
+  if (r.backup_ambulances && r.backup_ambulances[0]) {
+    const b = r.backup_ambulances[0];
+    DATA.ambulances.backup = {
+      id: b.ambulance_id, sign: b.call_sign, type: b.type,
+      lat: b.latitude || b.current_lat, lng: b.longitude || b.current_lng,
+      locality: b.locality || b.current_locality, dist: b.distance_km, eta: b.eta_minutes,
+      crew: b.crew || '', ch: b.comms_channel || ''
+    };
+  }
+  drawAmbulance([DATA.ambulances.primary, DATA.ambulances.backup].filter(Boolean));
+
+  // Hospital
+  if (r.hospital) {
+    const h = r.hospital;
+    DATA.hospitals.primary = {
+      id: h.hospital_id, name: h.name || h.hospital_name,
+      lat: h.latitude, lng: h.longitude,
+      level: h.trauma_level || '', cap: h.mass_casualty_capacity || 0,
+      beds: h.available_beds, phone: h.phone || ''
+    };
+    mcpLog('resp', '◀ select_hospital', JSON.stringify(h, null, 2), now());
+    setTL('hospital', 'done', `✓ ${h.name || h.hospital_name}`);
+    addMapOverlay(`<span style="color:var(--green)">🏥</span> ${h.name || h.hospital_name}`);
+  }
+
+  // Traffic
+  if (r.traffic) {
+    const tr = r.traffic;
+    DATA.traffic = {
+      congestion: tr.congestion_level, score: tr.congestion_score,
+      delay: tr.expected_delay_minutes, peak: tr.peak_hour_active,
+      signals: (tr.affected_signals || []).map(s => ({
+        id: s.signal_id, name: s.name, lat: s.latitude, lng: s.longitude,
+        idx: s.congestion_index, preempt: s.preempt_capable
+      }))
+    };
+    mcpLog('resp', '◀ traffic_assessment', JSON.stringify(tr, null, 2), now());
+    setTL('traffic', 'done', `✓ ${tr.congestion_level} ${tr.congestion_score}/10`);
+    const col = tr.congestion_level === 'CRITICAL' ? 'var(--red)' : 'var(--amber)';
+    addMapOverlay(`<span style="color:${col}">● ${tr.congestion_level}</span>`);
+  }
+
+  // Route
+  if (r.route) {
+    const rt = r.route;
+    if (rt.leg_a) {
+      setTL('routeA', 'done', `✓ ${rt.leg_a.road_name || rt.leg_a.road_id} · ${rt.leg_a.distance_km} km · ${rt.leg_a.eta_minutes} min`);
+    }
+    if (rt.leg_b) {
+      setTL('routeB', 'done', `✓ ${rt.leg_b.road_name || rt.leg_b.road_id} · ${rt.leg_b.distance_km} km · ${rt.leg_b.eta_minutes} min`);
+      document.getElementById('eta-before').innerHTML = rt.leg_b.eta_minutes + '<span class="eta-unit">min</span>';
+    }
+    drawRoute();
+    mcpLog('resp', '◀ calculate_route', JSON.stringify(rt, null, 2), now());
+  }
+
+  // Green corridor
+  if (r.corridor && r.corridor.active) {
+    DATA.corridor = {
+      eta_before: r.corridor.eta_before_minutes,
+      eta_after:  r.corridor.eta_after_minutes,
+      saved:      r.corridor.time_saved_minutes
+    };
+    drawGreenCorridor();
+    document.getElementById('green-badge').style.display = 'inline';
+    addMapOverlay('<span style="color:var(--green)">🟢 CORRIDOR LIVE</span>');
+    document.getElementById('eta-after').innerHTML = r.corridor.eta_after_minutes + '<span class="eta-unit">min</span>';
+    document.getElementById('eta-saved').innerHTML = r.corridor.time_saved_minutes + '<span class="eta-unit">min</span>';
+    setTL('green', 'done', `✓ ${(r.corridor.preempted_signals || []).join(' + ')} · ${r.corridor.time_saved_minutes} min saved`);
+  }
+
+  // Final decision
+  setTL('coordinator', 'done', `✓ ${r.status || 'COMPLETE'} · Confidence ${r.confidence || '—'}`);
+  document.getElementById('sys-status').textContent = '● DISPATCH ACTIVE';
+  document.getElementById('sys-status').className   = 'badge badge-green';
+
+  // Decision panel
+  const amb  = r.ambulance || {};
+  const bak  = (r.backup_ambulances || [])[0] || {};
+  const hosp = r.hospital || {};
+  const alt  = r.alternate_hospital || {};
+  const cor  = r.corridor || {};
+  const cards = [
+    { label: 'Dispatch Unit',      value: `${amb.ambulance_id || '—'} · ${amb.call_sign || '—'}`,  sub: `${amb.type || ''} · ${amb.locality || ''}` },
+    { label: 'Backup Unit',        value: `${bak.ambulance_id || '—'} · ${bak.call_sign || '—'}`,   sub: `${bak.type || ''} · ${bak.locality || ''}` },
+    { label: 'Primary Hospital',   value: hosp.name || hosp.hospital_name || '—', sub: `${hosp.trauma_level ? 'Level ' + hosp.trauma_level : ''} · ${hosp.available_beds || 0} beds` },
+    { label: 'Alternate Hospital', value: alt.name  || alt.hospital_name  || '—', sub: `${alt.available_beds || 0} beds · ${alt.locality || ''}` },
+    { label: 'SOP Activated',      value: r.sop_code || '—', sub: '' },
+    { label: 'Status',             value: r.status   || '—', sub: '' },
+    { label: 'Time Saved',         value: cor.time_saved_minutes != null ? cor.time_saved_minutes + ' min' : '—', sub: `Before: ${cor.eta_before_minutes || '—'} → After: ${cor.eta_after_minutes || '—'} min` },
+    { label: 'Confidence',         value: r.confidence != null ? r.confidence.toFixed(2) + ' / 1.00' : '—', sub: '' },
+  ];
+  document.getElementById('decision-pending').style.display = 'none';
+  document.getElementById('decision-content').style.display = 'block';
+  document.getElementById('decision-grid').innerHTML = cards.map(c =>
+    `<div class="dec-card"><div class="dec-card-label">${c.label}</div>` +
+    `<div class="dec-card-value">${c.value}</div>` +
+    `<div class="dec-card-sub">${c.sub}</div></div>`
+  ).join('');
+  document.getElementById('decision-note').innerHTML =
+    `<span style="color:var(--amber)">⚠ COORDINATOR NOTE:</span> ${r.notes || ''}`;
 }
 
 // (injectIntoWidget retained for future use but no longer called)

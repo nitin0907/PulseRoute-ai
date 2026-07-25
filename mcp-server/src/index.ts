@@ -65,6 +65,10 @@ import {
 const PORT      = parseInt(process.env.PORT ?? "3000", 10);
 const TRANSPORT = (process.env.TRANSPORT ?? "http").toLowerCase();
 
+// In-memory store for the latest Mission Commander result posted via webhook
+let _latestResult:    unknown = null;
+let _resultTimestamp: number  = 0;
+
 // ---------------------------------------------------------------------------
 // Orchestrate proxy configuration
 // ---------------------------------------------------------------------------
@@ -539,6 +543,62 @@ async function startHttpServer(): Promise<void> {
       if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
         res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
         res.end(getAppHtml());
+        return;
+      }
+
+      // ── Webhook receiver — Orchestrate posts Mission Commander output here ─
+      // POST /api/result   { ...mission commander JSON response... }
+      // GET  /api/result   app.html polls this to get the latest result
+      // DELETE /api/result clears the stored result
+      if (req.method === "POST" && url.pathname === "/api/result") {
+        const chunks: Buffer[] = [];
+        for await (const chunk of req) chunks.push(chunk as Buffer);
+        const body = Buffer.concat(chunks).toString("utf-8");
+        try {
+          _latestResult = JSON.parse(body);
+          _resultTimestamp = Date.now();
+          console.error(`[Webhook] Result received at ${new Date().toISOString()}`);
+          res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          });
+          res.end(JSON.stringify({ ok: true, received_at: new Date().toISOString() }));
+        } catch {
+          res.writeHead(400, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: "Invalid JSON body" }));
+        }
+        return;
+      }
+
+      if (req.method === "GET" && url.pathname === "/api/result") {
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-store",
+        });
+        res.end(JSON.stringify({
+          result:    _latestResult,
+          timestamp: _resultTimestamp,
+          has_result: _latestResult !== null,
+        }));
+        return;
+      }
+
+      if (req.method === "DELETE" && url.pathname === "/api/result") {
+        _latestResult    = null;
+        _resultTimestamp = 0;
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.end(JSON.stringify({ ok: true }));
+        return;
+      }
+
+      if (req.method === "OPTIONS" && url.pathname === "/api/result") {
+        res.writeHead(204, {
+          "Access-Control-Allow-Origin":  "*",
+          "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type, Authorization",
+        });
+        res.end();
         return;
       }
 
