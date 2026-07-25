@@ -277,26 +277,34 @@ textarea{height:80px}
       <div style="color:var(--muted);font-size:11px;padding:20px 0;text-align:center">Awaiting dispatch activation...<br/><span style="font-size:10px;opacity:.5">pulseroute-mcp v1.0.0 — http transport</span></div>
     </div>
     <div class="panel-hdr"><div class="dot dot-purple"></div>Mission Commander — Live Agent</div>
-    <div id="decision" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden">
-      <div id="decision-pending" style="color:var(--muted);font-size:11px;padding:8px 14px;text-align:center;flex-shrink:0">Awaiting resource coordinator synthesis...</div>
-      <div id="decision-content" style="display:none;flex-shrink:0">
+    <div id="decision" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;padding:14px">
+      <div id="decision-pending" style="color:var(--muted);font-size:11px;padding:4px 0 10px;text-align:center">Awaiting dispatch activation...</div>
+      <div id="decision-content" style="display:none">
         <div class="decision-grid" id="decision-grid"></div>
         <div id="decision-note" style="margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-size:11px;color:var(--muted);line-height:1.6"></div>
       </div>
-      <!-- Mission Commander — iframe into Orchestrate instance (requires IBM Cloud session) -->
-      <div style="flex:1;min-height:0;display:flex;flex-direction:column;border-top:1px solid var(--border);margin-top:6px;position:relative">
-        <iframe
-          id="wxo-iframe"
-          src="https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/9291f63d-e948-4929-9c62-56eecfb515ad"
-          style="flex:1;width:100%;border:none;background:var(--card);min-height:320px"
-          allow="microphone; camera"
-          title="Mission Commander — watsonx Orchestrate"
-        ></iframe>
-        <div id="iframe-overlay" style="position:absolute;inset:0;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center">
-          <div style="font-size:13px;font-weight:600;color:#e6edf3">Mission Commander</div>
-          <div style="font-size:11px;color:#8b949e;line-height:1.6">Open this page in a browser where<br>you are logged into IBM Cloud,<br>or click below to log in.</div>
-          <button onclick="document.getElementById('wxo-iframe').src='https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/9291f63d-e948-4929-9c62-56eecfb515ad';document.getElementById('iframe-overlay').style.display='none'" style="background:#0f62fe;color:#fff;border:none;padding:7px 16px;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600">▶ Load Agent</button>
-          <a href="https://cloud.ibm.com" target="_blank" style="font-size:11px;color:#58a6ff">Log in to IBM Cloud →</a>
+      <!-- Mission Commander launch card -->
+      <div id="mc-launch-card" style="margin-top:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
+        <div style="font-size:12px;font-weight:700;color:#bc8cff;letter-spacing:.5px;margin-bottom:6px">MISSION COMMANDER</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:14px">
+          Click <strong style="color:var(--text)">ACTIVATE DISPATCH</strong> to send the incident<br>
+          to Mission Commander in watsonx Orchestrate.<br>
+          The agent will open in a new tab, authenticated.
+        </div>
+        <button id="mc-open-btn" onclick="openMissionCommander()"
+          style="width:100%;padding:9px;background:#6929c4;color:#fff;border:none;border-radius:6px;
+                 font-weight:700;font-size:12px;cursor:pointer;letter-spacing:.3px;margin-bottom:10px">
+          ⚡ Open Mission Commander
+        </button>
+        <div id="mc-status" style="font-size:10px;color:var(--muted);min-height:14px"></div>
+        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Agent Details</div>
+          <div style="font-size:10px;color:var(--muted);text-align:left;line-height:1.8">
+            <span style="color:#57606a">Agent ID:</span> <span style="color:var(--text)">f5bb4d34...bc4b7</span><br>
+            <span style="color:#57606a">Instance:</span> <span style="color:var(--text)">9291f63d...15ad</span><br>
+            <span style="color:#57606a">Region:</span> <span style="color:var(--text)">ca-tor (Toronto)</span><br>
+            <span style="color:#57606a">MCP Server:</span> <span style="color:var(--green)">● Connected</span>
+          </div>
         </div>
       </div>
     </div>
@@ -686,39 +694,24 @@ function runSimulation() {
     `Reported: ${new Date().toISOString()}\n\n` +
     `Please activate full dispatch: find nearest ambulance, select hospital, assess traffic, calculate route, and activate green corridor.`;
 
-  // Try to inject into widget input after it has loaded (poll up to 5s)
-  let attempts = 0;
-  const injectInterval = setInterval(() => {
-    attempts++;
-    const injected = injectIntoWidget(chatMessage);
-    if (injected || attempts > 25) {
-      clearInterval(injectInterval);
-      if (injected) {
-        setTL('intake', 'done', '✓ Incident sent to Mission Commander');
-        mcpLog('agent', '[mission-commander]', 'Message delivered to widget — awaiting response in chat panel below.', t());
-        setTL('coordinator', 'running', 'Mission Commander reasoning...');
-      } else {
-        // Widget not found — scroll to widget panel so user can type manually
-        setTL('intake', 'done', '✓ Ready — type incident in chat panel below');
-        mcpLog('agent', '[mission-commander]',
-          `Widget ready. Incident pre-filled below — press Enter in the chat panel.\n\n${chatMessage}`, t());
-        // Pre-fill textarea if accessible
-        const ta = document.querySelector('#root textarea, #root input[type=text]');
-        if (ta) { ta.value = chatMessage; ta.dispatchEvent(new Event('input', {bubbles:true})); }
-      }
-    }
-  }, 200);
+  // ── Open Mission Commander in a new tab with the incident pre-filled ───
+  openMissionCommander(chatMessage);
 
-  // Re-enable button immediately — widget handles the rest
+  setTL('intake', 'done', '✓ Incident sent to Mission Commander');
+  setTL('coordinator', 'running', 'Mission Commander reasoning in new tab...');
+  mcpLog('agent', '[mission-commander]',
+    `Incident dispatched to Mission Commander (new tab).\n\n${chatMessage}`, t());
+
+  // Re-enable button
   setTimeout(() => {
     btn.disabled = false;
     document.getElementById('btn-spinner').style.display = 'none';
     document.getElementById('btn-text').textContent = 'RE-RUN DISPATCH';
     running = false;
-  }, 1200);
+  }, 800);
 }
 
-// Attempt to programmatically send a message into the Orchestrate widget.
+// (injectIntoWidget retained for future use but no longer called)
 // Returns true if successfully submitted, false if widget not ready yet.
 function injectIntoWidget(message) {
   try {
@@ -757,12 +750,33 @@ function injectIntoWidget(message) {
 <div style="text-align:center;padding:6px;font-size:11px;color:#3a4048;border-top:1px solid #1a1f27;flex-shrink:0">Made with IBM Bob</div>
 
 <script>
-  // Hide the iframe overlay once the iframe has loaded (best-effort)
-  document.getElementById('wxo-iframe') &&
-  document.getElementById('wxo-iframe').addEventListener('load', function() {
-    const ov = document.getElementById('iframe-overlay');
-    if (ov) ov.style.display = 'none';
-  });
+  const WXO_INSTANCE_URL = "https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/9291f63d-e948-4929-9c62-56eecfb515ad";
+
+  // Called by ACTIVATE DISPATCH and by the Open Mission Commander button.
+  // Opens Orchestrate in a new tab with the incident pre-typed in the chat.
+  function openMissionCommander(prefillMessage) {
+    const msg = prefillMessage || buildIncidentMessage();
+    // Orchestrate supports ?message= query param to pre-fill the chat input
+    const url = WXO_INSTANCE_URL + '?message=' + encodeURIComponent(msg);
+    window.open(url, 'mission-commander');
+    const status = document.getElementById('mc-status');
+    if (status) status.textContent = '✓ Opened in new tab — paste incident if not auto-filled';
+    setTimeout(() => { if (status) status.textContent = ''; }, 5000);
+  }
+
+  function buildIncidentMessage() {
+    const desc     = document.getElementById('incident-text')?.value || '';
+    const itype    = document.getElementById('incident-type')?.value || '';
+    const priority = document.getElementById('incident-priority')?.value || '';
+    return (
+      'EMERGENCY DISPATCH REQUEST\n' +
+      'Description: ' + desc + '\n' +
+      'Type: ' + itype + ' | Priority: ' + priority + '\n' +
+      'Reported: ' + new Date().toISOString() + '\n\n' +
+      'Please activate full dispatch: find nearest ambulance, select hospital, ' +
+      'assess traffic, calculate route, and activate green corridor.'
+    );
+  }
 </script>
 
 </body>
