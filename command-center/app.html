@@ -747,21 +747,49 @@ function injectIntoWidget(message) {
 <!-- ═══════════════════════════════════════════════════════════════════════════
      watsonx Orchestrate — Mission Commander chat widget
      Loads into <div id="root"> in the right panel.
+     The widget requires an active IBM Cloud browser session.
+     If not logged in, the login gate is shown first.
      ═══════════════════════════════════════════════════════════════════════════ -->
 <script>
-  // Fetch a short-lived IAM bearer token from our own server (which holds IBM_IAM_API_KEY).
-  // Pass it to the widget as iamAccessToken so it can authenticate without
-  // requiring the user to be logged into IBM Cloud in the browser.
-  async function initOrchestrateWidget() {
-    let iamToken = '';
-    try {
-      const r = await fetch('/api/token');
-      if (r.ok) { const j = await r.json(); iamToken = j.access_token || ''; }
-    } catch(e) { console.warn('Could not fetch IAM token for widget:', e); }
+  // ── Login gate ─────────────────────────────────────────────────────────────
+  // The Orchestrate widget requires the browser to have an active IBM Cloud
+  // session (cookie on *.cloud.ibm.com). Show a login prompt first; once the
+  // user has logged in and returned, the widget loads automatically.
+
+  const WXO_HOST  = "https://ca-tor.watson-orchestrate.cloud.ibm.com";
+  const LOGIN_URL = "https://cloud.ibm.com/authorize?redirectTo=" +
+                    encodeURIComponent(WXO_HOST + "/instances/9291f63d-e948-4929-9c62-56eecfb515ad");
+
+  function showLoginGate() {
+    const root = document.getElementById('root');
+    if (!root) return;
+    root.innerHTML =
+      '<div style="padding:20px;text-align:center;color:#8b949e;font-family:inherit">' +
+      '<div style="font-size:13px;font-weight:600;color:#e6edf3;margin-bottom:8px">Mission Commander</div>' +
+      '<div style="font-size:11px;margin-bottom:16px;line-height:1.6">' +
+      'The Mission Commander widget requires an active<br>IBM Cloud session in this browser.</div>' +
+      '<button onclick="loginAndReturn()" style="background:#0f62fe;color:#fff;border:none;' +
+      'padding:8px 18px;border-radius:4px;font-size:12px;cursor:pointer;font-weight:600">' +
+      '🔐 Log in to IBM Cloud</button>' +
+      '<div style="font-size:10px;color:#57606a;margin-top:12px">' +
+      'After logging in, return here and click<br><strong style="color:#e6edf3">Reload Widget</strong> below.</div>' +
+      '<button onclick="loadWidget()" style="margin-top:10px;background:transparent;color:#58a6ff;' +
+      'border:1px solid #30363d;padding:5px 14px;border-radius:4px;font-size:11px;cursor:pointer">' +
+      '↺ Reload Widget</button>' +
+      '</div>';
+  }
+
+  function loginAndReturn() {
+    window.open(LOGIN_URL, '_blank');
+  }
+
+  function loadWidget() {
+    const root = document.getElementById('root');
+    if (root) root.innerHTML = '';
 
     window.wxOConfiguration = {
       orchestrationID:    "61a7cca026674cb69f1c4e32e8c5c982_9291f63d-e948-4929-9c62-56eecfb515ad",
-      hostURL:            "https://ca-tor.watson-orchestrate.cloud.ibm.com",
+      hostURL:            WXO_HOST,
       rootElementID:      "root",
       deploymentPlatform: "ibmcloud",
       crn:                "crn:v1:bluemix:public:watsonx-orchestrate:ca-tor:a/61a7cca026674cb69f1c4e32e8c5c982:9291f63d-e948-4929-9c62-56eecfb515ad::",
@@ -769,16 +797,36 @@ function injectIntoWidget(message) {
         agentId:            "f5bb4d34-12e0-466b-9858-6304e52bc4b7",
         agentEnvironmentId: "2681c726-3962-4c10-8382-a7dd1acb1762",
       },
-      // Provide IAM token so widget authenticates without browser IBM Cloud session
-      iamAccessToken: iamToken || undefined,
     };
 
+    // Remove any previously loaded wxoLoader script before re-init
+    const old = document.getElementById('wxo-loader-script');
+    if (old) old.remove();
+    if (window.wxoLoader) {
+      try { window.wxoLoader.init(); return; } catch(e) {}
+    }
     const script = document.createElement('script');
-    script.src = window.wxOConfiguration.hostURL + '/wxochat/wxoLoader.js?embed=true';
-    script.addEventListener('load', function () { wxoLoader.init(); });
+    script.id  = 'wxo-loader-script';
+    script.src = WXO_HOST + '/wxochat/wxoLoader.js?embed=true';
+    script.addEventListener('load', function () {
+      try { wxoLoader.init(); }
+      catch(e) {
+        console.error('wxoLoader.init failed:', e);
+        showLoginGate();
+      }
+    });
+    script.addEventListener('error', function() { showLoginGate(); });
     document.head.appendChild(script);
   }
-  initOrchestrateWidget();
+
+  // On page load: try to load widget immediately.
+  // If it errors (auth failure), show the login gate.
+  window.addEventListener('DOMContentLoaded', function() {
+    // Brief delay so #root is in the DOM
+    setTimeout(function() {
+      try { loadWidget(); } catch(e) { showLoginGate(); }
+    }, 300);
+  });
 </script>
 
 </body>
