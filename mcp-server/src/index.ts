@@ -32,6 +32,10 @@
  */
 
 import { createServer, IncomingMessage, ServerResponse } from "node:http";
+import https from "node:https";
+import { readFileSync, existsSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import { randomUUID } from "node:crypto";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -58,8 +62,238 @@ import {
 // Constants
 // ---------------------------------------------------------------------------
 
-const PORT = parseInt(process.env.PORT ?? "3000", 10);
+const PORT      = parseInt(process.env.PORT ?? "3000", 10);
 const TRANSPORT = (process.env.TRANSPORT ?? "http").toLowerCase();
+
+// ---------------------------------------------------------------------------
+// Orchestrate proxy configuration
+// ---------------------------------------------------------------------------
+
+const ORCHESTRATE_INSTANCE_ID = "61a7cca026674cb69f1c4e32e8c5c982";
+const ORCHESTRATE_BASE_URL    = `https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/${ORCHESTRATE_INSTANCE_ID}`;
+const ORCHESTRATE_AGENT_ID    = "f5bb4d34-12e0-466b-9858-6304e52bc4b7";
+const IAM_TOKEN_URL           = "https://iam.cloud.ibm.com/identity/token";
+
+// IAM token cache
+let _iamToken     = "";
+let _iamExpiresAt = 0;
+
+async function getIAMToken(): Promise<string> {
+  const now = Date.now();
+  if (_iamToken && now < _iamExpiresAt) return _iamToken;
+  const apiKey = process.env.IBM_IAM_API_KEY ?? "";
+  if (!apiKey) throw new Error("IBM_IAM_API_KEY environment variable is not set");
+  const body = `grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=${encodeURIComponent(apiKey)}`;
+  const data = await httpsPost(IAM_TOKEN_URL, body, {
+    "Content-Type": "application/x-www-form-urlencoded",
+    "Accept":       "application/json",
+  });
+  const json = JSON.parse(data) as { access_token: string; expires_in: number };
+  if (!json.access_token) throw new Error(`IAM token exchange failed: ${data}`);
+  _iamToken     = json.access_token;
+  _iamExpiresAt = now + (json.expires_in - 300) * 1000;
+  console.error(`[Proxy] IAM token refreshed — expires in ${json.expires_in}s`);
+  return _iamToken;
+}
+
+function httpsPost(url: string, body: string, headers: Record<string, string>): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const req = https.request(
+      { hostname: u.hostname, path: u.pathname + u.search, method: "POST",
+        headers: { ...headers, "Content-Length": Buffer.byteLength(body) } },
+      (res) => { let d = ""; res.on("data", (c: Buffer) => (d += c)); res.on("end", () => resolve(d)); }
+    );
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+}
+
+// Serve app.html — resolved relative to this compiled file
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = dirname(__filename);
+// build/index.js → mcp-server root → command-center/app.html
+const APP_HTML_PATH = resolve(__dirname, "..", "..", "command-center", "app.html");
+let   _appHtml      = "";
+function getAppHtml(): string {
+  if (_appHtml) return _appHtml;
+  if (existsSync(APP_HTML_PATH)) {
+    // Rewrite the proxy URL to point at this same server so there is no CORS
+    const raw = readFileSync(APP_HTML_PATH, "utf-8");
+    _appHtml  = raw.replace(
+      /const ORCHESTRATE_PROXY_URL\s*=\s*['"][^'"]*['"]/,
+      "const ORCHESTRATE_PROXY_URL = '/api/dispatch'"
+    );
+    console.error(`[UI] Serving app.html from ${APP_HTML_PATH}`);
+  } else {
+    _appHtml = "<html><body style='background:#0a0c10;color:#e6edf3;font-family:monospace;padding:40px'>" +
+               "<h2>PulseRoute AI</h2><p>app.html not found at expected path.</p>" +
+               `<pre>${APP_HTML_PATH}</pre></body></html>`;
+    console.error(`[UI] WARNING: app.html not found at ${APP_HTML_PATH}`);
+  }
+  return _appHtml;
+}
+
+// Normalise an Orchestrate SSE event into the shape app.html expects
+function normaliseOrchestrateEvent(ev: Record<string, unknown>, stepCounter: number): Record<string, unknown> | null {
+  const now     = new Date().toISOString().slice(11, 19);
+  const evType  = (ev.event ?? ev.type ?? "") as string;
+  const evData  = (ev.data  ?? ev) as Record<string, unknown>;
+
+  if (["agent_message","thought","message"].includes(evType)) {
+    return { type: "thought", ts: evData.ts ?? now, content: evData.content ?? evData.text ?? JSON.stringify(evData) };
+  }
+  if (["tool_invocation","tool_call","function_call"].includes(evType)) {
+    const toolName = evData.tool ?? evData.tool_name ?? evData.name ?? "unknown";
+    const input    = evData.input ?? evData.arguments ?? evData.parameters ?? {};
+    return { type: "tool_call", ts: evData.ts ?? now, tool_name: toolName,
+             input: typeof input === "string" ? input : JSON.stringify(input, null, 2),
+             step: String(stepCounter + 1) };
+  }
+  if (["tool_response","tool_result","function_response"].includes(evType)) {
+    const toolName = evData.tool ?? evData.tool_name ?? evData.name ?? "unknown";
+    const output   = evData.output ?? evData.result ?? evData.content ?? {};
+    return { type: "tool_result", ts: evData.ts ?? now, tool_name: toolName,
+             output: typeof output === "string" ? output : JSON.stringify(output, null, 2) };
+  }
+  if (["final_response","final","completion"].includes(evType)) {
+    const text = (evData as Record<string,Record<string,unknown>>)?.output?.text ??
+                 (evData as Record<string,Record<string,unknown>>)?.output?.content ??
+                 evData?.result ?? evData?.content ?? JSON.stringify(evData);
+    let result: unknown;
+    try   { result = typeof text === "string" ? JSON.parse(text) : text; }
+    catch { result = { status: "error", notes: String(text), confidence: 0,
+                       ambulance: null, hospital: null, route: null, traffic: null,
+                       corridor: null, specialists: [] }; }
+    return { type: "final", ts: evData.ts ?? now, result: JSON.stringify(result) };
+  }
+  if (evType === "error") {
+    return { type: "error", ts: evData.ts ?? now,
+             message: evData.message ?? evData.error ?? JSON.stringify(evData) };
+  }
+  if (evType) {
+    return { type: "thought", ts: now, content: `[${evType}] ${JSON.stringify(evData).slice(0, 300)}` };
+  }
+  return null;
+}
+
+// Handle POST /api/dispatch — proxy to Orchestrate, stream SSE back to browser
+async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  // Read body
+  const chunks: Buffer[] = [];
+  for await (const chunk of req) chunks.push(chunk as Buffer);
+  const rawBody = Buffer.concat(chunks).toString("utf-8");
+
+  let payload: Record<string, unknown>;
+  try   { payload = JSON.parse(rawBody); }
+  catch { res.writeHead(400, { "Content-Type": "application/json" }); res.end(JSON.stringify({ error: "Invalid JSON" })); return; }
+
+  if (!payload.description) {
+    res.writeHead(400, { "Content-Type": "application/json" });
+    res.end(JSON.stringify({ error: "Missing field: description" }));
+    return;
+  }
+
+  // Start SSE response
+  res.writeHead(200, {
+    "Content-Type":  "text/event-stream",
+    "Cache-Control": "no-cache",
+    "Connection":    "keep-alive",
+    "Access-Control-Allow-Origin": "*",
+  });
+
+  const sseWrite = (type: string, data: Record<string, unknown>): void => {
+    res.write(`data: ${JSON.stringify({ ...data, type })}\n\n`);
+  };
+  const sseDone = (): void => { res.write("data: [DONE]\n\n"); res.end(); };
+  const now = (): string => new Date().toISOString().slice(11, 19);
+
+  let token: string;
+  try   { token = await getIAMToken(); }
+  catch (err) {
+    sseWrite("error", { ts: now(), message: (err as Error).message });
+    sseDone(); return;
+  }
+
+  const orchBody = JSON.stringify({
+    input:  { message: JSON.stringify(payload) },
+    stream: true,
+  });
+
+  const invokeUrl = `${ORCHESTRATE_BASE_URL}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`;
+  console.error(`[Proxy] POST ${invokeUrl}`);
+
+  const u = new URL(invokeUrl);
+  const orchReq = https.request({
+    hostname: u.hostname,
+    path:     u.pathname + u.search,
+    method:   "POST",
+    headers: {
+      "Content-Type":   "application/json",
+      "Authorization":  `Bearer ${token}`,
+      "Accept":         "text/event-stream, application/json",
+      "Content-Length": Buffer.byteLength(orchBody),
+    },
+  }, (orchRes) => {
+    const ct = orchRes.headers["content-type"] ?? "";
+    console.error(`[Proxy] Orchestrate → ${orchRes.statusCode} ${ct}`);
+
+    if ((orchRes.statusCode ?? 500) >= 400) {
+      let errBody = "";
+      orchRes.on("data", (c: Buffer) => (errBody += c));
+      orchRes.on("end", () => { sseWrite("error", { ts: now(), message: `Orchestrate ${orchRes.statusCode}: ${errBody}` }); sseDone(); });
+      return;
+    }
+
+    if (ct.includes("text/event-stream")) {
+      // ── Streaming — relay and normalise each event ──────────────────────
+      let buf = ""; let stepCounter = 0;
+      orchRes.on("data", (chunk: Buffer) => {
+        buf += chunk.toString("utf-8");
+        const lines = buf.split("\n"); buf = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+          const raw = line.slice(5).trim();
+          if (raw === "[DONE]") { sseDone(); return; }
+          let ev: Record<string, unknown>;
+          try { ev = JSON.parse(raw) as Record<string, unknown>; } catch { continue; }
+          const norm = normaliseOrchestrateEvent(ev, stepCounter);
+          if (!norm) continue;
+          if (norm.type === "tool_call") stepCounter++;
+          sseWrite(norm.type as string, norm);
+          if (norm.type === "final") { sseDone(); return; }
+        }
+      });
+      orchRes.on("end", sseDone);
+      orchRes.on("error", (e: Error) => { sseWrite("error", { ts: now(), message: e.message }); sseDone(); });
+    } else {
+      // ── Non-streaming — buffer and synthesise final event ───────────────
+      let body = "";
+      orchRes.on("data", (c: Buffer) => (body += c));
+      orchRes.on("end", () => {
+        let result: unknown;
+        try {
+          const json = JSON.parse(body) as Record<string, Record<string, unknown>>;
+          const text = json?.output?.text ?? json?.output?.content ?? json?.result ?? body;
+          result = typeof text === "string" ? JSON.parse(text) : text;
+        } catch {
+          sseWrite("thought", { ts: now(), content: `Mission Commander responded: ${body.slice(0, 400)}` });
+          sseWrite("error",   { ts: now(), message: "Could not parse Orchestrate response as JSON." });
+          sseDone(); return;
+        }
+        sseWrite("thought", { ts: now(), content: `Mission Commander synthesis complete — Status: ${(result as Record<string,unknown>).status ?? "unknown"}` });
+        sseWrite("final",   { ts: now(), result: JSON.stringify(result) });
+        sseDone();
+      });
+      orchRes.on("error", (e: Error) => { sseWrite("error", { ts: now(), message: e.message }); sseDone(); });
+    }
+  });
+
+  orchReq.on("error", (e: Error) => { sseWrite("error", { ts: now(), message: e.message }); sseDone(); });
+  orchReq.write(orchBody);
+  orchReq.end();
+}
 
 // ---------------------------------------------------------------------------
 // Factory — creates and fully registers a new McpServer instance.
@@ -225,10 +459,34 @@ async function startHttpServer(): Promise<void> {
         return;
       }
 
+      // ── Serve app.html at GET / ──────────────────────────────────────────
+      if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
+        res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+        res.end(getAppHtml());
+        return;
+      }
+
+      // ── CORS preflight for /api/dispatch ────────────────────────────────
+      if (req.method === "OPTIONS" && url.pathname === "/api/dispatch") {
+        res.writeHead(204, {
+          "Access-Control-Allow-Origin":  "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        });
+        res.end();
+        return;
+      }
+
+      // ── Orchestrate proxy ────────────────────────────────────────────────
+      if (req.method === "POST" && url.pathname === "/api/dispatch") {
+        await handleDispatch(req, res);
+        return;
+      }
+
       // ── Only handle /mcp ────────────────────────────────────────────────
       if (url.pathname !== "/mcp") {
         res.writeHead(404, { "Content-Type": "application/json" });
-        res.end(JSON.stringify({ error: "Not found. Use POST /mcp" }));
+        res.end(JSON.stringify({ error: "Not found. Use POST /mcp or GET /" }));
         return;
       }
 
