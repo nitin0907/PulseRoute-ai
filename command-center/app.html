@@ -749,25 +749,36 @@ function injectIntoWidget(message) {
      Loads into <div id="root"> in the right panel.
      ═══════════════════════════════════════════════════════════════════════════ -->
 <script>
-  window.wxOConfiguration = {
-    orchestrationID:    "61a7cca026674cb69f1c4e32e8c5c982_9291f63d-e948-4929-9c62-56eecfb515ad",
-    hostURL:            "https://ca-tor.watson-orchestrate.cloud.ibm.com",
-    rootElementID:      "root",
-    deploymentPlatform: "ibmcloud",
-    crn:                "crn:v1:bluemix:public:watsonx-orchestrate:ca-tor:a/61a7cca026674cb69f1c4e32e8c5c982:9291f63d-e948-4929-9c62-56eecfb515ad::",
-    chatOptions: {
-      agentId:            "f5bb4d34-12e0-466b-9858-6304e52bc4b7",
-      agentEnvironmentId: "2681c726-3962-4c10-8382-a7dd1acb1762",
-    }
-  };
-  setTimeout(function () {
+  // Fetch a short-lived IAM bearer token from our own server (which holds IBM_IAM_API_KEY).
+  // Pass it to the widget as iamAccessToken so it can authenticate without
+  // requiring the user to be logged into IBM Cloud in the browser.
+  async function initOrchestrateWidget() {
+    let iamToken = '';
+    try {
+      const r = await fetch('/api/token');
+      if (r.ok) { const j = await r.json(); iamToken = j.access_token || ''; }
+    } catch(e) { console.warn('Could not fetch IAM token for widget:', e); }
+
+    window.wxOConfiguration = {
+      orchestrationID:    "61a7cca026674cb69f1c4e32e8c5c982_9291f63d-e948-4929-9c62-56eecfb515ad",
+      hostURL:            "https://ca-tor.watson-orchestrate.cloud.ibm.com",
+      rootElementID:      "root",
+      deploymentPlatform: "ibmcloud",
+      crn:                "crn:v1:bluemix:public:watsonx-orchestrate:ca-tor:a/61a7cca026674cb69f1c4e32e8c5c982:9291f63d-e948-4929-9c62-56eecfb515ad::",
+      chatOptions: {
+        agentId:            "f5bb4d34-12e0-466b-9858-6304e52bc4b7",
+        agentEnvironmentId: "2681c726-3962-4c10-8382-a7dd1acb1762",
+      },
+      // Provide IAM token so widget authenticates without browser IBM Cloud session
+      iamAccessToken: iamToken || undefined,
+    };
+
     const script = document.createElement('script');
     script.src = window.wxOConfiguration.hostURL + '/wxochat/wxoLoader.js?embed=true';
-    script.addEventListener('load', function () {
-      wxoLoader.init();
-    });
+    script.addEventListener('load', function () { wxoLoader.init(); });
     document.head.appendChild(script);
-  }, 0);
+  }
+  initOrchestrateWidget();
 </script>
 
 </body>

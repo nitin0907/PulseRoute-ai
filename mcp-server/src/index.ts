@@ -541,6 +541,23 @@ async function startHttpServer(): Promise<void> {
         return;
       }
 
+      // ── IAM token vending — lets the widget authenticate without browser session
+      if (req.method === "GET" && url.pathname === "/api/token") {
+        try {
+          const token = await getIAMToken();
+          res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "no-store",
+          });
+          res.end(JSON.stringify({ access_token: token }));
+        } catch (err) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: (err as Error).message }));
+        }
+        return;
+      }
+
       // ── CORS preflight for /api/dispatch ────────────────────────────────
       if (req.method === "OPTIONS" && url.pathname === "/api/dispatch") {
         res.writeHead(204, {
