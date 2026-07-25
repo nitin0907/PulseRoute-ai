@@ -750,14 +750,18 @@ function injectIntoWidget(message) {
 <div style="text-align:center;padding:6px;font-size:11px;color:#3a4048;border-top:1px solid #1a1f27;flex-shrink:0">Made with IBM Bob</div>
 
 <script>
+  // Chat UI URL — opens Mission Commander in the browser (requires IBM Cloud session)
+  const WXO_CHAT_URL = "https://ca-tor.watson-orchestrate.cloud.ibm.com/chat";
+  // Keep instance URL as fallback
   const WXO_INSTANCE_URL = "https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/9291f63d-e948-4929-9c62-56eecfb515ad";
 
   // Called by ACTIVATE DISPATCH and by the Open Mission Commander button.
   // Opens Orchestrate in a new tab with the incident pre-typed in the chat.
   function openMissionCommander(prefillMessage) {
     const msg = prefillMessage || buildIncidentMessage();
-    // Orchestrate supports ?message= query param to pre-fill the chat input
-    const url = WXO_INSTANCE_URL + '?message=' + encodeURIComponent(msg);
+    // Try the /chat URL first — this is the direct chat interface
+    // ?message= pre-fills the input if Orchestrate supports it
+    const url = WXO_CHAT_URL + '?message=' + encodeURIComponent(msg);
     window.open(url, 'mission-commander');
     const status = document.getElementById('mc-status');
     if (status) status.textContent = '✓ Opened in new tab — paste incident if not auto-filled';
