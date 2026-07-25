@@ -1,0 +1,355 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>PulseRoute — Emergency Intake Agent</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#f0f2f5;color:#1f2328;min-height:100vh}
+
+  /* ── Layout ── */
+  .shell{max-width:780px;margin:0 auto;padding:20px 16px 48px}
+
+  /* ── Header ── */
+  .hdr{background:#1a1f2e;color:#fff;padding:16px 20px;border-radius:8px 8px 0 0;display:flex;align-items:center;gap:12px;margin-bottom:0}
+  .hdr-pulse{width:12px;height:12px;border-radius:50%;background:#ef4444;flex-shrink:0;animation:blink 1.2s infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+  .hdr-title{font-size:15px;font-weight:700;letter-spacing:.02em}
+  .hdr-sub{font-size:11px;color:#94a3b8;margin-left:auto;white-space:nowrap}
+  .hdr-kb{font-size:10px;color:#64748b;margin-left:8px;background:#0f172a;padding:2px 7px;border-radius:10px}
+
+  /* ── Main card ── */
+  .card{background:#fff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 8px 8px;padding:24px}
+
+  /* ── Section label ── */
+  .sec-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#57606a;margin-bottom:10px;padding-bottom:5px;border-bottom:1px solid #f0f1f3}
+
+  /* ── Form grid ── */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+  .form-grid.full{grid-template-columns:1fr}
+  .field{display:flex;flex-direction:column;gap:4px}
+  .field label{font-size:11px;font-weight:600;color:#374151}
+  .field label span.req{color:#ef4444;margin-left:2px}
+  .field input,.field select,.field textarea{border:1px solid #d1d5db;border-radius:5px;padding:7px 10px;font-size:13px;font-family:inherit;color:#1f2328;background:#fff;transition:border-color .15s}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:#3b82d4;box-shadow:0 0 0 2px rgba(59,130,212,.12)}
+  .field textarea{resize:vertical;min-height:80px}
+  .field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%2357606a' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+
+  /* ── Vitals row ── */
+  .vitals-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+
+  /* ── SOP quick-pick ── */
+  .sop-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+  .chip{font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;border:1px solid #d1d5db;cursor:pointer;background:#f7f8fa;color:#374151;transition:all .15s;user-select:none}
+  .chip:hover{border-color:#3b82d4;color:#3b82d4;background:#eff6ff}
+  .chip.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}
+
+  /* ── Buttons ── */
+  .btn-row{display:flex;gap:10px;margin-top:6px}
+  .btn{padding:9px 20px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:background .15s}
+  .btn-primary{background:#1d4ed8;color:#fff}
+  .btn-primary:hover{background:#1e40af}
+  .btn-secondary{background:#f7f8fa;color:#374151;border:1px solid #d1d5db}
+  .btn-secondary:hover{background:#e5e7eb}
+  .btn-danger{background:#dc2626;color:#fff}
+  .btn-danger:hover{background:#b91c1c}
+
+  /* ── Divider ── */
+  hr{border:none;border-top:1px solid #e5e7eb;margin:20px 0}
+
+  /* ── Output panel ── */
+  .output-panel{display:none;background:#0f172a;border-radius:8px;padding:20px;margin-top:20px;font-family:"Courier New",monospace;font-size:12.5px;color:#e2e8f0;line-height:1.8}
+  .output-panel.show{display:block}
+  .out-header{font-size:11px;font-weight:700;letter-spacing:.1em;color:#64748b;margin-bottom:16px;text-transform:uppercase}
+  .out-line{display:flex;gap:8px;margin-bottom:2px}
+  .out-key{color:#7dd3fc;min-width:230px;flex-shrink:0}
+  .out-val{color:#f1f5f9}
+  .out-sep{border:none;border-top:1px solid #1e293b;margin:10px 0}
+  .out-status{margin-top:14px;background:#14532d;border:1px solid #166534;border-radius:5px;padding:8px 14px;font-size:12px;font-weight:700;color:#86efac;letter-spacing:.06em;text-align:center}
+  .out-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;font-family:-apple-system,"Segoe UI",sans-serif}
+  .p1{background:#7f1d1d;color:#fca5a5}
+  .p2{background:#713f12;color:#fde68a}
+  .p3{background:#1e3a5f;color:#93c5fd}
+  .p4{background:#1e2f1e;color:#86efac}
+  .crit{color:#f87171;font-weight:700}
+  .high{color:#fb923c;font-weight:700}
+  .mod{color:#facc15;font-weight:700}
+  .low{color:#4ade80;font-weight:700}
+  .sop-ref{color:#c084fc}
+  .out-steps{margin-left:238px;margin-top:2px;color:#94a3b8;font-size:11.5px;line-height:1.7}
+  .out-step::before{content:"  → ";color:#475569}
+
+  /* ── Incident log ── */
+  .log-wrap{margin-top:20px}
+  .log-item{background:#fff;border:1px solid #e5e7eb;border-left:4px solid #e5e7eb;border-radius:0 6px 6px 0;padding:10px 14px;margin-bottom:8px;font-size:12px}
+  .log-item.P1{border-left-color:#ef4444}
+  .log-item.P2{border-left-color:#f97316}
+  .log-item.P3{border-left-color:#3b82d4}
+  .log-item.P4{border-left-color:#22c55e}
+  .log-item-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+  .log-ts{font-size:10px;color:#57606a}
+
+  /* ── Alert bar ── */
+  .alert{display:none;padding:9px 14px;border-radius:5px;font-size:12.5px;font-weight:600;margin-bottom:14px}
+  .alert.show{display:block}
+  .alert-err{background:#fff0f0;color:#c0392b;border:1px solid #f8c0c0}
+  .alert-ok{background:#f0faf4;color:#1a7f4b;border:1px solid #b3e8cc}
+
+  @media(max-width:520px){
+    .form-grid{grid-template-columns:1fr}
+    .vitals-grid{grid-template-columns:repeat(2,1fr)}
+    .out-key{min-width:160px}
+    .out-steps{margin-left:168px}
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  
+  <div class="hdr">
+    <div class="hdr-pulse"></div>
+    <div>
+      <div class="hdr-title">PulseRoute — Emergency Intake Agent</div>
+    </div>
+    <div class="hdr-sub">Bengaluru Emergency Response</div>
+    <div class="hdr-kb">KB v1.0.0</div>
+  </div>
+
+  
+  <div class="card">
+
+    <div id="alertBox" class="alert"></div>
+
+    
+    <div class="sec-label">Incident Details</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Incident ID <span class="req">*</span></label>
+        <input type="text" id="incidentId" style="background:#f7f8fa;color:#57606a" />
+      </div>
+      <div class="field">
+        <label>Caller / Reporting Source</label>
+        <input type="text" id="caller" />
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Location / Locality <span class="req">*</span></label>
+        <select id="locality">
+          <option>— Select Bengaluru locality —</option>
+          <option>Electronic City</option>
+          <option>Koramangala</option>
+          <option>HSR Layout</option>
+          <option>Bellandur</option>
+          <option>Whitefield</option>
+          <option>KR Puram</option>
+          <option>Hebbal</option>
+          <option>Yelahanka</option>
+          <option>Rajajinagar</option>
+          <option>Indiranagar</option>
+          <option>Jayanagar</option>
+          <option>Banashankari</option>
+          <option>Marathahalli</option>
+          <option>Sarjapur</option>
+          <option>Peenya</option>
+          <option>Majestic / City Market</option>
+          <option>Shivajinagar</option>
+          <option>Bommasandra</option>
+          <option>Kengeri</option>
+          <option>Mathikere</option>
+          <option>Richmond Town</option>
+          <option>MG Road / Trinity</option>
+          <option>Infantry Road</option>
+          <option>Other — specify below</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Exact Address / Landmark</label>
+        <input type="text" id="address" />
+      </div>
+    </div>
+
+    
+    <hr />
+    <div class="sec-label">Patient Information</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Age (years)</label>
+        <input type="number" id="age" />
+      </div>
+      <div class="field">
+        <label>Sex</label>
+        <select id="sex">
+          <option>— Select —</option>
+          <option>Male</option>
+          <option>Female</option>
+          <option>Unknown</option>
+        </select>
+      </div>
+    </div>
+    <div class="vitals-grid">
+      <div class="field">
+        <label>Conscious?</label>
+        <select id="conscious">
+          <option>—</option>
+          <option>Yes</option>
+          <option>No</option>
+          <option>Unknown</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Breathing?</label>
+        <select id="breathing">
+          <option>—</option>
+          <option>Yes</option>
+          <option>No / Agonal</option>
+          <option>Laboured</option>
+          <option>Unknown</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Pulse?</label>
+        <select id="pulse">
+          <option>—</option>
+          <option>Present</option>
+          <option>Absent</option>
+          <option>Weak / Thready</option>
+          <option>Unknown</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Visible Bleeding?</label>
+        <select id="bleeding">
+          <option>—</option>
+          <option>None</option>
+          <option>Minor</option>
+          <option>Severe</option>
+        </select>
+      </div>
+    </div>
+
+    
+    <hr />
+    <div class="sec-label">Incident Narrative</div>
+    <div class="form-grid full">
+      <div class="field">
+        <label>Chief Complaint / What happened? <span class="req">*</span></label>
+        <textarea id="narrative"></textarea>
+      </div>
+    </div>
+
+    
+    <hr />
+    <div class="sec-label">Quick Emergency Category Assist</div>
+    <div class="sop-chips" id="sopChips">
+      <div class="chip" data-sop="CA-P1-BLR" data-type="Cardiac Emergency" data-sev="Critical" data-pri="P1">🫀 Cardiac Arrest</div>
+      <div class="chip" data-sop="STEMI-P1-BLR" data-type="Cardiac Emergency" data-sev="Critical" data-pri="P1">⚡ STEMI</div>
+      <div class="chip" data-sop="STR-P1-BLR" data-type="Stroke" data-sev="Critical" data-pri="P1">🧠 Acute Stroke</div>
+      <div class="chip" data-sop="TR-MJR-P1-BLR" data-type="Trauma" data-sev="Critical" data-pri="P1">🩸 Polytrauma</div>
+      <div class="chip" data-sop="TR-PEN-P1-BLR" data-type="Trauma" data-sev="High" data-pri="P1">🔪 Penetrating Trauma</div>
+      <div class="chip" data-sop="BURN-MJR-P1-BLR" data-type="Fire Emergency" data-sev="Critical" data-pri="P1">🔥 Major Burns</div>
+      <div class="chip" data-sop="OBS-P1-BLR" data-type="General Medical Emergency" data-sev="Critical" data-pri="P1">🤱 Obstetric — Eclampsia</div>
+      <div class="chip" data-sop="OBS-PPH-P1-BLR" data-type="General Medical Emergency" data-sev="Critical" data-pri="P1">🩸 Obstetric — PPH</div>
+      <div class="chip" data-sop="PED-CA-P1-BLR" data-type="Pediatric Emergency" data-sev="Critical" data-pri="P1">👶 Paediatric Cardiac</div>
+      <div class="chip" data-sop="PED-RESP-P1-BLR" data-type="Pediatric Emergency" data-sev="High" data-pri="P1">🫁 Paediatric Resp Distress</div>
+      <div class="chip" data-sop="MCI-P1-BLR" data-type="Mass Casualty Incident" data-sev="Critical" data-pri="P1">🚨 Mass Casualty (MCI)</div>
+      <div class="chip" data-sop="DROWN-P1-BLR" data-type="Respiratory Emergency" data-sev="Critical" data-pri="P1">💧 Drowning</div>
+      <div class="chip" data-sop="FIRE-P1-BLR" data-type="Fire Emergency" data-sev="High" data-pri="P1">🏭 Fire / Smoke Inhalation</div>
+      <div class="chip" data-sop="POIS-P2-BLR" data-type="General Medical Emergency" data-sev="Moderate" data-pri="P2">☠️ Poisoning / Toxic</div>
+      <div class="chip" data-sop="SEPSIS-P2-BLR" data-type="General Medical Emergency" data-sev="Moderate" data-pri="P2">🧬 Septic Shock</div>
+      <div class="chip" data-sop data-type="Road Traffic Accident" data-sev="High" data-pri="P1">🚗 Road Traffic Accident</div>
+      <div class="chip" data-sop data-type="General Medical Emergency" data-sev="Moderate" data-pri="P3">📋 General Medical</div>
+      <div class="chip" data-sop data-type="Other" data-sev="Low" data-pri="P4">❓ Other</div>
+    </div>
+
+    
+    <div class="form-grid">
+      <div class="field">
+        <label>Emergency Type <span class="req">*</span></label>
+        <select id="emergencyType">
+          <option>— Select or use assist above —</option>
+          <option>Cardiac Emergency</option>
+          <option>Stroke</option>
+          <option>Trauma</option>
+          <option>Road Traffic Accident</option>
+          <option>Fire Emergency</option>
+          <option>Mass Casualty Incident</option>
+          <option>Respiratory Emergency</option>
+          <option>Pediatric Emergency</option>
+          <option>General Medical Emergency</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>SOP Code (auto-filled)</label>
+        <input type="text" id="sopCode" />
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Severity <span class="req">*</span></label>
+        <select id="severity">
+          <option>— Select —</option>
+          <option>Low</option>
+          <option>Moderate</option>
+          <option>High</option>
+          <option>Critical</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Priority <span class="req">*</span></label>
+        <select id="priority">
+          <option>— Select —</option>
+          <option>P1 — Immediate / Life-threatening</option>
+          <option>P2 — Urgent</option>
+          <option>P3 — Non-urgent</option>
+          <option>P4 — Minor / Routine</option>
+        </select>
+      </div>
+    </div>
+
+    
+    <div class="form-grid">
+      <div class="field">
+        <label>No. of Patients</label>
+        <input type="number" id="patientCount" />
+      </div>
+      <div class="field">
+        <label>Nearest Intersection / Road</label>
+        <input type="text" id="nearestRoad" />
+      </div>
+    </div>
+
+    
+    <hr />
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btnProcess">▶ Process Incident</button>
+      <button class="btn btn-secondary" id="btnReset">↺ Reset Form</button>
+    </div>
+
+    
+    <div class="output-panel" id="outputPanel">
+      <div class="out-header">▌ PulseRoute Intake Agent — Structured Output</div>
+      <div id="outputContent"></div>
+      <div class="out-status" id="outputStatus"></div>
+    </div>
+
+    
+    <div class="log-wrap" id="logWrap" style="display:none">
+      <hr />
+      <div class="sec-label">Session Incident Log</div>
+      <div id="logItems"></div>
+    </div>
+
+  </div>
+
+  <footer style="text-align:center;font-size:11px;color:#94a3b8;margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb">
+    Made with IBM Bob — PulseRoute Emergency Intake Agent • KB: PulseRoute_Bengaluru_KB v1.0.0 • Bengaluru, Karnataka
+  </footer>
+</div>
+
+
+</body>
+</html>

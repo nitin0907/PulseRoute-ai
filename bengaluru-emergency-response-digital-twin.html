@@ -1,0 +1,466 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bengaluru Emergency Response Digital Twin</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; background: #ffffff; color: #1f2328; }
+  .page { max-width: 760px; margin: 0 auto; padding: 24px 20px 40px; }
+
+  /* Header */
+  .header { border-bottom: 2px solid #e5e7eb; padding-bottom: 16px; margin-bottom: 24px; }
+  .header h1 { font-size: 20px; font-weight: 700; color: #1f2328; }
+  .header .subtitle { font-size: 12px; color: #57606a; margin-top: 4px; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 12px; background: #f0f4ff; color: #3b82d4; border: 1px solid #c8d8f8; }
+  .badge.green { background: #f0faf4; color: #1a7f4b; border-color: #b3e8cc; }
+  .badge.orange { background: #fff8f0; color: #b45309; border-color: #fcd9a0; }
+  .badge.red { background: #fff0f0; color: #c0392b; border-color: #f8c0c0; }
+  .badge.purple { background: #f8f0ff; color: #7c5cd8; border-color: #d8c0f8; }
+
+  /* Section */
+  .section { margin-bottom: 28px; }
+  .section-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #57606a; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin-bottom: 12px; }
+
+  /* Stat cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 14px; }
+  .stat-card .val { font-size: 26px; font-weight: 700; color: #3b82d4; line-height: 1.2; }
+  .stat-card .lbl { font-size: 11px; color: #57606a; margin-top: 2px; }
+  .stat-card .sub { font-size: 11px; color: #1a7f4b; margin-top: 3px; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th { background: #f7f8fa; font-weight: 600; text-align: left; padding: 7px 10px; border-bottom: 2px solid #e5e7eb; color: #57606a; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 6px 10px; border-bottom: 1px solid #f0f1f3; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafbfc; }
+
+  /* Pills */
+  .pill { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 8px; white-space: nowrap; }
+  .pill-govt { background: #e8f5e9; color: #2e7d32; }
+  .pill-private { background: #e3f2fd; color: #1565c0; }
+  .pill-trust { background: #fce4ec; color: #880e4f; }
+  .pill-t1 { background: #ffebee; color: #c62828; font-weight: 700; }
+  .pill-t2 { background: #fff3e0; color: #e65100; }
+  .pill-t3 { background: #f3e5f5; color: #6a1b9a; }
+  .pill-tn { background: #f5f5f5; color: #616161; }
+  .pill-avail { background: #e8f5e9; color: #2e7d32; }
+  .pill-disp { background: #fff9c4; color: #f57f17; }
+  .pill-maint { background: #ffebee; color: #b71c1c; }
+  .pill-stby { background: #e8eaf6; color: #283593; }
+  .pill-p1 { background: #ffebee; color: #c62828; font-weight: 700; }
+  .pill-p2 { background: #fff8e1; color: #f57f17; font-weight: 700; }
+  .pill-als { background: #e3f2fd; color: #0d47a1; }
+  .pill-bls { background: #e8f5e9; color: #1b5e20; }
+  .pill-micu { background: #f3e5f5; color: #4a148c; }
+  .pill-neo { background: #fce4ec; color: #880e4f; }
+  .pill-preempt { background: #e8f5e9; color: #1b5e20; }
+  .pill-adaptive { background: #e3f2fd; color: #1565c0; }
+  .pill-standard { background: #f5f5f5; color: #616161; }
+  .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+  .dot-green { background: #1a7f4b; }
+  .dot-red { background: #c0392b; }
+  .dot-amber { background: #d97706; }
+
+  /* Congestion bar */
+  .cbar-wrap { display: flex; align-items: center; gap: 6px; }
+  .cbar { height: 6px; border-radius: 3px; min-width: 4px; }
+  .cbar-val { font-size: 11px; color: #57606a; white-space: nowrap; }
+
+  /* Zone legend */
+  .zone-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+  .zone-card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px 8px; text-align: center; }
+  .zone-card .zn { font-size: 18px; font-weight: 700; color: #3b82d4; }
+  .zone-card .zl { font-size: 10px; color: #57606a; }
+
+  /* Ambulance fleet bars */
+  .fleet-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .fleet-label { font-size: 12px; width: 90px; }
+  .fleet-bar-wrap { flex: 1; background: #f0f1f3; border-radius: 3px; height: 14px; overflow: hidden; }
+  .fleet-bar { height: 14px; border-radius: 3px; }
+  .fleet-count { font-size: 12px; font-weight: 600; width: 28px; text-align: right; }
+
+  /* SOP table extras */
+  .rt { font-size: 11px; color: #57606a; }
+
+  /* Two-col layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* Separator */
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 20px 0; }
+
+  /* Footer */
+  footer { text-align: center; font-size: 11px; color: #57606a; padding-top: 20px; border-top: 1px solid #e5e7eb; margin-top: 32px; }
+
+  @media (max-width: 500px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .zone-grid { grid-template-columns: repeat(3, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  
+  <div class="header">
+    <h1>Bengaluru Emergency Response Digital Twin</h1>
+    <div class="subtitle">Synthetic Knowledge Dataset · PulseRoute AI · Last Compiled: June 2025</div>
+    <div class="badge-row">
+      <span class="badge">20 Hospitals</span>
+      <span class="badge green">40 Ambulances</span>
+      <span class="badge orange">30 Road Corridors</span>
+      <span class="badge purple">25 Traffic Signals</span>
+      <span class="badge red">15 Emergency SOPs</span>
+      <span class="badge">30 Specialists</span>
+      <span class="badge green">20 ICU Units</span>
+      <span class="badge orange">15 Cardiac Centres</span>
+      <span class="badge red">12 Trauma Centres</span>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Ecosystem at a Glance</div>
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="val">9,810</div>
+        <div class="lbl">Total Hospital Beds</div>
+        <div class="sub">▲ 1,394 available now</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">509</div>
+        <div class="lbl">ICU Beds (across 20 units)</div>
+        <div class="sub">▲ 66 available now</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">23</div>
+        <div class="lbl">Ambulances Available</div>
+        <div class="sub">of 40 fleet · 57.5% ready</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">38 min</div>
+        <div class="lbl">Best D2B Time (STEMI)</div>
+        <div class="sub">Sri Jayadeva Institute</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">3</div>
+        <div class="lbl">Level I Trauma Centres</div>
+        <div class="sub">Victoria · Manipal · Apollo</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">4</div>
+        <div class="lbl">ECMO-Capable ICUs</div>
+        <div class="sub">Manipal × 2 · Narayana · Apollo</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Hospitals (20)</div>
+    <table>
+      <thead>
+        <tr><th>Hospital</th><th>Locality</th><th>Type</th><th>Trauma</th><th>Beds Total</th><th>Available</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Victoria Hospital</strong></td><td>Majestic</td><td><span class="pill pill-govt">Govt</span></td><td><span class="pill pill-t1">L1</span></td><td>1,350</td><td>210</td></tr>
+        <tr><td><strong>Narayana Health City</strong></td><td>Bommasandra</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t1">L1</span></td><td>1,500</td><td>221</td></tr>
+        <tr><td><strong>St. John's MCH</strong></td><td>Koramangala</td><td><span class="pill pill-trust">Trust</span></td><td><span class="pill pill-t1">L1</span></td><td>1,250</td><td>178</td></tr>
+        <tr><td><strong>Manipal Hospital</strong></td><td>Old Airport Road</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t1">L1</span></td><td>650</td><td>87</td></tr>
+        <tr><td><strong>Apollo Hospital</strong></td><td>Bannerghatta Road</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t1">L1</span></td><td>710</td><td>104</td></tr>
+        <tr><td><strong>MS Ramaiah Memorial</strong></td><td>Mathikere</td><td><span class="pill pill-trust">Trust</span></td><td><span class="pill pill-t1">L1</span></td><td>800</td><td>116</td></tr>
+        <tr><td><strong>Aster CMI Hospital</strong></td><td>Hebbal</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t1">L1</span></td><td>450</td><td>58</td></tr>
+        <tr><td><strong>Sparsh Hospital</strong></td><td>Infantry Road</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t1">L1</span></td><td>300</td><td>41</td></tr>
+        <tr><td><strong>Bowring &amp; Lady Curzon</strong></td><td>Shivajinagar</td><td><span class="pill pill-govt">Govt</span></td><td><span class="pill pill-t2">L2</span></td><td>520</td><td>68</td></tr>
+        <tr><td><strong>Fortis Hospital</strong></td><td>Bannerghatta Road</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t2">L2</span></td><td>400</td><td>52</td></tr>
+        <tr><td><strong>BGS Gleneagles</strong></td><td>Kengeri</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t2">L2</span></td><td>450</td><td>63</td></tr>
+        <tr><td><strong>Sakra World Hospital</strong></td><td>Bellandur</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t2">L2</span></td><td>350</td><td>47</td></tr>
+        <tr><td><strong>Vydehi IMSRC</strong></td><td>Whitefield</td><td><span class="pill pill-trust">Trust</span></td><td><span class="pill pill-t2">L2</span></td><td>800</td><td>113</td></tr>
+        <tr><td><strong>Columbia Asia</strong></td><td>Hebbal</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t2">L2</span></td><td>210</td><td>35</td></tr>
+        <tr><td><strong>Columbia Asia</strong></td><td>Whitefield</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t2">L2</span></td><td>175</td><td>28</td></tr>
+        <tr><td><strong>Sagar Hospitals</strong></td><td>Jayanagar</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t2">L2</span></td><td>300</td><td>44</td></tr>
+        <tr><td><strong>HOSMAT Hospital</strong></td><td>Richmond Town</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-t2">L2</span></td><td>175</td><td>22</td></tr>
+        <tr><td><strong>NIMHANS</strong></td><td>Hosur Road</td><td><span class="pill pill-govt">Govt</span></td><td><span class="pill pill-tn">—</span></td><td>780</td><td>95</td></tr>
+        <tr><td><strong>Kidwai Memorial</strong></td><td>Koramangala</td><td><span class="pill pill-govt">Govt</span></td><td><span class="pill pill-tn">—</span></td><td>700</td><td>89</td></tr>
+        <tr><td><strong>Cloudnine Hospital</strong></td><td>Jayanagar</td><td><span class="pill pill-private">Private</span></td><td><span class="pill pill-tn">—</span></td><td>120</td><td>18</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Ambulance Fleet (40 Vehicles)</div>
+    <div class="two-col" style="margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#57606a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">By Vehicle Type</div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-als">ALS</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:35%;background:#3b82d4"></div></div><div class="fleet-count">14</div></div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-bls">BLS</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:35%;background:#1a7f4b"></div></div><div class="fleet-count">14</div></div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-micu">MICU</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:20%;background:#7c5cd8"></div></div><div class="fleet-count">8</div></div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-neo">Neonatal</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:10%;background:#c0392b"></div></div><div class="fleet-count">4</div></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#57606a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">By Operational Status</div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-avail">Available</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:57%;background:#1a7f4b"></div></div><div class="fleet-count">23</div></div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-stby">Standby</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:15%;background:#3b5bdb"></div></div><div class="fleet-count">6</div></div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-disp">Dispatched</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:17%;background:#d97706"></div></div><div class="fleet-count">7</div></div>
+        <div class="fleet-row"><div class="fleet-label"><span class="pill pill-maint">Maintenance</span></div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:10%;background:#c0392b"></div></div><div class="fleet-count">4</div></div>
+      </div>
+    </div>
+    <div style="font-size:11px;font-weight:600;color:#57606a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">By Response Zone</div>
+    <div class="zone-grid">
+      <div class="zone-card"><div class="zn">11</div><div class="zl">South Zone</div></div>
+      <div class="zone-card"><div class="zn">9</div><div class="zl">East Zone</div></div>
+      <div class="zone-card"><div class="zn">7</div><div class="zl">North Zone</div></div>
+      <div class="zone-card"><div class="zn">6</div><div class="zl">Central Zone</div></div>
+      <div class="zone-card"><div class="zn">5</div><div class="zl">West Zone</div></div>
+    </div>
+    <div style="font-size:11px;color:#57606a">Localities covered: Electronic City · Koramangala · HSR Layout · Bellandur · Whitefield · KR Puram · Hebbal · Yelahanka · Rajajinagar · Indiranagar · Jayanagar · Banashankari · Marathahalli · Sarjapur · Peenya. Operators: 108 Karnataka Ambulance Service (27 vehicles) + Private Hospital Fleet (13 vehicles).</div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Road Network Corridors (30)</div>
+    <table>
+      <thead>
+        <tr><th>Corridor</th><th>Type</th><th>Dist (km)</th><th>Normal / Peak (km/h)</th><th>Emergency Route</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>ORR — Hebbal to Silk Board</strong></td><td>ORR</td><td>34.2</td><td>55 / <span style="color:#c0392b">14</span></td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>NICE Peripheral Ring Road</strong></td><td>Ring Road</td><td>65.0</td><td>80 / 65</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Bellary Road NH44 — Hebbal to Devanahalli</strong></td><td>NH</td><td>35.0</td><td>70 / 35</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Mysore Road NH275 — Kengeri to Ramanagara</strong></td><td>NH</td><td>48.0</td><td>75 / 40</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Hosur Road NH44 — Silk Board to EC</strong></td><td>NH</td><td>10.5</td><td>45 / <span style="color:#c0392b">10</span></td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Tumkur Road NH48 — Yeshwanthpur to Nelamangala</strong></td><td>NH</td><td>28.0</td><td>60 / 22</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Old Madras Road NH75 — KR Puram to Hoskote</strong></td><td>NH</td><td>22.5</td><td>55 / 20</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>KIAL Bypass Spur — Yelahanka to Doddajala</strong></td><td>NH</td><td>18.5</td><td>70 / 50</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Hebbal Flyover</strong></td><td>City</td><td>4.2</td><td>55 / 18</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Sarjapur Road — Iblur to Attibele</strong></td><td>SH</td><td>20.0</td><td>40 / <span style="color:#c0392b">12</span></td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Bannerghatta Road SH87</strong></td><td>SH</td><td>32.0</td><td>42 / 15</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>KR Puram–Whitefield Corridor</strong></td><td>City</td><td>12.0</td><td>38 / <span style="color:#c0392b">11</span></td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Marathahalli Bridge</strong></td><td>City</td><td>8.0</td><td>35 / <span style="color:#c0392b">9</span></td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>MG Road — Trinity to Richmond</strong></td><td>City</td><td>3.2</td><td>30 / <span style="color:#c0392b">8</span></td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Sarjapur–Marathahalli Connector</strong></td><td>City</td><td>14.5</td><td>36 / <span style="color:#c0392b">10</span></td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td style="color:#57606a" colspan="5">+ 15 more city corridors including Chord Road · Hennur Road · Thanisandra · Whitefield Main Road · Kanakapura Rd · Doddaballapur Rd · Varthur Rd · Koramangala IRR · JP Nagar · Residency Rd · Nagarathpete · Electronic City Flyover · Metro Purple + Green Lines</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Traffic Signal Network (25 Junctions)</div>
+    <table>
+      <thead>
+        <tr><th>Junction</th><th>Type</th><th>Congestion</th><th>Preemption</th><th>Peak Delay</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Silk Board Junction</strong></td><td><span class="pill pill-adaptive">Adaptive</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:78px;background:#c0392b"></div><span class="cbar-val">9.8/10</span></div></td><td><span class="dot dot-green"></span>Yes</td><td>420 s</td></tr>
+        <tr><td><strong>Marathahalli Bridge</strong></td><td><span class="pill pill-adaptive">Adaptive</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:76px;background:#c0392b"></div><span class="cbar-val">9.5/10</span></div></td><td><span class="dot dot-green"></span>Yes</td><td>380 s</td></tr>
+        <tr><td><strong>Hebbal Flyover Junction</strong></td><td><span class="pill pill-adaptive">Adaptive</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:74px;background:#c0392b"></div><span class="cbar-val">9.2/10</span></div></td><td><span class="dot dot-green"></span>Yes</td><td>350 s</td></tr>
+        <tr><td><strong>Bellandur Junction</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:73px;background:#c0392b"></div><span class="cbar-val">9.1/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>340 s</td></tr>
+        <tr><td><strong>KR Puram Railway Crossing</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:72px;background:#c0392b"></div><span class="cbar-val">9.0/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>360 s</td></tr>
+        <tr><td><strong>Yeshwanthpur Circle</strong></td><td><span class="pill pill-adaptive">Adaptive</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:72px;background:#c0392b"></div><span class="cbar-val">9.0/10</span></div></td><td><span class="dot dot-green"></span>Yes</td><td>310 s</td></tr>
+        <tr><td><strong>Kadubeesanahalli Junction</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:71px;background:#e67e22"></div><span class="cbar-val">8.9/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>300 s</td></tr>
+        <tr><td><strong>ITPL Main Gate</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:70px;background:#e67e22"></div><span class="cbar-val">8.8/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>290 s</td></tr>
+        <tr><td><strong>Electronic City Toll Plaza</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:70px;background:#e67e22"></div><span class="cbar-val">8.7/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>290 s</td></tr>
+        <tr><td><strong>Iblur Junction</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:69px;background:#e67e22"></div><span class="cbar-val">8.6/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>270 s</td></tr>
+        <tr><td><strong>Tin Factory Junction</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:68px;background:#e67e22"></div><span class="cbar-val">8.5/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>265 s</td></tr>
+        <tr><td><strong>Trinity Circle</strong></td><td><span class="pill pill-preempt">Emergency Preemptible</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:61px;background:#d97706"></div><span class="cbar-val">7.6/10</span></div></td><td><span class="dot dot-green"></span>Yes</td><td>195 s</td></tr>
+        <tr><td><strong>Domlur Flyover Junction</strong></td><td><span class="pill pill-preempt">Emergency Preemptible</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:62px;background:#d97706"></div><span class="cbar-val">7.7/10</span></div></td><td><span class="dot dot-green"></span>Yes</td><td>210 s</td></tr>
+        <tr><td><strong>Nagawara Junction</strong></td><td><span class="pill pill-adaptive">Adaptive</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:66px;background:#e67e22"></div><span class="cbar-val">8.3/10</span></div></td><td><span class="dot dot-green"></span>Yes</td><td>245 s</td></tr>
+        <tr><td><strong>Yelahanka New Town</strong></td><td><span class="pill pill-standard">Standard</span></td><td><div class="cbar-wrap"><div class="cbar" style="width:55px;background:#d97706"></div><span class="cbar-val">6.9/10</span></div></td><td><span class="dot dot-red"></span>No</td><td>140 s</td></tr>
+        <tr><td style="color:#57606a" colspan="5">+ 10 more signals: HSR BDA Complex · Peenya Industrial · Hoodi Circle · Bommanahalli · Sony World · Rajajinagar Circle · JP Nagar 5th Phase · Hope Farm · Goraguntepalya · Dairy Circle Underpass</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Emergency SOPs (15 Protocols)</div>
+    <table>
+      <thead>
+        <tr><th>Code</th><th>Protocol</th><th>Priority</th><th>Target Response</th><th>Ambulance Req.</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>CA-P1-BLR</code></td><td><strong>Out-of-Hospital Cardiac Arrest</strong></td><td><span class="pill pill-p1">P1</span></td><td>8 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>STEMI-P1-BLR</code></td><td><strong>STEMI — Pre-hospital</strong></td><td><span class="pill pill-p1">P1</span></td><td>10 min</td><td><span class="pill pill-micu">MICU</span></td></tr>
+        <tr><td><code>TR-MJR-P1-BLR</code></td><td><strong>Major Trauma / Polytrauma</strong></td><td><span class="pill pill-p1">P1</span></td><td>8 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>STR-P1-BLR</code></td><td><strong>Acute Ischaemic Stroke — Code Stroke</strong></td><td><span class="pill pill-p1">P1</span></td><td>10 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>BURN-MJR-P1-BLR</code></td><td><strong>Major Burns &gt;20% TBSA</strong></td><td><span class="pill pill-p1">P1</span></td><td>10 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>OBS-P1-BLR</code></td><td><strong>Obstetric Emergency — Eclampsia</strong></td><td><span class="pill pill-p1">P1</span></td><td>10 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>OBS-PPH-P1-BLR</code></td><td><strong>Postpartum Haemorrhage (PPH)</strong></td><td><span class="pill pill-p1">P1</span></td><td>5 min</td><td><span class="pill pill-micu">MICU</span></td></tr>
+        <tr><td><code>PED-CA-P1-BLR</code></td><td><strong>Paediatric Cardiac Arrest</strong></td><td><span class="pill pill-p1">P1</span></td><td>8 min</td><td><span class="pill pill-neo">Neonatal</span></td></tr>
+        <tr><td><code>MCI-P1-BLR</code></td><td><strong>Mass Casualty Incident (≥10 victims)</strong></td><td><span class="pill pill-p1">P1</span></td><td>10 min</td><td><span class="pill pill-als">ALS</span> + multi</td></tr>
+        <tr><td><code>TR-PEN-P1-BLR</code></td><td><strong>Penetrating Trauma — Stab / GSW</strong></td><td><span class="pill pill-p1">P1</span></td><td>8 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>DROWN-P1-BLR</code></td><td><strong>Drowning / Near-Drowning</strong></td><td><span class="pill pill-p1">P1</span></td><td>8 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>FIRE-P1-BLR</code></td><td><strong>Fire / Smoke Inhalation / Entrapment</strong></td><td><span class="pill pill-p1">P1</span></td><td>8 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>PED-RESP-P1-BLR</code></td><td><strong>Paediatric Respiratory Distress</strong></td><td><span class="pill pill-p1">P1</span></td><td>8 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+        <tr><td><code>POIS-P2-BLR</code></td><td><strong>Acute Poisoning / Toxic Ingestion</strong></td><td><span class="pill pill-p2">P2</span></td><td>12 min</td><td><span class="pill pill-bls">BLS</span></td></tr>
+        <tr><td><code>SEPSIS-P2-BLR</code></td><td><strong>Septic Shock — Pre-hospital</strong></td><td><span class="pill pill-p2">P2</span></td><td>12 min</td><td><span class="pill pill-als">ALS</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">On-Call Specialists (30)</div>
+    <div class="two-col" style="margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#57606a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">By Specialty</div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Cardiologist</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:27%;background:#3b82d4"></div></div><div class="fleet-count">4</div></div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Neurosurgeon</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:33%;background:#7c5cd8"></div></div><div class="fleet-count">5</div></div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Trauma Surgeon</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:20%;background:#c0392b"></div></div><div class="fleet-count">3</div></div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Orthopedic</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:27%;background:#e67e22"></div></div><div class="fleet-count">4</div></div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Burn Specialist</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:20%;background:#e74c3c"></div></div><div class="fleet-count">3</div></div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Neonatologist</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:20%;background:#16a085"></div></div><div class="fleet-count">3</div></div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Intensivist</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:20%;background:#2980b9"></div></div><div class="fleet-count">3</div></div>
+        <div class="fleet-row"><div class="fleet-label" style="font-size:11px">Emerg. Physician</div><div class="fleet-bar-wrap"><div class="fleet-bar" style="width:20%;background:#27ae60"></div></div><div class="fleet-count">3</div></div>
+      </div>
+      <div>
+        <div style="font-size:11px;font-weight:600;color:#57606a;margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Key On-Call Contacts</div>
+        <table style="font-size:11.5px">
+          <thead><tr><th>Name</th><th>Role</th><th>Hospital</th></tr></thead>
+          <tbody>
+            <tr><td>Dr. Ramesh Venkataraman</td><td>Cardiologist</td><td>Manipal OAR</td></tr>
+            <tr><td>Dr. Suresh Babu Nair</td><td>Neurosurgeon</td><td>St. John's</td></tr>
+            <tr><td>Dr. Mohammed Iqbal Hussain</td><td>Trauma Surg.</td><td>Bowring</td></tr>
+            <tr><td>Dr. Girish Lakshmipathy</td><td>Orthopedic</td><td>Apollo BG Rd</td></tr>
+            <tr><td>Dr. Nalini Parthasarathy</td><td>Burn Specialist</td><td>Victoria Burns</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:11px;color:#57606a;margin-top:8px">17 of 30 specialists currently on-call · 24 eligible for tele-consult · Languages: Kannada, Tamil, Telugu, Malayalam, Hindi, Urdu, Tulu, Marathi</div>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">ICU Facilities (20 Units · 509 Beds · 66 Available)</div>
+    <table>
+      <thead>
+        <tr><th>Hospital</th><th>ICU Type</th><th>Total</th><th>Avail</th><th>ECMO</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Manipal Hospital OAR</strong></td><td>Medical ICU</td><td>40</td><td>6</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Manipal Hospital OAR</strong></td><td>Cardiac ICU</td><td>20</td><td>3</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Narayana Health City</strong></td><td>Cardiac ICU</td><td>50</td><td>8</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Narayana Health City</strong></td><td>Neonatal ICU</td><td>30</td><td>4</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Apollo BG Road</strong></td><td>Medical ICU</td><td>36</td><td>5</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Apollo BG Road</strong></td><td>Neuro ICU</td><td>18</td><td>1</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Fortis BG Road</strong></td><td>Surgical ICU</td><td>24</td><td>2</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Aster CMI Hebbal</strong></td><td>Medical ICU</td><td>32</td><td>7</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Aster CMI Hebbal</strong></td><td>Neuro ICU</td><td>16</td><td>2</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Bowring Hospital</strong></td><td>Medical ICU</td><td>30</td><td><span style="color:#c0392b;font-weight:700">0</span></td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Victoria Hospital</strong></td><td>Surgical ICU</td><td>28</td><td>2</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>St. John's MCH</strong></td><td>Medical ICU</td><td>26</td><td>5</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>St. John's MCH</strong></td><td>Neonatal ICU</td><td>20</td><td>3</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Sakra World Hospital</strong></td><td>Surgical ICU</td><td>22</td><td>3</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Sparsh Hospital</strong></td><td>Surgical ICU</td><td>18</td><td>4</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>BGS Gleneagles</strong></td><td>Burn ICU</td><td>12</td><td>2</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>MS Ramaiah Memorial</strong></td><td>Medical ICU</td><td>28</td><td>4</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Cloudnine Marathahalli</strong></td><td>Neonatal ICU</td><td>22</td><td>5</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>IGICH</strong></td><td>Pediatric ICU</td><td>24</td><td>3</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Vikram Hospital Millers Rd</strong></td><td>Medical ICU</td><td>20</td><td>4</td><td><span class="dot dot-red"></span>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Cardiac Care Centres (15) — STEMI Routing</div>
+    <table>
+      <thead>
+        <tr><th>Hospital</th><th>Locality</th><th>Cath Lab</th><th>Primary PCI</th><th>D2B (min)</th><th>STEMI</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Sri Jayadeva ICVS</strong></td><td>Jayanagar</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td><strong style="color:#1a7f4b">38</strong></td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Narayana Health City</strong></td><td>Bommasandra</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>42</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Manipal Hospital OAR</strong></td><td>Old Airport Rd</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>48</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Apollo BG Road</strong></td><td>Bannerghatta Rd</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>50</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Fortis BG Road</strong></td><td>Bannerghatta Rd</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>52</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Sakra World</strong></td><td>Bellandur / ORR</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>53</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Aster CMI</strong></td><td>Hebbal</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>55</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Mazumdar Shaw MC</strong></td><td>Bommasandra</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>56</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>MS Ramaiah Memorial</strong></td><td>Mathikere</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>57</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Wockhardt Rajajinagar</strong></td><td>Rajajinagar</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>58</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>St. John's MCH</strong></td><td>Koramangala</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>60</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Sagar Hospitals</strong></td><td>Jayanagar</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>65</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Columbia Asia Whitefield</strong></td><td>Whitefield</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td><td>68</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Fortis La Femme</strong></td><td>Richmond Road</td><td><span class="dot dot-red"></span>No</td><td><span class="dot dot-red"></span>No</td><td>—</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>HOSMAT Hospital</strong></td><td>Magrath Road</td><td><span class="dot dot-red"></span>No</td><td><span class="dot dot-red"></span>No</td><td>—</td><td><span class="dot dot-red"></span>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Trauma Centres (12)</div>
+    <table>
+      <thead>
+        <tr><th>Hospital</th><th>Locality</th><th>Level</th><th>Helipad</th><th>MCI Cap.</th><th>Neuro</th><th>Vasc. Surg.</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Victoria Hospital</strong></td><td>Majestic</td><td><span class="pill pill-t1">Level I</span></td><td><span class="dot dot-red"></span>No</td><td>80</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Manipal Hospital OAR</strong></td><td>Old Airport Rd</td><td><span class="pill pill-t1">Level I</span></td><td><span class="dot dot-green"></span>Yes</td><td>60</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Apollo BG Road</strong></td><td>Bannerghatta Rd</td><td><span class="pill pill-t1">Level I</span></td><td><span class="dot dot-green"></span>Yes</td><td>55</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-green"></span>Yes</td></tr>
+        <tr><td><strong>Narayana Health City</strong></td><td>Bommasandra</td><td><span class="pill pill-t2">Level II</span></td><td><span class="dot dot-green"></span>Yes</td><td>50</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>St. John's MCH</strong></td><td>Koramangala</td><td><span class="pill pill-t2">Level II</span></td><td><span class="dot dot-red"></span>No</td><td>45</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Fortis BG Road</strong></td><td>Bannerghatta Rd</td><td><span class="pill pill-t2">Level II</span></td><td><span class="dot dot-red"></span>No</td><td>40</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Sakra World</strong></td><td>Bellandur / ORR</td><td><span class="pill pill-t2">Level II</span></td><td><span class="dot dot-red"></span>No</td><td>35</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>MS Ramaiah Memorial</strong></td><td>Mathikere</td><td><span class="pill pill-t2">Level II</span></td><td><span class="dot dot-red"></span>No</td><td>35</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Sparsh Hospital</strong></td><td>Infantry Road</td><td><span class="pill pill-t2">Level II</span></td><td><span class="dot dot-red"></span>No</td><td>30</td><td><span class="dot dot-red"></span>No</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>Aster CMI</strong></td><td>Hebbal</td><td><span class="pill pill-t2">Level II</span></td><td><span class="dot dot-red"></span>No</td><td>30</td><td><span class="dot dot-green"></span>Yes</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>BGS Gleneagles</strong></td><td>Kengeri</td><td><span class="pill pill-t3">Level III</span></td><td><span class="dot dot-red"></span>No</td><td>20</td><td><span class="dot dot-red"></span>No</td><td><span class="dot dot-red"></span>No</td></tr>
+        <tr><td><strong>KIMS VV Puram</strong></td><td>Viveknagar</td><td><span class="pill pill-t3">Level III</span></td><td><span class="dot dot-red"></span>No</td><td>20</td><td><span class="dot dot-red"></span>No</td><td><span class="dot dot-red"></span>No</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">AI Routing Decision Matrix — Emergency Type to Facility Filter</div>
+    <table>
+      <thead>
+        <tr><th>Emergency</th><th>SOP Code</th><th>Primary Filter</th><th>Best Hospital(s)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cardiac Arrest / STEMI</td><td><code>CA-P1-BLR</code> / <code>STEMI-P1-BLR</code></td><td>primary_pci_capable + lowest D2B</td><td>Sri Jayadeva, Narayana</td></tr>
+        <tr><td>Polytrauma / TBI</td><td><code>TR-MJR-P1-BLR</code></td><td>trauma_level=I + neuro + CT 24×7</td><td>Victoria, Manipal OAR, Apollo</td></tr>
+        <tr><td>Acute Stroke</td><td><code>STR-P1-BLR</code></td><td>stroke_unit + neuro ICU + CT 24×7</td><td>Manipal OAR, Sakra, Fortis</td></tr>
+        <tr><td>Major Burns</td><td><code>BURN-MJR-P1-BLR</code></td><td>burn_unit + burn ICU available</td><td>Victoria Burns Unit, BGS Gleneagles</td></tr>
+        <tr><td>Obstetric Emergency</td><td><code>OBS-P1-BLR</code></td><td>obstetric_unit + neonatal ICU</td><td>St. John's, Cloudnine, Narayana</td></tr>
+        <tr><td>Paediatric Cardiac Arrest</td><td><code>PED-CA-P1-BLR</code></td><td>picu_available + neonatal ICU</td><td>IGICH, Cloudnine, Narayana</td></tr>
+        <tr><td>Mass Casualty (MCI)</td><td><code>MCI-P1-BLR</code></td><td>mass_casualty_capacity DESC</td><td>Victoria (80), Manipal (60), Apollo (55)</td></tr>
+        <tr><td>ECMO Required</td><td>CA + STEMI escalation</td><td>ecmo_capable = true</td><td>Manipal OAR, Narayana, Apollo BG Rd</td></tr>
+        <tr><td>Septic Shock</td><td><code>SEPSIS-P2-BLR</code></td><td>MICU available + intensivist on-call</td><td>Aster CMI, Apollo, Fortis</td></tr>
+        <tr><td>Air Transfer</td><td>Any escalation</td><td>helipad = true</td><td>Manipal OAR, Apollo BG Rd, Narayana</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="section">
+    <div class="section-title">Generated Dataset Files</div>
+    <table>
+      <thead><tr><th>File</th><th>Records</th><th>Primary Key</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>data/hospitals.json</code></td><td>20</td><td>HOSP-BLR-XXX</td><td>Hospital master registry</td></tr>
+        <tr><td><code>data/ambulances.json</code></td><td>40</td><td>KA-108-XXXX / KA-PVT-XXXX</td><td>Fleet dispatch &amp; tracking</td></tr>
+        <tr><td><code>data/road_network.json</code></td><td>30</td><td>RD001–RD030</td><td>Routing graph edges</td></tr>
+        <tr><td><code>data/traffic_signals.json</code></td><td>25</td><td>SIG-BLR-XXX</td><td>Signal preemption &amp; delay</td></tr>
+        <tr><td><code>data/emergency_sops.json</code></td><td>15</td><td>SOP-XXX</td><td>Dispatch protocol engine</td></tr>
+        <tr><td><code>data/specialists.json</code></td><td>30</td><td>SPEC-XXX</td><td>On-call specialist lookup</td></tr>
+        <tr><td><code>data/icu_facilities.json</code></td><td>20</td><td>ICU-XXX</td><td>Real-time ICU capacity</td></tr>
+        <tr><td><code>data/cardiac_care.json</code></td><td>15</td><td>CARD-XXX</td><td>STEMI routing filter</td></tr>
+        <tr><td><code>data/trauma_centers.json</code></td><td>12</td><td>TRAUMA-XXX</td><td>Trauma triage routing</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>Made with IBM Bob — Bengaluru Emergency Response Digital Twin • PulseRoute AI • 2025</footer>
+</div>
+</body>
+</html>

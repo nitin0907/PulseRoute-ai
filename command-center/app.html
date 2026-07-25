@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PulseRoute — Emergency Operations Command Center</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0c10;--surface:#111318;--card:#161b22;--border:#21262d;
+  --text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#39d353;
+  --red:#f85149;--amber:#e3b341;--purple:#bc8cff;--teal:#39c5cf;
+  --route:#f78166;--corridor:#39d353;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;min-height:100vh;display:flex;flex-direction:column}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+#topbar .brand{display:flex;align-items:center;gap:10px}
+#topbar .brand .pulse{width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;animation:pulseRing 1.6s infinite}
+@keyframes pulseRing{0%,100%{box-shadow:0 0 0 0 rgba(248,81,73,.6)}50%{box-shadow:0 0 0 8px rgba(248,81,73,0)}}
+#topbar .brand h1{font-size:17px;font-weight:700;letter-spacing:.5px}
+#topbar .status-row{display:flex;gap:14px;align-items:center}
+.badge{padding:3px 9px;border-radius:12px;font-size:11px;font-weight:600;letter-spacing:.4px}
+.badge-red{background:rgba(248,81,73,.18);color:var(--red);border:1px solid rgba(248,81,73,.35)}
+.badge-green{background:rgba(57,211,83,.15);color:var(--green);border:1px solid rgba(57,211,83,.3)}
+.badge-amber{background:rgba(227,179,65,.15);color:var(--amber);border:1px solid rgba(227,179,65,.3)}
+.badge-blue{background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.3)}
+#clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+#main{display:grid;grid-template-columns:300px 1fr 300px;grid-template-rows:auto 1fr;flex:1;overflow:hidden;gap:1px;background:var(--border)}
+#main>*{background:var(--bg);overflow:hidden}
+#left{display:flex;flex-direction:column;grid-row:1/3}
+.panel-hdr{padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.panel-hdr .dot{width:7px;height:7px;border-radius:50%}
+.dot-red{background:var(--red)}.dot-green{background:var(--green)}.dot-amber{background:var(--amber)}.dot-blue{background:var(--accent)}.dot-purple{background:var(--purple)}.dot-teal{background:var(--teal)}
+#incident-form{padding:14px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0}
+label{font-size:11px;color:var(--muted);margin-bottom:3px;display:block}
+textarea,select{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:12px;font-family:inherit;resize:none;outline:none;transition:border .2s}
+textarea:focus,select:focus{border-color:var(--accent)}
+textarea{height:80px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#run-btn{width:100%;padding:9px;background:var(--red);color:#fff;border:none;border-radius:6px;font-weight:700;font-size:13px;cursor:pointer;letter-spacing:.3px;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+#run-btn:hover{background:#ff5f52}
+#run-btn:disabled{background:#3a2020;color:#666;cursor:not-allowed}
+#run-btn .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+#timeline-wrap{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:10px;position:relative;padding-bottom:10px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item:last-child .tl-line{display:none}
+.tl-gutter{display:flex;flex-direction:column;align-items:center;width:22px;flex-shrink:0}
+.tl-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;z-index:1}
+.tl-line{width:1px;flex:1;background:var(--border);margin-top:2px;min-height:10px}
+.tl-body{flex:1;min-width:0;padding-top:2px}
+.tl-title{font-size:12px;font-weight:600;color:var(--text)}
+.tl-sub{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5}
+.tl-item.pending .tl-icon{background:var(--border);color:var(--muted)}
+.tl-item.running .tl-icon{background:rgba(88,166,255,.25);color:var(--accent);animation:iconPulse .8s infinite alternate}
+@keyframes iconPulse{from{box-shadow:0 0 0 0 rgba(88,166,255,.4)}to{box-shadow:0 0 0 5px rgba(88,166,255,0)}}
+.tl-item.done .tl-icon{background:rgba(57,211,83,.2);color:var(--green)}
+.tl-item.error .tl-icon{background:rgba(248,81,73,.2);color:var(--red)}
+#center{display:flex;flex-direction:column;grid-row:1/3}
+#map-wrap{flex:1;position:relative;overflow:hidden;min-height:0}
+#bengaluru-map{width:100%;height:100%;display:block}
+.map-legend{position:absolute;bottom:14px;left:14px;background:rgba(17,19,24,.88);border:1px solid var(--border);border-radius:8px;padding:10px 13px;display:flex;flex-direction:column;gap:5px;backdrop-filter:blur(4px)}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-line{width:18px;height:3px;border-radius:2px;flex-shrink:0}
+.map-overlay{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:7px}
+.map-badge{background:rgba(17,19,24,.88);border:1px solid var(--border);border-radius:6px;padding:6px 11px;font-size:11px;backdrop-filter:blur(4px)}
+#eta-panel{flex-shrink:0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)}
+.eta-cell{background:var(--surface);padding:12px 14px;text-align:center}
+.eta-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.eta-value{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
+.eta-unit{font-size:11px;color:var(--muted);margin-left:3px}
+.eta-before{color:var(--amber)}.eta-after{color:var(--green)}.eta-saved{color:var(--teal)}.eta-pending{color:var(--border)}
+#right{display:flex;flex-direction:column;grid-row:1/3}
+#mcp-console{flex:1;overflow-y:auto;padding:10px 12px;font-family:'Consolas','Courier New',monospace;font-size:11px;line-height:1.7;min-height:0}
+.mcp-entry{margin-bottom:10px;border-left:2px solid var(--border);padding-left:10px}
+.mcp-entry.tool-call{border-color:var(--accent)}.mcp-entry.tool-resp{border-color:var(--green)}.mcp-entry.agent-msg{border-color:var(--purple)}.mcp-entry.error{border-color:var(--red)}
+.mcp-ts{color:var(--muted);font-size:10px}
+.mcp-label{color:var(--accent);font-weight:700}.mcp-label.resp{color:var(--green)}.mcp-label.agent{color:var(--purple)}.mcp-label.err{color:var(--red)}
+.mcp-body{color:#c9d1d9;white-space:pre-wrap;word-break:break-all}
+#decision{flex-shrink:0;padding:14px;border-top:1px solid var(--border);background:var(--surface)}
+.decision-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dec-card{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 11px}
+.dec-card-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.dec-card-value{font-size:12px;font-weight:600;color:var(--text)}
+.dec-card-sub{font-size:10px;color:var(--muted);margin-top:2px}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.corridor-active{animation:corridorGlow 1.2s ease-out}
+@keyframes corridorGlow{0%{filter:drop-shadow(0 0 12px #39d353)}100%{filter:none}}
+#tooltip{position:fixed;background:rgba(22,27,34,.96);border:1px solid var(--border);border-radius:6px;padding:7px 11px;font-size:11px;pointer-events:none;display:none;z-index:9999;max-width:200px;line-height:1.6}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <div class="brand">
+    <div class="pulse">🚨</div>
+    <div>
+      <h1>PulseRoute AI <span style="color:var(--muted);font-weight:400">/ Emergency Operations Command Center</span></h1>
+      <div style="font-size:10px;color:var(--muted);margin-top:1px">Bengaluru Emergency Dispatch Intelligence Platform · pulseroute-mcp v1.0.0</div>
+    </div>
+  </div>
+  <div class="status-row">
+    <span id="sys-status" class="badge badge-green">● SYSTEM READY</span>
+    <span id="mci-badge" class="badge badge-amber" style="display:none">⚠ MCI ACTIVE</span>
+    <span id="green-badge" class="badge badge-green" style="display:none">🟢 GREEN CORRIDOR</span>
+    <span id="clock">--:--:-- IST</span>
+  </div>
+</div>
+
+<div id="main">
+  <div id="left">
+    <div class="panel-hdr"><div class="dot dot-red"></div>Incident Input</div>
+    <div id="incident-form">
+      <div>
+        <label>Incident Description</label>
+        <textarea id="incident-text" placeholder="Describe the emergency...">BMTC bus accident near Silk Board. 15 casualties. Heavy traffic congestion.</textarea>
+      </div>
+      <div class="row2">
+        <div>
+          <label>Incident Type</label>
+          <select id="incident-type">
+            <option value="MCI">Mass Casualty (MCI)</option>
+            <option value="Cardiac">Cardiac Arrest</option>
+            <option value="Trauma">Major Trauma</option>
+            <option value="Stroke">Acute Stroke</option>
+            <option value="Burns">Major Burns</option>
+          </select>
+        </div>
+        <div>
+          <label>Priority</label>
+          <select id="incident-priority">
+            <option value="P1">P1 — Immediate</option>
+            <option value="P2">P2 — Urgent</option>
+          </select>
+        </div>
+      </div>
+      <button id="run-btn" onclick="runSimulation()">
+        <span>▶</span><span id="btn-text">ACTIVATE DISPATCH</span>
+        <div class="spinner" id="btn-spinner"></div>
+      </button>
+    </div>
+
+    <div class="panel-hdr"><div class="dot dot-blue"></div>Agent Execution Timeline</div>
+    <div id="timeline-wrap">
+      <div class="tl-item pending" id="tl-intake">
+        <div class="tl-gutter"><div class="tl-icon">1</div><div class="tl-line"></div></div>
+        <div class="tl-body"><div class="tl-title">Emergency Intake Agent</div><div class="tl-sub">Awaiting incident input</div></div>
+      </div>
+      <div class="tl-item pending" id="tl-traffic">
+        <div class="tl-gutter"><div class="tl-icon">2</div><div class="tl-line"></div></div>
+        <div class="tl-body"><div class="tl-title">traffic_assessment</div><div class="tl-sub">MCP Tool — Pending</div></div>
+      </div>
+      <div class="tl-item pending" id="tl-ambulance">
+        <div class="tl-gutter"><div class="tl-icon">3</div><div class="tl-line"></div></div>
+        <div class="tl-body"><div class="tl-title">find_nearest_available_ambulance</div><div class="tl-sub">MCP Tool — Pending</div></div>
+      </div>
+      <div class="tl-item pending" id="tl-hospital">
+        <div class="tl-gutter"><div class="tl-icon">4</div><div class="tl-line"></div></div>
+        <div class="tl-body"><div class="tl-title">select_hospital</div><div class="tl-sub">MCP Tool — Pending</div></div>
+      </div>
+      <div class="tl-item pending" id="tl-routeA">
+        <div class="tl-gutter"><div class="tl-icon">5</div><div class="tl-line"></div></div>
+        <div class="tl-body"><div class="tl-title">calculate_route — Leg A</div><div class="tl-sub">Ambulance → Incident</div></div>
+      </div>
+      <div class="tl-item pending" id="tl-routeB">
+        <div class="tl-gutter"><div class="tl-icon">6</div><div class="tl-line"></div></div>
+        <div class="tl-body"><div class="tl-title">calculate_route — Leg B</div><div class="tl-sub">Incident → Hospital</div></div>
+      </div>
+      <div class="tl-item pending" id="tl-green">
+        <div class="tl-gutter"><div class="tl-icon">7</div><div class="tl-line"></div></div>
+        <div class="tl-body"><div class="tl-title">Green Corridor Activation</div><div class="tl-sub">Signal preemption — ERSS 112</div></div>
+      </div>
+      <div class="tl-item pending" id="tl-coordinator">
+        <div class="tl-gutter"><div class="tl-icon">8</div></div>
+        <div class="tl-body"><div class="tl-title">Resource Coordinator Agent</div><div class="tl-sub">Deployment synthesis</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="center">
+    <div class="panel-hdr"><div class="dot dot-teal"></div>Bengaluru Tactical Map — Live Operations View</div>
+    <div id="map-wrap">
+      <svg id="bengaluru-map" viewBox="0 0 760 540" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#0d1117"/><stop offset="100%" stop-color="#080b10"/>
+          </radialGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="strongGlow"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <marker id="arrowRoute" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#f78166"/></marker>
+          <marker id="arrowGreen" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3 z" fill="#39d353"/></marker>
+        </defs>
+        <rect width="760" height="540" fill="url(#bgGrad)"/>
+        <polygon points="200,60 250,45 310,40 370,42 430,50 490,65 540,85 580,115 615,150 630,190 635,235 625,280 610,320 590,360 565,400 540,430 510,455 475,470 440,478 400,480 360,478 318,472 280,460 245,440 215,415 190,385 170,350 155,310 148,270 148,228 155,185 168,148 185,112 200,80" fill="none" stroke="#1a2332" stroke-width="1.5"/>
+        <path d="M300,95 Q380,80 450,95 Q530,115 570,170 Q600,230 595,300 Q585,360 545,400 Q500,435 440,450 Q375,460 320,450 Q265,435 235,400 Q210,360 205,300 Q202,235 220,185 Q245,135 300,95" fill="none" stroke="#1e3a4a" stroke-width="2.5" stroke-dasharray="6,3" opacity=".7"/>
+        <line x1="368" y1="338" x2="390" y2="480" stroke="#1e3347" stroke-width="2"/>
+        <line x1="310" y1="118" x2="290" y2="60" stroke="#1e3347" stroke-width="2"/>
+        <line x1="230" y1="318" x2="120" y2="345" stroke="#1e3347" stroke-width="2"/>
+        <line x1="255" y1="178" x2="150" y2="110" stroke="#1e3347" stroke-width="2"/>
+        <line x1="490" y1="250" x2="620" y2="235" stroke="#1e3347" stroke-width="2"/>
+        <line x1="368" y1="338" x2="310" y2="318" stroke="#17293d" stroke-width="1.5"/>
+        <line x1="368" y1="338" x2="290" y2="370" stroke="#17293d" stroke-width="1.5"/>
+        <line x1="320" y1="265" x2="368" y2="338" stroke="#17293d" stroke-width="1.5"/>
+        <line x1="430" y1="290" x2="368" y2="338" stroke="#17293d" stroke-width="1.5"/>
+        <line x1="480" y1="310" x2="430" y2="290" stroke="#17293d" stroke-width="1.5"/>
+        <path d="M190,180 Q155,265 175,350 Q200,415 265,450 Q335,478 410,475 Q480,468 535,435 Q595,390 618,320 Q640,250 615,185 Q590,120 535,90 Q475,60 410,55 Q340,50 280,70 Q225,90 190,140" fill="none" stroke="#1a3028" stroke-width="2" stroke-dasharray="4,4" opacity=".5"/>
+        <text x="310" y="118" fill="#1e4060" font-size="9" text-anchor="middle" opacity=".8">NORTH</text>
+        <text x="490" y="270" fill="#1e4060" font-size="9" text-anchor="middle" opacity=".8">EAST</text>
+        <text x="370" y="455" fill="#1e4060" font-size="9" text-anchor="middle" opacity=".8">SOUTH</text>
+        <text x="215" y="318" fill="#1e4060" font-size="9" text-anchor="middle" opacity=".8">WEST</text>
+        <text x="360" y="300" fill="#1e4060" font-size="9" text-anchor="middle" opacity=".8">CENTRAL</text>
+        <!-- Hospitals -->
+        <g id="h-victoria" class="hosp-marker" data-name="Victoria Hospital" data-info="Level I Trauma · MCI Cap 80 · 210 beds · +91-80-26700435">
+          <rect x="298" y="193" width="24" height="24" rx="4" fill="#1a2a1a" stroke="#39d353" stroke-width="1.5"/><text x="310" y="209" fill="#39d353" font-size="12" text-anchor="middle" font-weight="bold">H</text><text x="310" y="228" fill="#39d353" font-size="8" text-anchor="middle">Victoria</text>
+        </g>
+        <g id="h-stjohns" class="hosp-marker" data-name="St. John's MCH" data-info="Level II Trauma · MCI Cap 45 · 178 beds">
+          <rect x="350" y="241" width="24" height="24" rx="4" fill="#1a2a1a" stroke="#39d353" stroke-width="1.5"/><text x="362" y="257" fill="#39d353" font-size="12" text-anchor="middle" font-weight="bold">H</text><text x="362" y="276" fill="#39d353" font-size="8" text-anchor="middle">St John's</text>
+        </g>
+        <g id="h-manipal" class="hosp-marker" data-name="Manipal Hospital" data-info="Level I Trauma · ECMO · Helipad · 87 beds">
+          <rect x="378" y="216" width="24" height="24" rx="4" fill="#1a2a1a" stroke="#39d353" stroke-width="1.5"/><text x="390" y="232" fill="#39d353" font-size="12" text-anchor="middle" font-weight="bold">H</text><text x="390" y="251" fill="#39d353" font-size="8" text-anchor="middle">Manipal</text>
+        </g>
+        <g id="h-apollo" class="hosp-marker" data-name="Apollo Hospital" data-info="Level I Trauma · Helipad · 104 beds">
+          <rect x="318" y="283" width="24" height="24" rx="4" fill="#1a2a1a" stroke="#39d353" stroke-width="1.5"/><text x="330" y="299" fill="#39d353" font-size="12" text-anchor="middle" font-weight="bold">H</text><text x="330" y="318" fill="#39d353" font-size="8" text-anchor="middle">Apollo</text>
+        </g>
+        <!-- Traffic signals -->
+        <circle id="ts001" cx="368" cy="338" r="5" fill="#e3b341" stroke="#0a0c10" stroke-width="1.5" opacity=".9"/>
+        <circle id="ts002" cx="344" cy="144" r="4" fill="#e3b341" stroke="#0a0c10" stroke-width="1.5" opacity=".6"/>
+        <circle id="ts004" cx="432" cy="227" r="4" fill="#e3b341" stroke="#0a0c10" stroke-width="1.5" opacity=".6"/>
+        <circle id="ts006" cx="412" cy="268" r="4" fill="#f85149" stroke="#0a0c10" stroke-width="1.5" opacity=".6"/>
+        <circle id="ts018" cx="378" cy="272" r="4" fill="#e3b341" stroke="#0a0c10" stroke-width="1.5" opacity=".6"/>
+        <text x="368" y="352" fill="#e3b341" font-size="8" text-anchor="middle" opacity=".8">SB Jn</text>
+        <text x="344" y="137" fill="#e3b341" font-size="8" text-anchor="middle" opacity=".6">Hebbal Jn</text>
+        <text x="432" y="218" fill="#e3b341" font-size="8" text-anchor="middle" opacity=".6">Marathahalli</text>
+        <text x="412" y="259" fill="#f85149" font-size="8" text-anchor="middle" opacity=".6">Bellandur</text>
+        <!-- Dynamic layers -->
+        <g id="route-layer"></g>
+        <g id="corridor-layer"></g>
+        <g id="incident-layer"></g>
+        <g id="ambulance-layer"></g>
+        <!-- Compass -->
+        <g transform="translate(710,70)">
+          <circle cx="0" cy="0" r="22" fill="rgba(17,19,24,.8)" stroke="#21262d" stroke-width="1"/>
+          <text x="0" y="-9" fill="#8b949e" font-size="9" text-anchor="middle" font-weight="700">N</text>
+          <line x1="0" y1="-16" x2="0" y2="-4" stroke="#58a6ff" stroke-width="1.5"/>
+          <text x="0" y="15" fill="#8b949e" font-size="8" text-anchor="middle">S</text>
+          <text x="-14" y="4" fill="#8b949e" font-size="8" text-anchor="middle">W</text>
+          <text x="14" y="4" fill="#8b949e" font-size="8" text-anchor="middle">E</text>
+        </g>
+        <g transform="translate(560,500)">
+          <line x1="0" y1="0" x2="80" y2="0" stroke="#8b949e" stroke-width="1.5"/>
+          <line x1="0" y1="-4" x2="0" y2="4" stroke="#8b949e" stroke-width="1.5"/>
+          <line x1="80" y1="-4" x2="80" y2="4" stroke="#8b949e" stroke-width="1.5"/>
+          <text x="40" y="-6" fill="#8b949e" font-size="9" text-anchor="middle">~10 km</text>
+        </g>
+      </svg>
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Incident</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Ambulance</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Hospital</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--route)"></div>Dispatch Route</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--corridor)"></div>Green Corridor</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Traffic Signal</div>
+      </div>
+      <div class="map-overlay" id="map-overlays"></div>
+    </div>
+    <div id="eta-panel">
+      <div class="eta-cell"><div class="eta-label">ETA Before Corridor</div><div class="eta-value eta-before" id="eta-before"><span class="eta-pending">—</span></div></div>
+      <div class="eta-cell"><div class="eta-label">ETA After Corridor</div><div class="eta-value eta-after" id="eta-after"><span class="eta-pending">—</span></div></div>
+      <div class="eta-cell" style="background:rgba(57,211,83,.06)"><div class="eta-label" style="color:var(--teal)">Time Saved</div><div class="eta-value eta-saved" id="eta-saved"><span class="eta-pending">—</span></div></div>
+    </div>
+  </div>
+
+  <div id="right">
+    <div class="panel-hdr"><div class="dot dot-green"></div>MCP Tool Invocation Console</div>
+    <div id="mcp-console">
+      <div style="color:var(--muted);font-size:11px;padding:20px 0;text-align:center">Awaiting dispatch activation...<br/><span style="font-size:10px;opacity:.5">pulseroute-mcp v1.0.0 — stdio transport</span></div>
+    </div>
+    <div class="panel-hdr"><div class="dot dot-purple"></div>Final Deployment Decision</div>
+    <div id="decision">
+      <div id="decision-pending" style="color:var(--muted);font-size:11px;padding:8px 0;text-align:center">Awaiting resource coordinator synthesis...</div>
+      <div id="decision-content" style="display:none">
+        <div class="decision-grid" id="decision-grid"></div>
+        <div id="decision-note" style="margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-size:11px;color:var(--muted);line-height:1.6"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const LAT_MIN=12.83,LAT_MAX=13.11,LNG_MIN=77.46,LNG_MAX=77.77,SVG_W=760,SVG_H=540,PAD=40;
+function ll2px(lat,lng){return[PAD+(lng-LNG_MIN)/(LNG_MAX-LNG_MIN)*(SVG_W-2*PAD),PAD+(LAT_MAX-lat)/(LAT_MAX-LAT_MIN)*(SVG_H-2*PAD)];}
+const DATA={
+  incident:{lat:12.9176,lng:77.6237,name:"Silk Board Junction"},
+  ambulances:{
+    primary:{id:"AMB-028",sign:"KA-108-SE04",type:"ALS",lat:12.9380,lng:77.6270,locality:"Koramangala",dist:2.48,eta:7,crew:"Subramaniam K / Indira Bai",ch:"CH-03"},
+    backup:{id:"AMB-017",sign:"KA-108-SE01",type:"BLS",lat:12.9352,lng:77.6245,locality:"Koramangala",dist:2.44,eta:7,crew:"Girish Hegde / Sneha Rao",ch:"CH-03"}
+  },
+  hospitals:{primary:{id:"hosp_004",name:"Victoria Hospital",lat:12.9748,lng:77.5706,level:"I",cap:80,beds:210,phone:"+91-80-26700435"}},
+  traffic:{congestion:"CRITICAL",score:9.8,delay:7,peak:true,signals:[{id:"TS001",name:"Silk Board Junction",lat:12.9176,lng:77.6237,idx:9.8,preempt:true},{id:"TS004",name:"Marathahalli Bridge Junction",lat:12.9591,lng:77.6974,idx:9.5,preempt:true},{id:"TS006",name:"Bellandur Junction",lat:12.9279,lng:77.6756,idx:9.1,preempt:false}]},
+  corridor:{eta_before:45,eta_after:27,saved:18}
+};
+function updateClock(){const now=new Date(),ist=new Date(now.getTime()+5.5*3600000);document.getElementById('clock').textContent=ist.toISOString().slice(11,19)+' IST';}
+updateClock();setInterval(updateClock,1000);
+const tip=document.getElementById('tooltip');
+document.querySelectorAll('.hosp-marker').forEach(el=>{
+  el.style.cursor='pointer';
+  el.addEventListener('mouseenter',e=>{tip.style.display='block';tip.innerHTML=`<strong style="color:var(--green)">${el.dataset.name}</strong><br/>${el.dataset.info}`;});
+  el.addEventListener('mousemove',e=>{tip.style.left=(e.clientX+12)+'px';tip.style.top=(e.clientY-20)+'px';});
+  el.addEventListener('mouseleave',()=>{tip.style.display='none';});
+});
+function setTL(id,state,sub){const el=document.getElementById('tl-'+id);el.className='tl-item '+state;if(sub)el.querySelector('.tl-sub').textContent=sub;}
+function mcpLog(type,label,body,ts){
+  const c=document.getElementById('mcp-console');
+  const classes={call:'tool-call',resp:'tool-resp',agent:'agent-msg',err:'error'};
+  const lblClass={call:'',resp:'resp',agent:'agent',err:'err'};
+  const t=ts||new Date().toISOString().slice(11,19);
+  const div=document.createElement('div');
+  div.className=`mcp-entry ${classes[type]}`;
+  div.innerHTML=`<div><span class="mcp-ts">[${t}]</span> <span class="mcp-label ${lblClass[type]}">${label}</span></div><div class="mcp-body">${body}</div>`;
+  c.appendChild(div);c.scrollTop=c.scrollHeight;
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function clearLayer(id){document.getElementById(id).innerHTML='';}
+function svgEl(tag,attrs){const e=document.createElementNS('http://www.w3.org/2000/svg',tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));return e;}
+function drawIncident(){
+  clearLayer('incident-layer');const g=document.getElementById('incident-layer');
+  const[x,y]=ll2px(DATA.incident.lat,DATA.incident.lng);
+  for(let i=0;i<3;i++){g.appendChild(svgEl('circle',{cx:x,cy:y,r:8+i*8,fill:'none',stroke:'#f85149','stroke-width':'1',opacity:0.4-i*0.12}));}
+  g.appendChild(svgEl('circle',{cx:x,cy:y,r:7,fill:'#f85149',filter:'url(#glow)'}));
+  const lbl=svgEl('text',{x:x,y:y-14,fill:'#f85149','font-size':'9','text-anchor':'middle','font-weight':'bold'});lbl.textContent='⚠ INCIDENT';g.appendChild(lbl);
+  g.appendChild(svgEl('rect',{x:x-20,y:y+10,width:40,height:13,rx:3,fill:'rgba(248,81,73,.25)',stroke:'#f85149','stroke-width':'0.7'}));
+  const bt=svgEl('text',{x:x,y:y+20,fill:'#f85149','font-size':'8','text-anchor':'middle'});bt.textContent='MCI·15';g.appendChild(bt);
+}
+function drawAmbulance(ambs){
+  clearLayer('ambulance-layer');const g=document.getElementById('ambulance-layer');
+  ambs.forEach((amb,i)=>{
+    const[x,y]=ll2px(amb.lat,amb.lng);const col=i===0?'#58a6ff':'#7d8590';const sz=i===0?8:6;
+    const rect=svgEl('rect',{x:x-sz,y:y-sz,width:sz*2,height:sz*2,rx:2,fill:i===0?'rgba(88,166,255,.25)':'rgba(125,133,144,.15)',stroke:col,'stroke-width':i===0?1.5:1});
+    if(i===0)rect.setAttribute('filter','url(#glow)');g.appendChild(rect);
+    [['M'+x+','+(y-sz+2)+' L'+x+','+(y+sz-2)],['M'+(x-sz+2)+','+y+' L'+(x+sz-2)+','+y]].forEach(d=>{const ln=svgEl('path',{d:d[0],stroke:col,'stroke-width':i===0?2:1.5});g.appendChild(ln);});
+    const lbl=svgEl('text',{x:x,y:y-sz-4,fill:col,'font-size':'8','text-anchor':'middle'});lbl.textContent=amb.sign+(i>0?' (BLS)':'');g.appendChild(lbl);
+  });
+}
+function drawRoute(){
+  clearLayer('route-layer');const g=document.getElementById('route-layer');
+  const[ix,iy]=ll2px(DATA.incident.lat,DATA.incident.lng);
+  const[ax,ay]=ll2px(DATA.ambulances.primary.lat,DATA.ambulances.primary.lng);
+  const[hx,hy]=ll2px(DATA.hospitals.primary.lat,DATA.hospitals.primary.lng);
+  const cpAx=(ax+ix)/2+15,cpAy=(ay+iy)/2-20;
+  const legA=svgEl('path',{d:`M${ax},${ay} Q${cpAx},${cpAy} ${ix},${iy}`,fill:'none',stroke:'#f78166','stroke-width':'2.5','stroke-dasharray':'6,3','marker-end':'url(#arrowRoute)',opacity:'0.85'});g.appendChild(legA);
+  const cpBx=(ix+hx)/2-30,cpBy=(iy+hy)/2-25;
+  const legB=svgEl('path',{d:`M${ix},${iy} Q${cpBx},${cpBy} ${hx},${hy}`,fill:'none',stroke:'#f78166','stroke-width':'2.5','marker-end':'url(#arrowRoute)',opacity:'0.85'});g.appendChild(legB);
+  const la=svgEl('text',{x:(ax+ix)/2+15,y:(ay+iy)/2-28,fill:'#f78166','font-size':'8','text-anchor':'middle'});la.textContent='Leg A · 7km · 7min';g.appendChild(la);
+  const lb=svgEl('text',{x:(ix+hx)/2-38,y:(iy+hy)/2-30,fill:'#f78166','font-size':'8','text-anchor':'middle'});lb.textContent='Leg B · 13.8km';g.appendChild(lb);
+}
+function drawGreenCorridor(){
+  clearLayer('corridor-layer');const g=document.getElementById('corridor-layer');
+  const[ix,iy]=ll2px(DATA.incident.lat,DATA.incident.lng);
+  const[hx,hy]=ll2px(DATA.hospitals.primary.lat,DATA.hospitals.primary.lng);
+  const cpx=(ix+hx)/2-35,cpy=(iy+hy)/2-35;
+  g.appendChild(svgEl('path',{d:`M${ix},${iy} Q${cpx},${cpy} ${hx},${hy}`,fill:'none',stroke:'#39d353','stroke-width':'8',opacity:'0.15'}));
+  const main=svgEl('path',{d:`M${ix},${iy} Q${cpx},${cpy} ${hx},${hy}`,fill:'none',stroke:'#39d353','stroke-width':'2.5','stroke-dasharray':'10,4','marker-end':'url(#arrowGreen)',filter:'url(#glow)',class:'corridor-active'});g.appendChild(main);
+  DATA.traffic.signals.filter(s=>s.preempt).forEach(s=>{
+    const[sx,sy]=ll2px(s.lat,s.lng);
+    g.appendChild(svgEl('circle',{cx:sx,cy:sy,r:10,fill:'none',stroke:'#39d353','stroke-width':'1.5',opacity:'0.7'}));
+    g.appendChild(svgEl('circle',{cx:sx,cy:sy,r:5,fill:'#39d353',filter:'url(#glow)'}));
+    const lbl=svgEl('text',{x:sx+12,y:sy-6,fill:'#39d353','font-size':'8'});lbl.textContent='✓ PREEMPT';g.appendChild(lbl);
+  });
+  const lbl=svgEl('text',{x:(ix+hx)/2-45,y:(iy+hy)/2-42,fill:'#39d353','font-size':'9','font-weight':'bold','text-anchor':'middle',filter:'url(#glow)'});lbl.textContent='🟢 GREEN CORRIDOR ACTIVE';g.appendChild(lbl);
+}
+function addMapOverlay(html){const d=document.createElement('div');d.className='map-badge';d.innerHTML=html;document.getElementById('map-overlays').appendChild(d);}
+function renderDecision(){
+  document.getElementById('decision-pending').style.display='none';
+  document.getElementById('decision-content').style.display='block';
+  const cards=[
+    {label:'Dispatch Unit',value:'AMB-028 · KA-108-SE04',sub:'ALS Tata Winger · Koramangala'},
+    {label:'MCI Backup',value:'AMB-017 · KA-108-SE01',sub:'BLS Force Traveller · Koramangala'},
+    {label:'Primary Hospital',value:'Victoria Hospital',sub:'Level I · MCI Cap 80 · Majestic'},
+    {label:'Secondary Hospital',value:"St. John's MCH",sub:'Level II · MCI Cap 45 · Koramangala'},
+    {label:'SOP Activated',value:'MCI-P1-BLR',sub:'Mass Casualty ≥10 · P1 Immediate'},
+    {label:'Deployment Status',value:'READY ⚠',sub:'READY_WITH_WARNINGS — CRITICAL traffic'},
+    {label:'Scene Safety',value:'NOT SAFE',sub:'Structural hazard · fuel leak risk'},
+    {label:'Confidence',value:'0.74 / 1.00',sub:'Degraded by CRITICAL congestion'},
+  ];
+  document.getElementById('decision-grid').innerHTML=cards.map(c=>`<div class="dec-card"><div class="dec-card-label">${c.label}</div><div class="dec-card-value">${c.value}</div><div class="dec-card-sub">${c.sub}</div></div>`).join('');
+  document.getElementById('decision-note').innerHTML=`<span style="color:var(--amber)">⚠ COORDINATOR NOTE:</span> Green Corridor activated on ORR (RD001) — ERSS 112 preemption at TS001 + TS004. Amb ETA to scene 7 min (P1 target met). Hospital pre-alert sent — Victoria Trauma Team & Blood Bank. Bellandur TS006 non-preemptible — route via Hosur Rd approach. Fire unit 101 dispatched (fuel risk).`;
+}
+let running=false;
+async function runSimulation(){
+  if(running)return;running=true;
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true;document.getElementById('btn-spinner').style.display='block';
+  document.getElementById('btn-text').textContent='RUNNING...';
+  document.getElementById('mcp-console').innerHTML='';
+  document.getElementById('decision-pending').style.display='block';
+  document.getElementById('decision-content').style.display='none';
+  document.getElementById('map-overlays').innerHTML='';
+  document.getElementById('mci-badge').style.display='none';
+  document.getElementById('green-badge').style.display='none';
+  document.getElementById('eta-before').innerHTML='<span class="eta-pending">—</span>';
+  document.getElementById('eta-after').innerHTML='<span class="eta-pending">—</span>';
+  document.getElementById('eta-saved').innerHTML='<span class="eta-pending">—</span>';
+  clearLayer('route-layer');clearLayer('corridor-layer');clearLayer('incident-layer');clearLayer('ambulance-layer');
+  ['intake','traffic','ambulance','hospital','routeA','routeB','green','coordinator'].forEach(id=>setTL(id,'pending',null));
+  const t=()=>new Date().toISOString().slice(11,19);
+  setTL('intake','running','Parsing incident description...');
+  mcpLog('agent','[emergency-intake-agent]','Processing: "'+document.getElementById('incident-text').value+'"',t());
+  await sleep(900);
+  mcpLog('agent','[emergency-intake-agent]',`Incident classified: Mass Casualty Incident\nSOP: MCI-P1-BLR | Priority: P1 | Severity: S-MCI\nLocation: Silk Board Junction (TS001) ✓\nCasualties: 15 | MCI threshold MET (≥10)\nHazards: structural=true, chemical=true\nConfidence: 0.81`,t());
+  setTL('intake','done','✓ MCI-P1-BLR · P1 · 15 casualties');
+  document.getElementById('mci-badge').style.display='inline';
+  drawIncident();document.getElementById('sys-status').textContent='● MCI ACTIVE';document.getElementById('sys-status').className='badge badge-red';
+  await sleep(400);
+  setTL('traffic','running','Calling traffic_assessment...');
+  mcpLog('call','▶ TOOL [1/6] traffic_assessment',`{ "incident_location": { "latitude": 12.9176, "longitude": 77.6237 }, "radius_km": 10 }`,t());
+  await sleep(1100);
+  mcpLog('resp','◀ RESPONSE traffic_assessment',`{ "congestion_level": "CRITICAL", "congestion_score": 9.8,\n  "peak_hour_active": true, "expected_delay_minutes": 7,\n  "preempt_signals": ["TS001 (9.8)", "TS004 (9.5)"],\n  "recommendation": "NICE Road bypass / ERSS-112 preemption" }`,t());
+  setTL('traffic','done','✓ CRITICAL 9.8/10 · Peak hour · +7 min delay');
+  addMapOverlay('<span style="color:var(--red)">🔴 CRITICAL</span> Silk Board 9.8/10');
+  await sleep(300);
+  setTL('ambulance','running','find_nearest_available_ambulance (ALS + BLS)...');
+  mcpLog('call','▶ TOOL [2/6] find_nearest_available_ambulance',`{ "latitude":12.9176, "longitude":77.6237, "ambulance_type":"ALS" }`,t());
+  await sleep(900);
+  mcpLog('resp','◀ RESPONSE',`{ "ambulance_id":"AMB-028", "call_sign":"KA-108-SE04",\n  "type":"ALS", "status":"available",\n  "locality":"Koramangala", "distance_km":2.48, "eta_minutes":7 }`,t());
+  mcpLog('call','▶ TOOL [3/6] find_nearest_available_ambulance',`{ "latitude":12.9176, "longitude":77.6237, "ambulance_type":"BLS" }  [MCI backup]`,t());
+  await sleep(700);
+  mcpLog('resp','◀ RESPONSE',`{ "ambulance_id":"AMB-017", "call_sign":"KA-108-SE01",\n  "type":"BLS", "status":"available",\n  "locality":"Koramangala", "distance_km":2.44, "eta_minutes":7 }`,t());
+  setTL('ambulance','done','✓ AMB-028 ALS + AMB-017 BLS · 2.4 km · 7 min');
+  drawAmbulance([DATA.ambulances.primary,DATA.ambulances.backup]);
+  await sleep(300);
+  setTL('hospital','running','Calling select_hospital...');
+  mcpLog('call','▶ TOOL [4/6] select_hospital',`{ "emergency_type":"Polytrauma",\n  "required_specialties":["Trauma & Critical Care","Neurosurgery"],\n  "latitude":12.9176, "longitude":77.6237 }`,t());
+  await sleep(1000);
+  mcpLog('resp','◀ RESPONSE',`{ "hospital_name":"Victoria Hospital", "locality":"Majestic",\n  "available_beds":210, "trauma_level":"I",\n  "mass_casualty_capacity":80, "distance_km":11.2,\n  "recommendation":"Highest MCI capacity. Level I, 6 bays." }`,t());
+  setTL('hospital','done','✓ Victoria Hospital · Level I · MCI Cap 80');
+  addMapOverlay('<span style="color:var(--green)">🏥</span> Victoria Hospital selected');
+  await sleep(300);
+  setTL('routeA','running','calculate_route Leg A...');
+  mcpLog('call','▶ TOOL [5/6] calculate_route [Leg A]',`{ "source":{"locality":"Koramangala","lat":12.938,"lng":77.627},\n  "destination":{"locality":"Silk Board","lat":12.9176,"lng":77.6237} }`,t());
+  await sleep(800);
+  mcpLog('resp','◀ RESPONSE',`{ "road":"RD025", "distance_km":7.0, "eta_minutes":38,\n  "peak_speed_kmh":11, "emergency_route":false }`,t());
+  setTL('routeA','done','✓ RD025 · 7.0 km · 38 min peak');
+  await sleep(300);
+  setTL('routeB','running','calculate_route Leg B...');
+  mcpLog('call','▶ TOOL [6/6] calculate_route [Leg B]',`{ "source":{"locality":"Silk Board","lat":12.9176,"lng":77.6237},\n  "destination":{"locality":"Majestic","lat":12.9748,"lng":77.5706} }`,t());
+  await sleep(900);
+  mcpLog('resp','◀ RESPONSE',`{ "road":"RD001 Outer Ring Road", "distance_km":13.8,\n  "eta_minutes":59, "emergency_route":true,\n  "signal_preemption":true,\n  "alternate":"NICE Road RD002 — 60 min" }`,t());
+  setTL('routeB','done','✓ RD001 ORR · 13.8 km · 59 min peak');
+  drawRoute();
+  document.getElementById('eta-before').innerHTML='45<span class="eta-unit">min</span>';
+  await sleep(500);
+  setTL('green','running','Activating Green Corridor — ERSS 112...');
+  mcpLog('agent','[resource-coordinator-agent]',`GREEN CORRIDOR ACTIVATION\n  Preempting TS001 Silk Board Junction ✓\n  Preempting TS004 Marathahalli Bridge ✓\n  ERSS 112 signal override transmitted\n  Time saved: 18 minutes`,t());
+  await sleep(1200);
+  drawGreenCorridor();
+  document.getElementById('green-badge').style.display='inline';
+  addMapOverlay('<span style="color:var(--green)">🟢 CORRIDOR LIVE</span>');
+  setTL('green','done','✓ TS001 + TS004 preempted · 18 min saved');
+  document.getElementById('eta-after').innerHTML='27<span class="eta-unit">min</span>';
+  document.getElementById('eta-saved').innerHTML='18<span class="eta-unit">min</span>';
+  await sleep(400);
+  setTL('coordinator','running','Synthesising deployment recommendation...');
+  await sleep(1000);
+  mcpLog('agent','[resource-coordinator-agent]',`DEPLOYMENT SYNTHESIS COMPLETE\n  Status:     READY_WITH_WARNINGS\n  Dispatch:   AMB-028 KA-108-SE04 (ALS)\n  Backup:     AMB-017 KA-108-SE01 (BLS)\n  Hospital:   Victoria Hospital Level I\n  SOP:        MCI-P1-BLR\n  ETA Scene:  7 min  ✓ P1 TARGET MET\n  ETA Hosp:   27 min (post-corridor)\n  Confidence: 0.74\n  Pre-alert:  SENT`,t());
+  setTL('coordinator','done','✓ READY_WITH_WARNINGS · Confidence 0.74');
+  renderDecision();
+  btn.disabled=false;document.getElementById('btn-spinner').style.display='none';
+  document.getElementById('btn-text').textContent='RE-RUN SIMULATION';
+  document.getElementById('sys-status').textContent='● DISPATCH ACTIVE';
+  running=false;
+}
+</script>
+
+<div style="text-align:center;padding:6px;font-size:11px;color:#3a4048;border-top:1px solid #1a1f27;flex-shrink:0">Made with IBM Bob</div>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "name": "pulseroute-mcp",
+  "version": "1.1.0",
+  "description": "PulseRoute AI — MCP Server (dual-transport: HTTP + stdio) for Bengaluru emergency dispatch, ambulance routing, hospital selection, and traffic assessment.",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node build/index.js",
+    "start:http": "TRANSPORT=http node build/index.js",
+    "start:stdio": "TRANSPORT=stdio node build/index.js",
+    "start:port": "PORT=3000 TRANSPORT=http node build/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "bin": {
+    "pulseroute-mcp": "./build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "emergency-dispatch",
+    "ambulance-routing",
+    "pulseroute",
+    "bengaluru",
+    "watsonx-orchestrate"
+  ],
+  "author": "PulseRoute AI",
+  "license": "MIT"
+}
