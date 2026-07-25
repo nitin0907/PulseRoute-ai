@@ -595,17 +595,23 @@ async function consumeSSE(stream, btn) {
 }
 
 // ---------------------------------------------------------------------------
-// Main dispatch function — replaces runSimulation()
-// Sends the incident form to the backend proxy and drives the UI from SSE.
+// Main dispatch function
+//
+// Strategy: send incident into the Orchestrate chat widget directly.
+// The widget (wxoLoader) handles all auth and API routing internally.
+// The map, timeline, and MCP console show local context immediately.
+// Mission Commander's response appears in the widget panel.
 // ---------------------------------------------------------------------------
 let running = false;
-async function runSimulation() {
+
+function runSimulation() {
   if (running) return;
   running = true;
   routeCallCount = 0;
 
-  // Reset DATA
-  DATA = { incident:null, ambulances:{primary:null,backup:null}, hospitals:{primary:null}, traffic:{congestion:'',score:0,delay:0,peak:false,signals:[]}, corridor:{eta_before:0,eta_after:0,saved:0} };
+  DATA = { incident:null, ambulances:{primary:null,backup:null}, hospitals:{primary:null},
+           traffic:{congestion:'',score:0,delay:0,peak:false,signals:[]},
+           corridor:{eta_before:0,eta_after:0,saved:0} };
 
   const btn = document.getElementById('run-btn');
   btn.disabled = true;
@@ -622,63 +628,117 @@ async function runSimulation() {
   document.getElementById('eta-saved').innerHTML  = '<span class="eta-pending">—</span>';
   clearLayer('route-layer'); clearLayer('corridor-layer');
   clearLayer('incident-layer'); clearLayer('ambulance-layer');
-  ['intake','traffic','ambulance','hospital','routeA','routeB','green','coordinator'].forEach(id => setTL(id,'pending',null));
+  ['intake','traffic','ambulance','hospital','routeA','routeB','green','coordinator']
+    .forEach(id => setTL(id,'pending',null));
 
   const t = () => new Date().toISOString().slice(11,19);
+  const desc      = document.getElementById('incident-text').value;
+  const itype     = document.getElementById('incident-type').value;
+  const priority  = document.getElementById('incident-priority').value;
+  const locality  = desc.match(/near (.+?)[.\n,]/i)?.[1] || '';
 
-  // Show intake step as running immediately
-  setTL('intake','running','Sending to Mission Commander...');
-  mcpLog('agent','[mission-commander]', 'Incident received: "' + document.getElementById('incident-text').value + '"', t());
-
-  // Build the payload from the form
-  const payload = {
-    description:   document.getElementById('incident-text').value,
-    incident_type: document.getElementById('incident-type').value,
-    priority:      document.getElementById('incident-priority').value,
-    location: { locality: document.getElementById('incident-text').value.match(/near (.+?)[.\n,]/i)?.[1] || '' },
-    reported_at: new Date().toISOString(),
+  // ── Step 1: draw incident pin immediately from text ─────────────────────
+  // Best-effort coordinate lookup from known localities in the description
+  const LOCALITY_COORDS = {
+    'silk board': [12.9176, 77.6237], 'koramangala': [12.9352, 77.6245],
+    'whitefield': [12.9698, 77.7500], 'hebbal': [12.9850, 77.5760],
+    'marathahalli': [12.9591, 77.6974], 'electronic city': [12.8399, 77.6770],
+    'yeshwanthpur': [13.0283, 77.5524], 'indiranagar': [12.9784, 77.6408],
+    'jayanagar': [12.9299, 77.5826], 'rajajinagar': [12.9900, 77.5560],
+    'yelahanka': [13.1005, 77.5963], 'btm layout': [12.9166, 77.6101],
+    'bellandur': [12.9279, 77.6756], 'bommanahalli': [12.9083, 77.6476],
   };
+  const descLow = desc.toLowerCase();
+  let incLat = 12.9176, incLng = 77.6237, incName = locality || 'Incident';
+  for (const [key, coords] of Object.entries(LOCALITY_COORDS)) {
+    if (descLow.includes(key)) { incLat = coords[0]; incLng = coords[1]; incName = key; break; }
+  }
+  DATA.incident = { lat: incLat, lng: incLng, name: incName };
+  drawIncident();
 
-  try {
-    const res = await fetch(ORCHESTRATE_PROXY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+  // ── Step 2: update status + timeline ────────────────────────────────────
+  document.getElementById('mci-badge').style.display = 'inline';
+  document.getElementById('sys-status').textContent  = '● DISPATCH IN PROGRESS';
+  document.getElementById('sys-status').className    = 'badge badge-amber';
+  setTL('intake', 'running', 'Sending to Mission Commander...');
+  mcpLog('agent', '[mission-commander]',
+    `Incident: "${desc}"\nType: ${itype} | Priority: ${priority} | Location: ${incName}`, t());
 
-    if (!res.ok) {
-      throw new Error(`Proxy returned ${res.status}: ${await res.text()}`);
+  // ── Step 3: inject incident into the Orchestrate chat widget ────────────
+  // Build a structured message Mission Commander will understand
+  const chatMessage =
+    `EMERGENCY DISPATCH REQUEST\n` +
+    `Description: ${desc}\n` +
+    `Type: ${itype} | Priority: ${priority}\n` +
+    `Location: ${incName} (${incLat.toFixed(4)}, ${incLng.toFixed(4)})\n` +
+    `Reported: ${new Date().toISOString()}\n\n` +
+    `Please activate full dispatch: find nearest ambulance, select hospital, assess traffic, calculate route, and activate green corridor.`;
+
+  // Try to inject into widget input after it has loaded (poll up to 5s)
+  let attempts = 0;
+  const injectInterval = setInterval(() => {
+    attempts++;
+    const injected = injectIntoWidget(chatMessage);
+    if (injected || attempts > 25) {
+      clearInterval(injectInterval);
+      if (injected) {
+        setTL('intake', 'done', '✓ Incident sent to Mission Commander');
+        mcpLog('agent', '[mission-commander]', 'Message delivered to widget — awaiting response in chat panel below.', t());
+        setTL('coordinator', 'running', 'Mission Commander reasoning...');
+      } else {
+        // Widget not found — scroll to widget panel so user can type manually
+        setTL('intake', 'done', '✓ Ready — type incident in chat panel below');
+        mcpLog('agent', '[mission-commander]',
+          `Widget ready. Incident pre-filled below — press Enter in the chat panel.\n\n${chatMessage}`, t());
+        // Pre-fill textarea if accessible
+        const ta = document.querySelector('#root textarea, #root input[type=text]');
+        if (ta) { ta.value = chatMessage; ta.dispatchEvent(new Event('input', {bubbles:true})); }
+      }
     }
+  }, 200);
 
-    // Draw incident pin from parsed location (proxy may echo it back in headers)
-    const loc = res.headers.get('X-Incident-Location');
-    if (loc) {
-      try {
-        const lp = JSON.parse(loc);
-        DATA.incident = { lat: lp.lat, lng: lp.lng, name: lp.name || 'Incident' };
-        drawIncident();
-      } catch {}
-    }
-
-    setTL('intake','done','✓ Incident accepted by Mission Commander');
-    document.getElementById('mci-badge').style.display = 'inline';
-    document.getElementById('sys-status').textContent = '● DISPATCH IN PROGRESS';
-    document.getElementById('sys-status').className = 'badge badge-amber';
-    setTL('coordinator','running','Mission Commander reasoning...');
-
-    // Stream SSE events from the proxy
-    await consumeSSE(res.body, btn);
-
-  } catch (err) {
-    mcpLog('err','[connection error]', err.message || String(err), t());
-    setTL('intake','error', err.message || 'Failed to reach proxy');
-    document.getElementById('sys-status').textContent = '● CONNECTION ERROR';
-    document.getElementById('sys-status').className = 'badge badge-red';
+  // Re-enable button immediately — widget handles the rest
+  setTimeout(() => {
     btn.disabled = false;
     document.getElementById('btn-spinner').style.display = 'none';
-    document.getElementById('btn-text').textContent = 'RETRY DISPATCH';
+    document.getElementById('btn-text').textContent = 'RE-RUN DISPATCH';
     running = false;
-  }
+  }, 1200);
+}
+
+// Attempt to programmatically send a message into the Orchestrate widget.
+// Returns true if successfully submitted, false if widget not ready yet.
+function injectIntoWidget(message) {
+  try {
+    // Orchestrate widget renders a textarea or input inside #root
+    const input = document.querySelector('#root textarea') ||
+                  document.querySelector('#root input[type="text"]') ||
+                  document.querySelector('#root [contenteditable="true"]');
+    if (!input) return false;
+
+    // Set value and dispatch React synthetic events
+    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+      input.tagName === 'TEXTAREA'
+        ? window.HTMLTextAreaElement.prototype
+        : window.HTMLInputElement.prototype,
+      'value'
+    );
+    if (nativeInputValueSetter) nativeInputValueSetter.set.call(input, message);
+    input.dispatchEvent(new Event('input',  { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    // Find and click the send button
+    setTimeout(() => {
+      const sendBtn =
+        document.querySelector('#root button[type="submit"]') ||
+        document.querySelector('#root button[aria-label*="send" i]') ||
+        document.querySelector('#root button[aria-label*="Send" i]') ||
+        [...document.querySelectorAll('#root button')].pop(); // last button = send
+      if (sendBtn && !sendBtn.disabled) sendBtn.click();
+    }, 150);
+
+    return true;
+  } catch { return false; }
 }
 </script>
 
