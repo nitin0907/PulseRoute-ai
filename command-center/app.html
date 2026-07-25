@@ -277,36 +277,64 @@ textarea{height:80px}
       <div style="color:var(--muted);font-size:11px;padding:20px 0;text-align:center">Awaiting dispatch activation...<br/><span style="font-size:10px;opacity:.5">pulseroute-mcp v1.0.0 — http transport</span></div>
     </div>
     <div class="panel-hdr"><div class="dot dot-purple"></div>Mission Commander — Live Agent</div>
-    <div id="decision" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;padding:14px">
-      <div id="decision-pending" style="color:var(--muted);font-size:11px;padding:4px 0 10px;text-align:center">Awaiting dispatch activation...</div>
+    <div id="decision" style="display:flex;flex-direction:column;flex:1;min-height:0;overflow-y:auto;padding:14px;gap:10px">
+
+      <!-- ── Paste agent output here ──────────────────────────────────── -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:7px">
+          Paste Agent Output
+        </div>
+        <textarea id="paste-output"
+          placeholder='Paste Mission Commander JSON response here and click Apply...'
+          style="width:100%;height:110px;background:var(--bg);border:1px solid var(--border);
+                 color:var(--text);border-radius:5px;padding:8px;font-size:10px;
+                 font-family:'Consolas','Courier New',monospace;resize:vertical;outline:none;
+                 line-height:1.5;transition:border .2s"
+          onfocus="this.style.borderColor='var(--accent)'"
+          onblur="this.style.borderColor='var(--border)'"
+        ></textarea>
+        <div style="display:flex;gap:7px;margin-top:7px">
+          <button onclick="applyPastedOutput()"
+            style="flex:1;padding:7px;background:#6929c4;color:#fff;border:none;border-radius:5px;
+                   font-weight:700;font-size:11px;cursor:pointer;letter-spacing:.3px">
+            ▶ Apply to Dashboard
+          </button>
+          <button onclick="document.getElementById('paste-output').value=''"
+            style="padding:7px 11px;background:transparent;color:var(--muted);border:1px solid var(--border);
+                   border-radius:5px;font-size:11px;cursor:pointer">
+            ✕ Clear
+          </button>
+        </div>
+        <div id="paste-status" style="font-size:10px;margin-top:6px;min-height:13px;color:var(--muted)"></div>
+      </div>
+
+      <!-- ── Deployment decision cards (populated by Apply) ──────────── -->
+      <div id="decision-pending" style="color:var(--muted);font-size:11px;padding:4px 0;text-align:center">
+        Awaiting dispatch activation...
+      </div>
       <div id="decision-content" style="display:none">
         <div class="decision-grid" id="decision-grid"></div>
-        <div id="decision-note" style="margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-size:11px;color:var(--muted);line-height:1.6"></div>
+        <div id="decision-note" style="margin-top:10px;background:var(--card);border:1px solid var(--border);
+             border-radius:6px;padding:9px 11px;font-size:11px;color:var(--muted);line-height:1.6"></div>
       </div>
-      <!-- Mission Commander launch card -->
-      <div id="mc-launch-card" style="margin-top:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center">
-        <div style="font-size:12px;font-weight:700;color:#bc8cff;letter-spacing:.5px;margin-bottom:6px">MISSION COMMANDER</div>
-        <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:14px">
-          Click <strong style="color:var(--text)">ACTIVATE DISPATCH</strong> to send the incident<br>
-          to Mission Commander in watsonx Orchestrate.<br>
-          The agent will open in a new tab, authenticated.
-        </div>
+
+      <!-- ── Mission Commander launch card ───────────────────────────── -->
+      <div id="mc-launch-card" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:11px;font-weight:700;color:#bc8cff;letter-spacing:.5px;margin-bottom:5px">MISSION COMMANDER</div>
         <button id="mc-open-btn" onclick="openMissionCommander()"
-          style="width:100%;padding:9px;background:#6929c4;color:#fff;border:none;border-radius:6px;
-                 font-weight:700;font-size:12px;cursor:pointer;letter-spacing:.3px;margin-bottom:10px">
+          style="width:100%;padding:8px;background:#6929c4;color:#fff;border:none;border-radius:5px;
+                 font-weight:700;font-size:11px;cursor:pointer;letter-spacing:.3px;margin-bottom:8px">
           ⚡ Open Mission Commander
         </button>
-        <div id="mc-status" style="font-size:10px;color:var(--muted);min-height:14px"></div>
-        <div style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">
-          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Agent Details</div>
-          <div style="font-size:10px;color:var(--muted);text-align:left;line-height:1.8">
-            <span style="color:#57606a">Agent ID:</span> <span style="color:var(--text)">f5bb4d34...bc4b7</span><br>
-            <span style="color:#57606a">Instance:</span> <span style="color:var(--text)">9291f63d...15ad</span><br>
-            <span style="color:#57606a">Region:</span> <span style="color:var(--text)">ca-tor (Toronto)</span><br>
-            <span style="color:#57606a">MCP Server:</span> <span style="color:var(--green)">● Connected</span>
-          </div>
+        <div id="mc-status" style="font-size:10px;color:var(--muted);min-height:13px;margin-bottom:8px"></div>
+        <div style="border-top:1px solid var(--border);padding-top:8px;font-size:10px;color:var(--muted);text-align:left;line-height:1.8">
+          <span style="color:#57606a">Agent ID:</span> <span style="color:var(--text)">f5bb4d34...bc4b7</span><br>
+          <span style="color:#57606a">Instance:</span> <span style="color:var(--text)">9291f63d...15ad</span><br>
+          <span style="color:#57606a">Region:</span> <span style="color:var(--text)">ca-tor (Toronto)</span><br>
+          <span style="color:#57606a">MCP Server:</span> <span style="color:var(--green)">● Connected</span>
         </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -871,6 +899,155 @@ function applyResultToDashboard(r, t) {
   ).join('');
   document.getElementById('decision-note').innerHTML =
     `<span style="color:var(--amber)">⚠ COORDINATOR NOTE:</span> ${r.notes || ''}`;
+}
+
+// ---------------------------------------------------------------------------
+// applyPastedOutput — parses text pasted from Mission Commander and
+// drives the full dashboard exactly like applyResultToDashboard does.
+// Handles: pure JSON, JSON embedded in prose, plain-text key:value output.
+// ---------------------------------------------------------------------------
+function applyPastedOutput() {
+  const raw    = (document.getElementById('paste-output').value || '').trim();
+  const status = document.getElementById('paste-status');
+  if (!raw) { status.textContent = '⚠ Nothing pasted.'; status.style.color = 'var(--amber)'; return; }
+
+  // ── Try to extract JSON from the text ──────────────────────────────────
+  let parsed = null;
+
+  // 1. Direct JSON parse
+  try { parsed = JSON.parse(raw); } catch {}
+
+  // 2. Extract first {...} block from prose (agent often wraps JSON in text)
+  if (!parsed) {
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (m) try { parsed = JSON.parse(m[0]); } catch {}
+  }
+
+  // 3. Extract JSON code block from markdown ```json ... ```
+  if (!parsed) {
+    const m = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (m) try { parsed = JSON.parse(m[1].trim()); } catch {}
+  }
+
+  // 4. Plain-text fallback — build a synthetic result from key:value lines
+  if (!parsed) {
+    parsed = parsePlainTextOutput(raw);
+  }
+
+  if (!parsed) {
+    status.textContent = '✕ Could not parse output. Paste the JSON block from Mission Commander.';
+    status.style.color = 'var(--red)';
+    return;
+  }
+
+  // Reset the map layers before applying
+  clearLayer('route-layer'); clearLayer('corridor-layer');
+  clearLayer('ambulance-layer');
+  document.getElementById('map-overlays').innerHTML = '';
+  ['traffic','ambulance','hospital','routeA','routeB','green','coordinator']
+    .forEach(id => setTL(id,'pending',null));
+
+  // Draw incident pin if not already drawn
+  if (!DATA.incident) {
+    DATA.incident = { lat: 12.9176, lng: 77.6237, name: 'Incident' };
+    drawIncident();
+  }
+  document.getElementById('mci-badge').style.display = 'inline';
+
+  const t = () => new Date().toISOString().slice(11,19);
+  applyResultToDashboard(parsed, t);
+
+  mcpLog('agent', '[paste]',
+    'Output pasted and applied to dashboard:\n' + JSON.stringify(parsed, null, 2), t());
+
+  status.textContent = '✅ Dashboard populated from agent output.';
+  status.style.color = 'var(--green)';
+  setTimeout(() => { status.textContent = ''; }, 4000);
+}
+
+// Plain-text parser — extracts values from lines like "Ambulance: AMB-028"
+function parsePlainTextOutput(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  const get   = (pattern) => {
+    for (const l of lines) {
+      const m = l.match(pattern);
+      if (m) return m[1].trim();
+    }
+    return null;
+  };
+
+  // Ambulance fields
+  const ambId   = get(/ambulance[_ ]?id[:\s]+([A-Z0-9\-]+)/i) || get(/AMB-\d+/);
+  const ambSign = get(/call[_ ]?sign[:\s]+([A-Z0-9\-]+)/i);
+  const ambType = get(/\b(ALS|BLS|MICU|Neonatal)\b/i);
+  const ambEta  = get(/eta[_ ]?minutes?[:\s]+(\d+)/i) || get(/eta[:\s]+(\d+)\s*min/i);
+  const ambDist = get(/distance[_ ]?km[:\s]+([\d.]+)/i);
+
+  // Hospital fields
+  const hospName = get(/hospital[_ ]?name[:\s]+([^\n,]+)/i) || get(/hospital[:\s]+([^\n,]+)/i);
+  const hospBeds = get(/available[_ ]?beds?[:\s]+(\d+)/i);
+  const hospLvl  = get(/trauma[_ ]?level[:\s]+([I]+|[123])/i);
+
+  // Status / confidence
+  const status   = get(/status[:\s]+([A-Z_]+)/i);
+  const conf     = get(/confidence[:\s]+([\d.]+)/i);
+  const notes    = get(/note[s]?[:\s]+(.+)/i) || get(/recommendation[:\s]+(.+)/i) || '';
+
+  // Only return something useful if we found at least ambulance or hospital
+  if (!ambId && !hospName) return null;
+
+  const result = {
+    status:     status || 'READY',
+    confidence: conf   ? parseFloat(conf) : null,
+    notes:      notes,
+    ambulance:  ambId ? {
+      ambulance_id: ambId, call_sign: ambSign || ambId,
+      type: ambType || 'ALS', latitude: 12.9352, longitude: 77.6245,
+      locality: get(/locality[:\s]+([^\n,]+)/i) || 'Bengaluru',
+      distance_km: ambDist ? parseFloat(ambDist) : null,
+      eta_minutes: ambEta  ? parseInt(ambEta)    : null,
+      crew: '', comms_channel: ''
+    } : null,
+    hospital: hospName ? {
+      hospital_id: 'paste', name: hospName.replace(/['"]/g,''),
+      hospital_name: hospName.replace(/['"]/g,''),
+      latitude: 12.9748, longitude: 77.5706,
+      trauma_level: hospLvl || null,
+      available_beds: hospBeds ? parseInt(hospBeds) : null,
+      locality: get(/locality[:\s]+([^\n,]+)/i) || '',
+      phone: get(/phone[:\s]+([+\d\- ]+)/i) || ''
+    } : null,
+    traffic: null, route: null, corridor: null,
+    backup_ambulances: [], specialists: []
+  };
+
+  // Try to extract traffic info
+  const cong  = get(/congestion[_ ]?level[:\s]+([A-Z]+)/i);
+  const score = get(/congestion[_ ]?score[:\s]+([\d.]+)/i);
+  if (cong) {
+    result.traffic = {
+      congestion_level: cong, congestion_score: score ? parseFloat(score) : null,
+      peak_hour_active: /peak/i.test(text),
+      expected_delay_minutes: parseInt(get(/delay[:\s]+(\d+)/i) || '0'),
+      affected_signals: []
+    };
+  }
+
+  // Try to extract corridor info
+  const etaBefore = get(/eta[_ ]?before[:\s]+(\d+)/i);
+  const etaAfter  = get(/eta[_ ]?after[:\s]+(\d+)/i);
+  const saved     = get(/time[_ ]?saved[:\s]+(\d+)/i) || get(/saved[:\s]+(\d+)/i);
+  if (etaBefore || etaAfter || saved) {
+    result.corridor = {
+      active: true,
+      eta_before_minutes: etaBefore ? parseInt(etaBefore) : null,
+      eta_after_minutes:  etaAfter  ? parseInt(etaAfter)  : null,
+      time_saved_minutes: saved     ? parseInt(saved)     : null,
+      preempted_signals:  []
+    };
+  }
+
+  return result;
 }
 
 // (injectIntoWidget retained for future use but no longer called)
