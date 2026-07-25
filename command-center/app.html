@@ -292,15 +292,23 @@ textarea{height:80px}
 <script>
 const LAT_MIN=12.83,LAT_MAX=13.11,LNG_MIN=77.46,LNG_MAX=77.77,SVG_W=760,SVG_H=540,PAD=40;
 function ll2px(lat,lng){return[PAD+(lng-LNG_MIN)/(LNG_MAX-LNG_MIN)*(SVG_W-2*PAD),PAD+(LAT_MAX-lat)/(LAT_MAX-LAT_MIN)*(SVG_H-2*PAD)];}
-const DATA={
-  incident:{lat:12.9176,lng:77.6237,name:"Silk Board Junction"},
-  ambulances:{
-    primary:{id:"AMB-028",sign:"KA-108-SE04",type:"ALS",lat:12.9380,lng:77.6270,locality:"Koramangala",dist:2.48,eta:7,crew:"Subramaniam K / Indira Bai",ch:"CH-03"},
-    backup:{id:"AMB-017",sign:"KA-108-SE01",type:"BLS",lat:12.9352,lng:77.6245,locality:"Koramangala",dist:2.44,eta:7,crew:"Girish Hegde / Sneha Rao",ch:"CH-03"}
-  },
-  hospitals:{primary:{id:"hosp_004",name:"Victoria Hospital",lat:12.9748,lng:77.5706,level:"I",cap:80,beds:210,phone:"+91-80-26700435"}},
-  traffic:{congestion:"CRITICAL",score:9.8,delay:7,peak:true,signals:[{id:"TS001",name:"Silk Board Junction",lat:12.9176,lng:77.6237,idx:9.8,preempt:true},{id:"TS004",name:"Marathahalli Bridge Junction",lat:12.9591,lng:77.6974,idx:9.5,preempt:true},{id:"TS006",name:"Bellandur Junction",lat:12.9279,lng:77.6756,idx:9.1,preempt:false}]},
-  corridor:{eta_before:45,eta_after:27,saved:18}
+
+// ---------------------------------------------------------------------------
+// ORCHESTRATE INTEGRATION CONFIGURATION
+// Set ORCHESTRATE_PROXY_URL to your backend proxy endpoint.
+// The proxy accepts POST {incident} and streams SSE events back.
+// Never put IBM Cloud API keys here — they belong in the proxy only.
+// ---------------------------------------------------------------------------
+const ORCHESTRATE_PROXY_URL = 'https://YOUR-PROXY-RAILWAY-URL/api/dispatch'; // set after proxy is deployed
+
+// DATA is now populated at runtime from Mission Commander's response.
+// It starts empty and is filled in by applyResponse().
+let DATA = {
+  incident: null,
+  ambulances: { primary: null, backup: null },
+  hospitals: { primary: null },
+  traffic: { congestion:'', score:0, delay:0, peak:false, signals:[] },
+  corridor: { eta_before:0, eta_after:0, saved:0 }
 };
 function updateClock(){const now=new Date(),ist=new Date(now.getTime()+5.5*3600000);document.getElementById('clock').textContent=ist.toISOString().slice(11,19)+' IST';}
 updateClock();setInterval(updateClock,1000);
@@ -388,89 +396,285 @@ function renderDecision(){
   document.getElementById('decision-grid').innerHTML=cards.map(c=>`<div class="dec-card"><div class="dec-card-label">${c.label}</div><div class="dec-card-value">${c.value}</div><div class="dec-card-sub">${c.sub}</div></div>`).join('');
   document.getElementById('decision-note').innerHTML=`<span style="color:var(--amber)">⚠ COORDINATOR NOTE:</span> Green Corridor activated on ORR (RD001) — ERSS 112 preemption at TS001 + TS004. Amb ETA to scene 7 min (P1 target met). Hospital pre-alert sent — Victoria Trauma Team & Blood Bank. Bellandur TS006 non-preemptible — route via Hosur Rd approach. Fire unit 101 dispatched (fuel risk).`;
 }
-let running=false;
-async function runSimulation(){
-  if(running)return;running=true;
-  const btn=document.getElementById('run-btn');
-  btn.disabled=true;document.getElementById('btn-spinner').style.display='block';
-  document.getElementById('btn-text').textContent='RUNNING...';
-  document.getElementById('mcp-console').innerHTML='';
-  document.getElementById('decision-pending').style.display='block';
-  document.getElementById('decision-content').style.display='none';
-  document.getElementById('map-overlays').innerHTML='';
-  document.getElementById('mci-badge').style.display='none';
-  document.getElementById('green-badge').style.display='none';
-  document.getElementById('eta-before').innerHTML='<span class="eta-pending">—</span>';
-  document.getElementById('eta-after').innerHTML='<span class="eta-pending">—</span>';
-  document.getElementById('eta-saved').innerHTML='<span class="eta-pending">—</span>';
-  clearLayer('route-layer');clearLayer('corridor-layer');clearLayer('incident-layer');clearLayer('ambulance-layer');
-  ['intake','traffic','ambulance','hospital','routeA','routeB','green','coordinator'].forEach(id=>setTL(id,'pending',null));
-  const t=()=>new Date().toISOString().slice(11,19);
-  setTL('intake','running','Parsing incident description...');
-  mcpLog('agent','[emergency-intake-agent]','Processing: "'+document.getElementById('incident-text').value+'"',t());
-  await sleep(900);
-  mcpLog('agent','[emergency-intake-agent]',`Incident classified: Mass Casualty Incident\nSOP: MCI-P1-BLR | Priority: P1 | Severity: S-MCI\nLocation: Silk Board Junction (TS001) ✓\nCasualties: 15 | MCI threshold MET (≥10)\nHazards: structural=true, chemical=true\nConfidence: 0.81`,t());
-  setTL('intake','done','✓ MCI-P1-BLR · P1 · 15 casualties');
-  document.getElementById('mci-badge').style.display='inline';
-  drawIncident();document.getElementById('sys-status').textContent='● MCI ACTIVE';document.getElementById('sys-status').className='badge badge-red';
-  await sleep(400);
-  setTL('traffic','running','Calling traffic_assessment...');
-  mcpLog('call','▶ TOOL [1/6] traffic_assessment',`{ "incident_location": { "latitude": 12.9176, "longitude": 77.6237 }, "radius_km": 10 }`,t());
-  await sleep(1100);
-  mcpLog('resp','◀ RESPONSE traffic_assessment',`{ "congestion_level": "CRITICAL", "congestion_score": 9.8,\n  "peak_hour_active": true, "expected_delay_minutes": 7,\n  "preempt_signals": ["TS001 (9.8)", "TS004 (9.5)"],\n  "recommendation": "NICE Road bypass / ERSS-112 preemption" }`,t());
-  setTL('traffic','done','✓ CRITICAL 9.8/10 · Peak hour · +7 min delay');
-  addMapOverlay('<span style="color:var(--red)">🔴 CRITICAL</span> Silk Board 9.8/10');
-  await sleep(300);
-  setTL('ambulance','running','find_nearest_available_ambulance (ALS + BLS)...');
-  mcpLog('call','▶ TOOL [2/6] find_nearest_available_ambulance',`{ "latitude":12.9176, "longitude":77.6237, "ambulance_type":"ALS" }`,t());
-  await sleep(900);
-  mcpLog('resp','◀ RESPONSE',`{ "ambulance_id":"AMB-028", "call_sign":"KA-108-SE04",\n  "type":"ALS", "status":"available",\n  "locality":"Koramangala", "distance_km":2.48, "eta_minutes":7 }`,t());
-  mcpLog('call','▶ TOOL [3/6] find_nearest_available_ambulance',`{ "latitude":12.9176, "longitude":77.6237, "ambulance_type":"BLS" }  [MCI backup]`,t());
-  await sleep(700);
-  mcpLog('resp','◀ RESPONSE',`{ "ambulance_id":"AMB-017", "call_sign":"KA-108-SE01",\n  "type":"BLS", "status":"available",\n  "locality":"Koramangala", "distance_km":2.44, "eta_minutes":7 }`,t());
-  setTL('ambulance','done','✓ AMB-028 ALS + AMB-017 BLS · 2.4 km · 7 min');
-  drawAmbulance([DATA.ambulances.primary,DATA.ambulances.backup]);
-  await sleep(300);
-  setTL('hospital','running','Calling select_hospital...');
-  mcpLog('call','▶ TOOL [4/6] select_hospital',`{ "emergency_type":"Polytrauma",\n  "required_specialties":["Trauma & Critical Care","Neurosurgery"],\n  "latitude":12.9176, "longitude":77.6237 }`,t());
-  await sleep(1000);
-  mcpLog('resp','◀ RESPONSE',`{ "hospital_name":"Victoria Hospital", "locality":"Majestic",\n  "available_beds":210, "trauma_level":"I",\n  "mass_casualty_capacity":80, "distance_km":11.2,\n  "recommendation":"Highest MCI capacity. Level I, 6 bays." }`,t());
-  setTL('hospital','done','✓ Victoria Hospital · Level I · MCI Cap 80');
-  addMapOverlay('<span style="color:var(--green)">🏥</span> Victoria Hospital selected');
-  await sleep(300);
-  setTL('routeA','running','calculate_route Leg A...');
-  mcpLog('call','▶ TOOL [5/6] calculate_route [Leg A]',`{ "source":{"locality":"Koramangala","lat":12.938,"lng":77.627},\n  "destination":{"locality":"Silk Board","lat":12.9176,"lng":77.6237} }`,t());
-  await sleep(800);
-  mcpLog('resp','◀ RESPONSE',`{ "road":"RD025", "distance_km":7.0, "eta_minutes":38,\n  "peak_speed_kmh":11, "emergency_route":false }`,t());
-  setTL('routeA','done','✓ RD025 · 7.0 km · 38 min peak');
-  await sleep(300);
-  setTL('routeB','running','calculate_route Leg B...');
-  mcpLog('call','▶ TOOL [6/6] calculate_route [Leg B]',`{ "source":{"locality":"Silk Board","lat":12.9176,"lng":77.6237},\n  "destination":{"locality":"Majestic","lat":12.9748,"lng":77.5706} }`,t());
-  await sleep(900);
-  mcpLog('resp','◀ RESPONSE',`{ "road":"RD001 Outer Ring Road", "distance_km":13.8,\n  "eta_minutes":59, "emergency_route":true,\n  "signal_preemption":true,\n  "alternate":"NICE Road RD002 — 60 min" }`,t());
-  setTL('routeB','done','✓ RD001 ORR · 13.8 km · 59 min peak');
-  drawRoute();
-  document.getElementById('eta-before').innerHTML='45<span class="eta-unit">min</span>';
-  await sleep(500);
-  setTL('green','running','Activating Green Corridor — ERSS 112...');
-  mcpLog('agent','[resource-coordinator-agent]',`GREEN CORRIDOR ACTIVATION\n  Preempting TS001 Silk Board Junction ✓\n  Preempting TS004 Marathahalli Bridge ✓\n  ERSS 112 signal override transmitted\n  Time saved: 18 minutes`,t());
-  await sleep(1200);
-  drawGreenCorridor();
-  document.getElementById('green-badge').style.display='inline';
-  addMapOverlay('<span style="color:var(--green)">🟢 CORRIDOR LIVE</span>');
-  setTL('green','done','✓ TS001 + TS004 preempted · 18 min saved');
-  document.getElementById('eta-after').innerHTML='27<span class="eta-unit">min</span>';
-  document.getElementById('eta-saved').innerHTML='18<span class="eta-unit">min</span>';
-  await sleep(400);
-  setTL('coordinator','running','Synthesising deployment recommendation...');
-  await sleep(1000);
-  mcpLog('agent','[resource-coordinator-agent]',`DEPLOYMENT SYNTHESIS COMPLETE\n  Status:     READY_WITH_WARNINGS\n  Dispatch:   AMB-028 KA-108-SE04 (ALS)\n  Backup:     AMB-017 KA-108-SE01 (BLS)\n  Hospital:   Victoria Hospital Level I\n  SOP:        MCI-P1-BLR\n  ETA Scene:  7 min  ✓ P1 TARGET MET\n  ETA Hosp:   27 min (post-corridor)\n  Confidence: 0.74\n  Pre-alert:  SENT`,t());
-  setTL('coordinator','done','✓ READY_WITH_WARNINGS · Confidence 0.74');
-  renderDecision();
-  btn.disabled=false;document.getElementById('btn-spinner').style.display='none';
-  document.getElementById('btn-text').textContent='RE-RUN SIMULATION';
-  document.getElementById('sys-status').textContent='● DISPATCH ACTIVE';
-  running=false;
+// ---------------------------------------------------------------------------
+// Response → DATA bridge
+// Converts Mission Commander's JSON response into the DATA shape the
+// existing draw functions (drawAmbulance, drawRoute, drawGreenCorridor,
+// renderDecision) already expect. No draw function is modified.
+// ---------------------------------------------------------------------------
+function applyResponse(r) {
+  // Incident pin
+  if (r.incident_location) {
+    DATA.incident = { lat: r.incident_location.latitude, lng: r.incident_location.longitude, name: r.incident_location.locality || 'Incident' };
+  }
+  // Ambulances
+  if (r.ambulance) {
+    DATA.ambulances.primary = { id:r.ambulance.ambulance_id, sign:r.ambulance.call_sign, type:r.ambulance.type, lat:r.ambulance.latitude, lng:r.ambulance.longitude, locality:r.ambulance.locality, dist:r.ambulance.distance_km, eta:r.ambulance.eta_minutes, crew:r.ambulance.crew, ch:r.ambulance.comms_channel };
+  }
+  if (r.backup_ambulances && r.backup_ambulances[0]) {
+    const b = r.backup_ambulances[0];
+    DATA.ambulances.backup = { id:b.ambulance_id, sign:b.call_sign, type:b.type, lat:b.latitude, lng:b.longitude, locality:b.locality, dist:b.distance_km, eta:b.eta_minutes, crew:b.crew, ch:b.comms_channel };
+  }
+  // Hospital
+  if (r.hospital) {
+    DATA.hospitals.primary = { id:r.hospital.hospital_id, name:r.hospital.name, lat:r.hospital.latitude, lng:r.hospital.longitude, level:r.hospital.trauma_level||'', cap:r.hospital.mass_casualty_capacity||0, beds:r.hospital.available_beds, phone:r.hospital.phone };
+  }
+  // Traffic
+  if (r.traffic) {
+    DATA.traffic = { congestion:r.traffic.congestion_level, score:r.traffic.congestion_score, delay:r.traffic.expected_delay_minutes, peak:r.traffic.peak_hour_active, signals:(r.traffic.affected_signals||[]).map(s=>({id:s.signal_id,name:s.name,lat:s.latitude,lng:s.longitude,idx:s.congestion_index,preempt:s.preempt_capable})) };
+  }
+  // Corridor
+  if (r.corridor) {
+    DATA.corridor = { eta_before:r.corridor.eta_before_minutes, eta_after:r.corridor.eta_after_minutes, saved:r.corridor.time_saved_minutes };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Decision panel — driven by Mission Commander response
+// ---------------------------------------------------------------------------
+function renderDecisionFromResponse(r) {
+  document.getElementById('decision-pending').style.display='none';
+  document.getElementById('decision-content').style.display='block';
+  const amb = r.ambulance || {};
+  const bak = (r.backup_ambulances||[])[0] || {};
+  const hosp = r.hospital || {};
+  const alt = r.alternate_hospital || {};
+  const cor = r.corridor || {};
+  const cards = [
+    {label:'Dispatch Unit', value:`${amb.ambulance_id||'—'} · ${amb.call_sign||'—'}`, sub:`${amb.type||''} · ${amb.locality||''}`},
+    {label:'Backup Unit',   value:`${bak.ambulance_id||'—'} · ${bak.call_sign||'—'}`, sub:`${bak.type||''} · ${bak.locality||''}`},
+    {label:'Primary Hospital', value:hosp.name||'—', sub:`${hosp.trauma_level?'Level '+hosp.trauma_level:''} · ${hosp.available_beds||0} beds · ${hosp.locality||''}`},
+    {label:'Alternate Hospital', value:alt.name||'—', sub:`${alt.available_beds||0} beds · ${alt.locality||''}`},
+    {label:'SOP Activated',  value:r.sop_code||'—', sub:''},
+    {label:'Deployment Status', value:r.status||'—', sub:''},
+    {label:'Time Saved', value:cor.time_saved_minutes!=null?cor.time_saved_minutes+' min':'—', sub:`Before: ${cor.eta_before_minutes||'—'} min → After: ${cor.eta_after_minutes||'—'} min`},
+    {label:'Confidence', value:r.confidence!=null?(r.confidence.toFixed(2)+' / 1.00'):'—', sub:''},
+  ];
+  document.getElementById('decision-grid').innerHTML=cards.map(c=>`<div class="dec-card"><div class="dec-card-label">${c.label}</div><div class="dec-card-value">${c.value}</div><div class="dec-card-sub">${c.sub}</div></div>`).join('');
+  document.getElementById('decision-note').innerHTML=`<span style="color:var(--amber)">⚠ COORDINATOR NOTE:</span> ${r.notes||''}`;
+}
+
+// ---------------------------------------------------------------------------
+// SSE stream consumer
+// Handles events emitted by the backend proxy as Mission Commander reasons.
+// Event shapes:
+//   data: {"type":"thought","ts":"...","content":"..."}
+//   data: {"type":"tool_call","ts":"...","tool_name":"...","input":"...","step":"..."}
+//   data: {"type":"tool_result","ts":"...","tool_name":"...","output":"...","step":"..."}
+//   data: {"type":"final","ts":"...","result":"<JSON string>"}
+//   data: {"type":"error","ts":"...","message":"..."}
+//   data: [DONE]
+// ---------------------------------------------------------------------------
+const TOOL_TIMELINE_MAP = {
+  traffic_assessment:                'traffic',
+  find_nearest_available_ambulance:  'ambulance',
+  select_hospital:                   'hospital',
+  calculate_route:                   'routeA',   // first call → routeA, second → routeB
+};
+let routeCallCount = 0;
+
+async function consumeSSE(stream, btn) {
+  const reader = stream.getReader();
+  const decoder = new TextDecoder();
+  let buf = '';
+  const t = () => new Date().toISOString().slice(11,19);
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data:')) continue;
+      const raw = line.slice(5).trim();
+      if (raw === '[DONE]') return;
+
+      let ev;
+      try { ev = JSON.parse(raw); } catch { continue; }
+
+      if (ev.type === 'thought') {
+        mcpLog('agent','[mission-commander]', ev.content, ev.ts||t());
+
+      } else if (ev.type === 'tool_call') {
+        const tlId = ev.tool_name === 'calculate_route'
+          ? (routeCallCount === 0 ? 'routeA' : 'routeB')
+          : (TOOL_TIMELINE_MAP[ev.tool_name] || null);
+        if (tlId) setTL(tlId, 'running', `Calling ${ev.tool_name}...`);
+        mcpLog('call', `▶ TOOL [${ev.step||''}] ${ev.tool_name}`,
+          typeof ev.input === 'string' ? ev.input : JSON.stringify(ev.input, null, 2), ev.ts||t());
+
+      } else if (ev.type === 'tool_result') {
+        const isCalc = ev.tool_name === 'calculate_route';
+        const tlId = isCalc
+          ? (routeCallCount === 0 ? 'routeA' : 'routeB')
+          : (TOOL_TIMELINE_MAP[ev.tool_name] || null);
+
+        let parsed;
+        try { parsed = JSON.parse(ev.output); } catch { parsed = null; }
+
+        if (ev.tool_name === 'traffic_assessment' && parsed) {
+          DATA.traffic = { congestion:parsed.congestion_level, score:parsed.congestion_score, delay:parsed.expected_delay_minutes, peak:parsed.peak_hour_active, signals:(parsed.affected_signals||[]).map(s=>({id:s.signal_id,name:s.name,lat:s.latitude,lng:s.longitude,idx:s.congestion_index,preempt:s.preempt_capable})) };
+          const col = parsed.congestion_level==='CRITICAL'?'var(--red)':'var(--amber)';
+          addMapOverlay(`<span style="color:${col}">● ${parsed.congestion_level}</span> score ${parsed.congestion_score}`);
+          if (tlId) setTL(tlId, 'done', `✓ ${parsed.congestion_level} ${parsed.congestion_score}/10`);
+        }
+
+        if (ev.tool_name === 'find_nearest_available_ambulance' && parsed) {
+          if (!DATA.ambulances.primary) {
+            DATA.ambulances.primary = { id:parsed.ambulance_id, sign:parsed.call_sign, type:parsed.type, lat:parsed.latitude||parsed.current_lat, lng:parsed.longitude||parsed.current_lng, locality:parsed.locality||parsed.current_locality, dist:parsed.distance_km, eta:parsed.eta_minutes, crew:'', ch:'' };
+          } else {
+            DATA.ambulances.backup  = { id:parsed.ambulance_id, sign:parsed.call_sign, type:parsed.type, lat:parsed.latitude||parsed.current_lat, lng:parsed.longitude||parsed.current_lng, locality:parsed.locality||parsed.current_locality, dist:parsed.distance_km, eta:parsed.eta_minutes, crew:'', ch:'' };
+          }
+          drawAmbulance([DATA.ambulances.primary, DATA.ambulances.backup].filter(Boolean));
+          if (tlId) setTL(tlId, 'done', `✓ ${parsed.ambulance_id} ${parsed.type} · ${parsed.eta_minutes} min`);
+        }
+
+        if (ev.tool_name === 'select_hospital' && parsed) {
+          DATA.hospitals.primary = { id:parsed.hospital_id, name:parsed.hospital_name, lat:parsed.latitude, lng:parsed.longitude, level:parsed.trauma_level||'', cap:parsed.mass_casualty_capacity||0, beds:parsed.available_beds, phone:parsed.phone||'' };
+          addMapOverlay(`<span style="color:var(--green)">🏥</span> ${parsed.hospital_name}`);
+          if (tlId) setTL(tlId, 'done', `✓ ${parsed.hospital_name}`);
+        }
+
+        if (ev.tool_name === 'calculate_route' && parsed) {
+          if (routeCallCount === 0) {
+            setTL('routeA', 'done', `✓ ${parsed.road_name||parsed.road_id} · ${parsed.distance_km} km · ${parsed.eta_minutes} min`);
+          } else {
+            DATA.corridor.eta_before = parsed.eta_minutes;
+            document.getElementById('eta-before').innerHTML = parsed.eta_minutes + '<span class="eta-unit">min</span>';
+            drawRoute();
+            setTL('routeB', 'done', `✓ ${parsed.road_name||parsed.road_id} · ${parsed.distance_km} km · ${parsed.eta_minutes} min`);
+          }
+          routeCallCount++;
+        }
+
+        mcpLog('resp', `◀ RESPONSE ${ev.tool_name}`,
+          typeof ev.output === 'string' ? ev.output : JSON.stringify(ev.output, null, 2), ev.ts||t());
+
+      } else if (ev.type === 'final') {
+        let result;
+        try { result = typeof ev.result === 'string' ? JSON.parse(ev.result) : ev.result; } catch { result = null; }
+        if (result) {
+          applyResponse(result);
+          // Green corridor
+          if (result.corridor && result.corridor.active) {
+            setTL('green', 'running', 'Activating Green Corridor...');
+            drawGreenCorridor();
+            document.getElementById('green-badge').style.display = 'inline';
+            addMapOverlay('<span style="color:var(--green)">🟢 CORRIDOR LIVE</span>');
+            const cor = result.corridor;
+            document.getElementById('eta-after').innerHTML  = cor.eta_after_minutes  + '<span class="eta-unit">min</span>';
+            document.getElementById('eta-saved').innerHTML  = cor.time_saved_minutes + '<span class="eta-unit">min</span>';
+            setTL('green', 'done', `✓ ${(cor.preempted_signals||[]).join(' + ')} · ${cor.time_saved_minutes} min saved`);
+          }
+          setTL('coordinator', 'done', `✓ ${result.status} · Confidence ${result.confidence}`);
+          renderDecisionFromResponse(result);
+          document.getElementById('sys-status').textContent = '● DISPATCH ACTIVE';
+          document.getElementById('sys-status').className  = 'badge badge-green';
+        }
+        btn.disabled = false;
+        document.getElementById('btn-spinner').style.display = 'none';
+        document.getElementById('btn-text').textContent = 'RE-RUN DISPATCH';
+        running = false;
+
+      } else if (ev.type === 'error') {
+        mcpLog('err', '[error]', ev.message || 'Unknown error', ev.ts||t());
+        setTL('coordinator', 'error', ev.message || 'Error');
+        btn.disabled = false;
+        document.getElementById('btn-spinner').style.display = 'none';
+        document.getElementById('btn-text').textContent = 'RETRY DISPATCH';
+        running = false;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main dispatch function — replaces runSimulation()
+// Sends the incident form to the backend proxy and drives the UI from SSE.
+// ---------------------------------------------------------------------------
+let running = false;
+async function runSimulation() {
+  if (running) return;
+  running = true;
+  routeCallCount = 0;
+
+  // Reset DATA
+  DATA = { incident:null, ambulances:{primary:null,backup:null}, hospitals:{primary:null}, traffic:{congestion:'',score:0,delay:0,peak:false,signals:[]}, corridor:{eta_before:0,eta_after:0,saved:0} };
+
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  document.getElementById('btn-spinner').style.display = 'block';
+  document.getElementById('btn-text').textContent = 'DISPATCHING...';
+  document.getElementById('mcp-console').innerHTML = '';
+  document.getElementById('decision-pending').style.display = 'block';
+  document.getElementById('decision-content').style.display = 'none';
+  document.getElementById('map-overlays').innerHTML = '';
+  document.getElementById('mci-badge').style.display = 'none';
+  document.getElementById('green-badge').style.display = 'none';
+  document.getElementById('eta-before').innerHTML = '<span class="eta-pending">—</span>';
+  document.getElementById('eta-after').innerHTML  = '<span class="eta-pending">—</span>';
+  document.getElementById('eta-saved').innerHTML  = '<span class="eta-pending">—</span>';
+  clearLayer('route-layer'); clearLayer('corridor-layer');
+  clearLayer('incident-layer'); clearLayer('ambulance-layer');
+  ['intake','traffic','ambulance','hospital','routeA','routeB','green','coordinator'].forEach(id => setTL(id,'pending',null));
+
+  const t = () => new Date().toISOString().slice(11,19);
+
+  // Show intake step as running immediately
+  setTL('intake','running','Sending to Mission Commander...');
+  mcpLog('agent','[mission-commander]', 'Incident received: "' + document.getElementById('incident-text').value + '"', t());
+
+  // Build the payload from the form
+  const payload = {
+    description:   document.getElementById('incident-text').value,
+    incident_type: document.getElementById('incident-type').value,
+    priority:      document.getElementById('incident-priority').value,
+    location: { locality: document.getElementById('incident-text').value.match(/near (.+?)[.\n,]/i)?.[1] || '' },
+    reported_at: new Date().toISOString(),
+  };
+
+  try {
+    const res = await fetch(ORCHESTRATE_PROXY_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      throw new Error(`Proxy returned ${res.status}: ${await res.text()}`);
+    }
+
+    // Draw incident pin from parsed location (proxy may echo it back in headers)
+    const loc = res.headers.get('X-Incident-Location');
+    if (loc) {
+      try {
+        const lp = JSON.parse(loc);
+        DATA.incident = { lat: lp.lat, lng: lp.lng, name: lp.name || 'Incident' };
+        drawIncident();
+      } catch {}
+    }
+
+    setTL('intake','done','✓ Incident accepted by Mission Commander');
+    document.getElementById('mci-badge').style.display = 'inline';
+    document.getElementById('sys-status').textContent = '● DISPATCH IN PROGRESS';
+    document.getElementById('sys-status').className = 'badge badge-amber';
+    setTL('coordinator','running','Mission Commander reasoning...');
+
+    // Stream SSE events from the proxy
+    await consumeSSE(res.body, btn);
+
+  } catch (err) {
+    mcpLog('err','[connection error]', err.message || String(err), t());
+    setTL('intake','error', err.message || 'Failed to reach proxy');
+    document.getElementById('sys-status').textContent = '● CONNECTION ERROR';
+    document.getElementById('sys-status').className = 'badge badge-red';
+    btn.disabled = false;
+    document.getElementById('btn-spinner').style.display = 'none';
+    document.getElementById('btn-text').textContent = 'RETRY DISPATCH';
+    running = false;
+  }
 }
 </script>
 
