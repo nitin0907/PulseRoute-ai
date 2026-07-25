@@ -70,9 +70,17 @@ const TRANSPORT = (process.env.TRANSPORT ?? "http").toLowerCase();
 // ---------------------------------------------------------------------------
 
 const ORCHESTRATE_INSTANCE_ID = "61a7cca026674cb69f1c4e32e8c5c982";
-const ORCHESTRATE_BASE_URL    = `https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/${ORCHESTRATE_INSTANCE_ID}`;
+const ORCHESTRATE_HOST        = "ca-tor.watson-orchestrate.cloud.ibm.com";
 const ORCHESTRATE_AGENT_ID    = "f5bb4d34-12e0-466b-9858-6304e52bc4b7";
 const IAM_TOKEN_URL           = "https://iam.cloud.ibm.com/identity/token";
+
+// Candidate API paths tried in order until one succeeds (not 301/404).
+const ORCHESTRATE_API_CANDIDATES = [
+  `/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,
+  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
+  `/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,
+  `/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
+];
 
 // IAM token cache
 let _iamToken     = "";
@@ -221,13 +229,36 @@ async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promis
     stream: true,
   });
 
-  const invokeUrl = `${ORCHESTRATE_BASE_URL}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`;
-  console.error(`[Proxy] POST ${invokeUrl}`);
+  // Delegate to the redirect-following multi-candidate function
+  postToOrchestrate(orchBody, token, sseWrite, sseDone, now, 0);
+}
 
-  const u = new URL(invokeUrl);
+// ---------------------------------------------------------------------------
+// Try Orchestrate API candidate paths in order.
+// Follows 301/302/307/308 redirects. Falls through to next candidate on 404.
+// ---------------------------------------------------------------------------
+function postToOrchestrate(
+  orchBody: string,
+  token: string,
+  sseWrite: (type: string, data: Record<string, unknown>) => void,
+  sseDone: () => void,
+  now: () => string,
+  candidateIndex: number,
+  overridePath?: string
+): void {
+  const apiPath = overridePath ?? ORCHESTRATE_API_CANDIDATES[candidateIndex];
+  if (!apiPath) {
+    sseWrite("error", { ts: now(), message: "All Orchestrate API path candidates exhausted. Check Railway logs for the correct URL." });
+    sseDone();
+    return;
+  }
+
+  console.error(`[Proxy] POST https://${ORCHESTRATE_HOST}${apiPath}`);
+  sseWrite("thought", { ts: now(), content: `[proxy] Calling Orchestrate: ${apiPath}` });
+
   const orchReq = https.request({
-    hostname: u.hostname,
-    path:     u.pathname + u.search,
+    hostname: ORCHESTRATE_HOST,
+    path:     apiPath,
     method:   "POST",
     headers: {
       "Content-Type":   "application/json",
@@ -236,18 +267,41 @@ async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promis
       "Content-Length": Buffer.byteLength(orchBody),
     },
   }, (orchRes) => {
-    const ct = orchRes.headers["content-type"] ?? "";
-    console.error(`[Proxy] Orchestrate → ${orchRes.statusCode} ${ct}`);
+    const ct     = orchRes.headers["content-type"] ?? "";
+    const status = orchRes.statusCode ?? 500;
+    console.error(`[Proxy] Orchestrate → ${status} ${ct}`);
 
-    if ((orchRes.statusCode ?? 500) >= 400) {
+    // Follow redirects
+    if (status === 301 || status === 302 || status === 307 || status === 308) {
+      const location = orchRes.headers["location"] ?? "";
+      console.error(`[Proxy] Redirect ${status} → ${location}`);
+      sseWrite("thought", { ts: now(), content: `[proxy] Redirect ${status} → ${location}` });
+      orchRes.on("data", () => {});
+      orchRes.on("end", () => {
+        let nextPath: string;
+        try { nextPath = new URL(location).pathname; }
+        catch { nextPath = location; }
+        postToOrchestrate(orchBody, token, sseWrite, sseDone, now, candidateIndex + 1, nextPath);
+      });
+      return;
+    }
+
+    // On 404 try next candidate
+    if (status === 404 && !overridePath && candidateIndex + 1 < ORCHESTRATE_API_CANDIDATES.length) {
+      orchRes.on("data", () => {});
+      orchRes.on("end", () => { postToOrchestrate(orchBody, token, sseWrite, sseDone, now, candidateIndex + 1); });
+      return;
+    }
+
+    if (status >= 400) {
       let errBody = "";
       orchRes.on("data", (c: Buffer) => (errBody += c));
-      orchRes.on("end", () => { sseWrite("error", { ts: now(), message: `Orchestrate ${orchRes.statusCode}: ${errBody}` }); sseDone(); });
+      orchRes.on("end", () => { sseWrite("error", { ts: now(), message: `Orchestrate ${status}: ${errBody.slice(0, 400)}` }); sseDone(); });
       return;
     }
 
     if (ct.includes("text/event-stream")) {
-      // ── Streaming — relay and normalise each event ──────────────────────
+      // ── Streaming ─────────────────────────────────────────────────────
       let buf = ""; let stepCounter = 0;
       orchRes.on("data", (chunk: Buffer) => {
         buf += chunk.toString("utf-8");
@@ -268,7 +322,7 @@ async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promis
       orchRes.on("end", sseDone);
       orchRes.on("error", (e: Error) => { sseWrite("error", { ts: now(), message: e.message }); sseDone(); });
     } else {
-      // ── Non-streaming — buffer and synthesise final event ───────────────
+      // ── Non-streaming ─────────────────────────────────────────────────
       let body = "";
       orchRes.on("data", (c: Buffer) => (body += c));
       orchRes.on("end", () => {
@@ -276,13 +330,13 @@ async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promis
         try {
           const json = JSON.parse(body) as Record<string, Record<string, unknown>>;
           const text = json?.output?.text ?? json?.output?.content ?? json?.result ?? body;
-          result = typeof text === "string" ? JSON.parse(text) : text;
+          result = typeof text === "string" ? JSON.parse(text as string) : text;
         } catch {
-          sseWrite("thought", { ts: now(), content: `Mission Commander responded: ${body.slice(0, 400)}` });
-          sseWrite("error",   { ts: now(), message: "Could not parse Orchestrate response as JSON." });
+          sseWrite("thought", { ts: now(), content: `Orchestrate raw: ${body.slice(0, 600)}` });
+          sseWrite("error",   { ts: now(), message: "Could not parse Orchestrate response as JSON. See raw above." });
           sseDone(); return;
         }
-        sseWrite("thought", { ts: now(), content: `Mission Commander synthesis complete — Status: ${(result as Record<string,unknown>).status ?? "unknown"}` });
+        sseWrite("thought", { ts: now(), content: `Mission Commander complete — Status: ${(result as Record<string,unknown>).status ?? "unknown"}` });
         sseWrite("final",   { ts: now(), result: JSON.stringify(result) });
         sseDone();
       });
