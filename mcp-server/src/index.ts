@@ -69,20 +69,20 @@ const TRANSPORT = (process.env.TRANSPORT ?? "http").toLowerCase();
 // Orchestrate proxy configuration
 // ---------------------------------------------------------------------------
 
-const ORCHESTRATE_INSTANCE_ID = "9291f63d-e948-4929-9c62-56eecfb515ad";
-const ORCHESTRATE_HOST        = "api.ca-tor.watson-orchestrate.cloud.ibm.com";
-const ORCHESTRATE_AGENT_ID    = "f5bb4d34-12e0-466b-9858-6304e52bc4b7";
-const IAM_TOKEN_URL           = "https://iam.cloud.ibm.com/identity/token";
+const ORCHESTRATE_INSTANCE_ID    = "9291f63d-e948-4929-9c62-56eecfb515ad";
+const ORCHESTRATE_HOST           = "ca-tor.watson-orchestrate.cloud.ibm.com";  // no api. prefix — confirmed from embed code
+const ORCHESTRATE_AGENT_ID       = "f5bb4d34-12e0-466b-9858-6304e52bc4b7";
+const ORCHESTRATE_ENV_ID         = "2681c726-3962-4c10-8382-a7dd1acb1762";    // agentEnvironmentId from embed code
+const IAM_TOKEN_URL              = "https://iam.cloud.ibm.com/identity/token";
 
-// Full confirmed base URL:
-//   https://api.ca-tor.watson-orchestrate.cloud.ibm.com/instances/9291f63d-e948-4929-9c62-56eecfb515ad
-// Candidate API paths tried in order until one succeeds.
+// Candidate API paths — all using confirmed host + instance + env ID
 const ORCHESTRATE_API_CANDIDATES = [
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/chat`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/chat`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/invoke`,
+  `/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,
+  `/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,
+  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,
+  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,
+  `/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
+  `/v1/agents/${ORCHESTRATE_AGENT_ID}/chat`,
 ];
 
 // IAM token cache
@@ -227,15 +227,14 @@ async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promis
     sseDone(); return;
   }
 
-  // Build request body — try both Orchestrate v2 schema and v1 schema.
-  // v2: { input: { text: "..." } }
-  // v1: { message: "..." }
-  // We send v2 format; the candidate fallback handles version mismatches.
+  // Build request body using confirmed agentEnvironmentId from embed code
   const incidentText = JSON.stringify(payload);
   const orchBody = JSON.stringify({
-    input:   { text: incidentText },   // v2 schema
-    message: incidentText,             // v1 schema (ignored by v2, accepted by v1)
-    stream:  true,
+    input:              { text: incidentText },
+    message:            incidentText,
+    agent_id:           ORCHESTRATE_AGENT_ID,
+    agent_environment_id: ORCHESTRATE_ENV_ID,
+    stream:             true,
   });
 
   // Delegate to the redirect-following multi-candidate function

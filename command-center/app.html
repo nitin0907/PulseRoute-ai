@@ -274,14 +274,18 @@ textarea{height:80px}
   <div id="right">
     <div class="panel-hdr"><div class="dot dot-green"></div>MCP Tool Invocation Console</div>
     <div id="mcp-console">
-      <div style="color:var(--muted);font-size:11px;padding:20px 0;text-align:center">Awaiting dispatch activation...<br/><span style="font-size:10px;opacity:.5">pulseroute-mcp v1.0.0 — stdio transport</span></div>
+      <div style="color:var(--muted);font-size:11px;padding:20px 0;text-align:center">Awaiting dispatch activation...<br/><span style="font-size:10px;opacity:.5">pulseroute-mcp v1.0.0 — http transport</span></div>
     </div>
-    <div class="panel-hdr"><div class="dot dot-purple"></div>Final Deployment Decision</div>
+    <div class="panel-hdr"><div class="dot dot-purple"></div>Mission Commander — Live Agent</div>
     <div id="decision">
       <div id="decision-pending" style="color:var(--muted);font-size:11px;padding:8px 0;text-align:center">Awaiting resource coordinator synthesis...</div>
       <div id="decision-content" style="display:none">
         <div class="decision-grid" id="decision-grid"></div>
         <div id="decision-note" style="margin-top:10px;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:9px 11px;font-size:11px;color:var(--muted);line-height:1.6"></div>
+      </div>
+      <!-- Orchestrate chat widget — Mission Commander live agent -->
+      <div id="wxo-widget-wrap" style="flex:1;min-height:0;display:flex;flex-direction:column;border-top:1px solid var(--border);margin-top:8px">
+        <div id="root" style="flex:1;min-height:280px;background:var(--card);border-radius:6px;overflow:hidden"></div>
       </div>
     </div>
   </div>
@@ -679,5 +683,32 @@ async function runSimulation() {
 </script>
 
 <div style="text-align:center;padding:6px;font-size:11px;color:#3a4048;border-top:1px solid #1a1f27;flex-shrink:0">Made with IBM Bob</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     watsonx Orchestrate — Mission Commander chat widget
+     Loads into <div id="root"> in the right panel.
+     ═══════════════════════════════════════════════════════════════════════════ -->
+<script>
+  window.wxOConfiguration = {
+    orchestrationID:    "61a7cca026674cb69f1c4e32e8c5c982_9291f63d-e948-4929-9c62-56eecfb515ad",
+    hostURL:            "https://ca-tor.watson-orchestrate.cloud.ibm.com",
+    rootElementID:      "root",
+    deploymentPlatform: "ibmcloud",
+    crn:                "crn:v1:bluemix:public:watsonx-orchestrate:ca-tor:a/61a7cca026674cb69f1c4e32e8c5c982:9291f63d-e948-4929-9c62-56eecfb515ad::",
+    chatOptions: {
+      agentId:            "f5bb4d34-12e0-466b-9858-6304e52bc4b7",
+      agentEnvironmentId: "2681c726-3962-4c10-8382-a7dd1acb1762",
+    }
+  };
+  setTimeout(function () {
+    const script = document.createElement('script');
+    script.src = window.wxOConfiguration.hostURL + '/wxochat/wxoLoader.js?embed=true';
+    script.addEventListener('load', function () {
+      wxoLoader.init();
+    });
+    document.head.appendChild(script);
+  }, 0);
+</script>
+
 </body>
 </html>
