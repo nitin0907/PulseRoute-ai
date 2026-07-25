@@ -1,0 +1,573 @@
+[
+  {
+    "id": "RD001",
+    "name": "Outer Ring Road (ORR) – Hebbal to Silk Board",
+    "from_locality": "Hebbal",
+    "to_locality": "Silk Board",
+    "distance_km": 34.2,
+    "typical_speed_kmh": 55,
+    "peak_hour_speed_kmh": 14,
+    "road_type": "ORR",
+    "lanes": 6,
+    "has_signal_preemption": true,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Hebbal Flyover merge",
+      "Marathahalli Bridge",
+      "Bellandur Lake crossing",
+      "Silk Board Junction"
+    ],
+    "alternate_routes": ["Bannerghatta Road (SH87)", "NICE Road (Peripheral Ring Road)"]
+  },
+  {
+    "id": "RD002",
+    "name": "NICE Road (Peripheral Ring Road)",
+    "from_locality": "Tumkur Road Junction",
+    "to_locality": "Hosur Road Junction",
+    "distance_km": 65.0,
+    "typical_speed_kmh": 80,
+    "peak_hour_speed_kmh": 65,
+    "road_type": "Ring Road",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Mysore Road toll plaza",
+      "Kanakapura Road intersection"
+    ],
+    "alternate_routes": ["Outer Ring Road (ORR) – Hebbal to Silk Board", "Mysore Road (NH275)"]
+  },
+  {
+    "id": "RD003",
+    "name": "Hosur Road (NH44) – Silk Board to Electronic City",
+    "from_locality": "Silk Board",
+    "to_locality": "Electronic City Phase II",
+    "distance_km": 10.5,
+    "typical_speed_kmh": 45,
+    "peak_hour_speed_kmh": 10,
+    "road_type": "NH",
+    "lanes": 6,
+    "has_signal_preemption": true,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Silk Board Junction",
+      "Bommanahalli signal",
+      "Electronic City toll plaza",
+      "Chandapura circle"
+    ],
+    "alternate_routes": ["Bannerghatta Road (SH87)", "NICE Road (Peripheral Ring Road)"]
+  },
+  {
+    "id": "RD004",
+    "name": "Tumkur Road (NH48) – Yeshwanthpur to Nelamangala",
+    "from_locality": "Yeshwanthpur",
+    "to_locality": "Nelamangala",
+    "distance_km": 28.0,
+    "typical_speed_kmh": 60,
+    "peak_hour_speed_kmh": 22,
+    "road_type": "NH",
+    "lanes": 8,
+    "has_signal_preemption": true,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Yeshwanthpur circle",
+      "Peenya Industrial Area signal",
+      "Dabaspet junction"
+    ],
+    "alternate_routes": ["Magadi Road", "Chord Road"]
+  },
+  {
+    "id": "RD005",
+    "name": "Old Madras Road (NH75) – KR Puram to Hoskote",
+    "from_locality": "KR Puram",
+    "to_locality": "Hoskote",
+    "distance_km": 22.5,
+    "typical_speed_kmh": 55,
+    "peak_hour_speed_kmh": 20,
+    "road_type": "NH",
+    "lanes": 6,
+    "has_signal_preemption": false,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "KR Puram Railway Crossing",
+      "Tin Factory junction",
+      "ITPL signal",
+      "Hoskote town circle"
+    ],
+    "alternate_routes": ["Whitefield Road", "Outer Ring Road (ORR) – Hebbal to Silk Board"]
+  },
+  {
+    "id": "RD006",
+    "name": "Sarjapur Road – Iblur to Attibele",
+    "from_locality": "Iblur Junction",
+    "to_locality": "Attibele",
+    "distance_km": 20.0,
+    "typical_speed_kmh": 40,
+    "peak_hour_speed_kmh": 12,
+    "road_type": "SH",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Iblur Junction",
+      "Carmelaram signal",
+      "Sarjapur town circle",
+      "Dommasandra junction"
+    ],
+    "alternate_routes": ["Hosur Road (NH44) – Silk Board to Electronic City", "Bannerghatta Road (SH87)"]
+  },
+  {
+    "id": "RD007",
+    "name": "Bannerghatta Road (SH87) – Dairy Circle to Anekal",
+    "from_locality": "Dairy Circle",
+    "to_locality": "Anekal",
+    "distance_km": 32.0,
+    "typical_speed_kmh": 42,
+    "peak_hour_speed_kmh": 15,
+    "road_type": "SH",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Dairy Circle underpass",
+      "JP Nagar 5th Phase signal",
+      "Gottigere junction",
+      "Bannerghatta National Park gate"
+    ],
+    "alternate_routes": ["Hosur Road (NH44) – Silk Board to Electronic City", "NICE Road (Peripheral Ring Road)"]
+  },
+  {
+    "id": "RD008",
+    "name": "Bellary Road (NH44) – Hebbal to Devanahalli",
+    "from_locality": "Hebbal",
+    "to_locality": "Devanahalli (KIA)",
+    "distance_km": 35.0,
+    "typical_speed_kmh": 70,
+    "peak_hour_speed_kmh": 35,
+    "road_type": "NH",
+    "lanes": 8,
+    "has_signal_preemption": true,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Hebbal Flyover",
+      "Yelahanka junction",
+      "Jakkur cross signal",
+      "KIAL toll plaza"
+    ],
+    "alternate_routes": ["Doddaballapur Road", "Thanisandra Road"]
+  },
+  {
+    "id": "RD009",
+    "name": "KR Puram–Whitefield Corridor",
+    "from_locality": "KR Puram",
+    "to_locality": "Whitefield",
+    "distance_km": 12.0,
+    "typical_speed_kmh": 38,
+    "peak_hour_speed_kmh": 11,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "KR Puram Railway Crossing",
+      "Mahadevapura junction",
+      "Hoodi Circle",
+      "Whitefield Police Station signal"
+    ],
+    "alternate_routes": ["Old Madras Road (NH75) – KR Puram to Hoskote", "Outer Ring Road (ORR) – Hebbal to Silk Board"]
+  },
+  {
+    "id": "RD010",
+    "name": "Electronic City Flyover (NICE – EC connector)",
+    "from_locality": "Bommasandra",
+    "to_locality": "Electronic City Phase I",
+    "distance_km": 6.5,
+    "typical_speed_kmh": 60,
+    "peak_hour_speed_kmh": 30,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Bommasandra NICE junction",
+      "Electronic City toll gate"
+    ],
+    "alternate_routes": ["Hosur Road (NH44) – Silk Board to Electronic City"]
+  },
+  {
+    "id": "RD011",
+    "name": "Mysore Road (NH275) – Kengeri to Ramanagara",
+    "from_locality": "Kengeri",
+    "to_locality": "Ramanagara",
+    "distance_km": 48.0,
+    "typical_speed_kmh": 75,
+    "peak_hour_speed_kmh": 40,
+    "road_type": "NH",
+    "lanes": 6,
+    "has_signal_preemption": true,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Kengeri satellite town signal",
+      "Bidadi toll plaza",
+      "Channapatna junction"
+    ],
+    "alternate_routes": ["NICE Road (Peripheral Ring Road)", "Kanakapura Road"]
+  },
+  {
+    "id": "RD012",
+    "name": "Marathahalli Bridge – ORR to Airport Road",
+    "from_locality": "Marathahalli",
+    "to_locality": "HAL Airport Road",
+    "distance_km": 8.0,
+    "typical_speed_kmh": 35,
+    "peak_hour_speed_kmh": 9,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Marathahalli Bridge bottleneck",
+      "Sony World Junction",
+      "Domlur Flyover"
+    ],
+    "alternate_routes": ["Outer Ring Road (ORR) – Hebbal to Silk Board", "HAL Old Airport Road"]
+  },
+  {
+    "id": "RD013",
+    "name": "Magadi Road – Rajajinagar to Magadi Town",
+    "from_locality": "Rajajinagar",
+    "to_locality": "Magadi Town",
+    "distance_km": 42.0,
+    "typical_speed_kmh": 50,
+    "peak_hour_speed_kmh": 18,
+    "road_type": "SH",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Rajajinagar circle",
+      "Chord Road crossing",
+      "Attiguppe junction"
+    ],
+    "alternate_routes": ["Tumkur Road (NH48) – Yeshwanthpur to Nelamangala", "Chord Road"]
+  },
+  {
+    "id": "RD014",
+    "name": "Kanakapura Road – JP Nagar to Kanakapura Town",
+    "from_locality": "JP Nagar",
+    "to_locality": "Kanakapura Town",
+    "distance_km": 55.0,
+    "typical_speed_kmh": 60,
+    "peak_hour_speed_kmh": 20,
+    "road_type": "SH",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "JP Nagar 8th Phase signal",
+      "Harohalli junction",
+      "Bidadi NICE interchange"
+    ],
+    "alternate_routes": ["Mysore Road (NH275) – Kengeri to Ramanagara", "NICE Road (Peripheral Ring Road)"]
+  },
+  {
+    "id": "RD015",
+    "name": "Chord Road – Rajajinagar to Yeshwanthpur",
+    "from_locality": "Rajajinagar",
+    "to_locality": "Yeshwanthpur",
+    "distance_km": 5.5,
+    "typical_speed_kmh": 40,
+    "peak_hour_speed_kmh": 16,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Goraguntepalya junction",
+      "Yeshwanthpur circle",
+      "Rajajinagar 1st Block signal"
+    ],
+    "alternate_routes": ["Tumkur Road (NH48) – Yeshwanthpur to Nelamangala", "Magadi Road – Rajajinagar to Magadi Town"]
+  },
+  {
+    "id": "RD016",
+    "name": "Hebbal Flyover – Bellary Road to ORR",
+    "from_locality": "Hebbal",
+    "to_locality": "Nagawara",
+    "distance_km": 4.2,
+    "typical_speed_kmh": 55,
+    "peak_hour_speed_kmh": 18,
+    "road_type": "City",
+    "lanes": 6,
+    "has_signal_preemption": true,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Hebbal Lake merge",
+      "Nagawara junction ramp",
+      "KSRTC bus depot signal"
+    ],
+    "alternate_routes": ["Outer Ring Road (ORR) – Hebbal to Silk Board", "Bellary Road (NH44) – Hebbal to Devanahalli"]
+  },
+  {
+    "id": "RD017",
+    "name": "Old Airport Road – Indiranagar to HAL",
+    "from_locality": "Indiranagar",
+    "to_locality": "HAL",
+    "distance_km": 6.0,
+    "typical_speed_kmh": 38,
+    "peak_hour_speed_kmh": 13,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Domlur junction",
+      "100 Feet Road Indiranagar signal",
+      "HAL Gate signal"
+    ],
+    "alternate_routes": ["Marathahalli Bridge – ORR to Airport Road", "Outer Ring Road (ORR) – Hebbal to Silk Board"]
+  },
+  {
+    "id": "RD018",
+    "name": "Namma Metro Green Line – Nagasandra to Silk Board",
+    "from_locality": "Nagasandra",
+    "to_locality": "Silk Board",
+    "distance_km": 24.0,
+    "typical_speed_kmh": 40,
+    "peak_hour_speed_kmh": 40,
+    "road_type": "City",
+    "lanes": 2,
+    "has_signal_preemption": true,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Chickpete station platform congestion",
+      "Jayanagar interchange"
+    ],
+    "alternate_routes": ["Bannerghatta Road (SH87) – Dairy Circle to Anekal", "Outer Ring Road (ORR) – Hebbal to Silk Board"]
+  },
+  {
+    "id": "RD019",
+    "name": "Doddaballapur Road – Yelahanka to Doddaballapur",
+    "from_locality": "Yelahanka",
+    "to_locality": "Doddaballapur",
+    "distance_km": 32.0,
+    "typical_speed_kmh": 65,
+    "peak_hour_speed_kmh": 38,
+    "road_type": "SH",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Yelahanka new town junction",
+      "Aerospace SEZ gate"
+    ],
+    "alternate_routes": ["Bellary Road (NH44) – Hebbal to Devanahalli"]
+  },
+  {
+    "id": "RD020",
+    "name": "Thanisandra Road – Hebbal to KIADB",
+    "from_locality": "Hebbal",
+    "to_locality": "KIADB Aerospace Park",
+    "distance_km": 14.0,
+    "typical_speed_kmh": 45,
+    "peak_hour_speed_kmh": 20,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Nagawara junction",
+      "Thanisandra Main Road signal",
+      "Kogilu cross"
+    ],
+    "alternate_routes": ["Bellary Road (NH44) – Hebbal to Devanahalli", "Hebbal Flyover – Bellary Road to ORR"]
+  },
+  {
+    "id": "RD021",
+    "name": "MG Road – Trinity Circle to Richmond Circle",
+    "from_locality": "Trinity Circle",
+    "to_locality": "Richmond Circle",
+    "distance_km": 3.2,
+    "typical_speed_kmh": 30,
+    "peak_hour_speed_kmh": 8,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Brigade Road crossing",
+      "MG Road Metro station",
+      "Anil Kumble circle"
+    ],
+    "alternate_routes": ["Old Airport Road – Indiranagar to HAL", "Residency Road"]
+  },
+  {
+    "id": "RD022",
+    "name": "Residency Road – Richmond Circle to Langford Town",
+    "from_locality": "Richmond Circle",
+    "to_locality": "Langford Town",
+    "distance_km": 2.8,
+    "typical_speed_kmh": 32,
+    "peak_hour_speed_kmh": 12,
+    "road_type": "City",
+    "lanes": 2,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Richmond Circle",
+      "Lalbagh West Gate signal"
+    ],
+    "alternate_routes": ["MG Road – Trinity Circle to Richmond Circle", "Hosur Road (NH44) – Silk Board to Electronic City"]
+  },
+  {
+    "id": "RD023",
+    "name": "Hennur Road – Kalyan Nagar to Hennur",
+    "from_locality": "Kalyan Nagar",
+    "to_locality": "Hennur",
+    "distance_km": 9.5,
+    "typical_speed_kmh": 42,
+    "peak_hour_speed_kmh": 16,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Kalyan Nagar junction",
+      "HBR Layout signal",
+      "Banaswadi cross"
+    ],
+    "alternate_routes": ["Thanisandra Road – Hebbal to KIADB", "Outer Ring Road (ORR) – Hebbal to Silk Board"]
+  },
+  {
+    "id": "RD024",
+    "name": "Sarjapur–Marathahalli Connector (AECS Layout Road)",
+    "from_locality": "Marathahalli",
+    "to_locality": "Sarjapur",
+    "distance_km": 14.5,
+    "typical_speed_kmh": 36,
+    "peak_hour_speed_kmh": 10,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Iblur Junction",
+      "Bellandur signal",
+      "Kadubeesanahalli junction",
+      "AECS Layout main gate"
+    ],
+    "alternate_routes": ["Sarjapur Road – Iblur to Attibele", "Outer Ring Road (ORR) – Hebbal to Silk Board"]
+  },
+  {
+    "id": "RD025",
+    "name": "Koramangala – Inner Ring Road to HSR Layout",
+    "from_locality": "Koramangala",
+    "to_locality": "HSR Layout",
+    "distance_km": 7.0,
+    "typical_speed_kmh": 35,
+    "peak_hour_speed_kmh": 11,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Koramangala 6th Block junction",
+      "ST Bed junction",
+      "HSR BDA Complex signal"
+    ],
+    "alternate_routes": ["Hosur Road (NH44) – Silk Board to Electronic City", "Sarjapur Road – Iblur to Attibele"]
+  },
+  {
+    "id": "RD026",
+    "name": "Varthur Road – Marathahalli to Varthur",
+    "from_locality": "Marathahalli",
+    "to_locality": "Varthur",
+    "distance_km": 8.5,
+    "typical_speed_kmh": 38,
+    "peak_hour_speed_kmh": 14,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Kundalahalli gate",
+      "Varthur Kodi signal",
+      "Whitefield ITPL back gate"
+    ],
+    "alternate_routes": ["KR Puram–Whitefield Corridor", "Outer Ring Road (ORR) – Hebbal to Silk Board"]
+  },
+  {
+    "id": "RD027",
+    "name": "Nagarathpete–Shivajinagar Corridor",
+    "from_locality": "Nagarathpete",
+    "to_locality": "Shivajinagar",
+    "distance_km": 4.0,
+    "typical_speed_kmh": 28,
+    "peak_hour_speed_kmh": 7,
+    "road_type": "City",
+    "lanes": 2,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "City Market junction",
+      "Cotton Pet junction",
+      "Shivajinagar bus stand junction"
+    ],
+    "alternate_routes": ["MG Road – Trinity Circle to Richmond Circle", "Chord Road – Rajajinagar to Yeshwanthpur"]
+  },
+  {
+    "id": "RD028",
+    "name": "Whitefield Main Road – ITPL to Kadugodi",
+    "from_locality": "ITPL",
+    "to_locality": "Kadugodi",
+    "distance_km": 9.0,
+    "typical_speed_kmh": 35,
+    "peak_hour_speed_kmh": 12,
+    "road_type": "City",
+    "lanes": 4,
+    "has_signal_preemption": false,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "ITPL Main Gate signal",
+      "Nallurhalli signal",
+      "Hope Farm junction"
+    ],
+    "alternate_routes": ["Old Madras Road (NH75) – KR Puram to Hoskote", "Varthur Road – Marathahalli to Varthur"]
+  },
+  {
+    "id": "RD029",
+    "name": "Namma Metro Purple Line – Baiyappanahalli to Mysore Road",
+    "from_locality": "Baiyappanahalli",
+    "to_locality": "Mysore Road Terminal",
+    "distance_km": 18.0,
+    "typical_speed_kmh": 45,
+    "peak_hour_speed_kmh": 45,
+    "road_type": "City",
+    "lanes": 2,
+    "has_signal_preemption": true,
+    "emergency_route": false,
+    "known_bottlenecks": [
+      "Cubbon Park station overloading",
+      "Vidhana Soudha interchange"
+    ],
+    "alternate_routes": ["Old Madras Road (NH75) – KR Puram to Hoskote", "Mysore Road (NH275) – Kengeri to Ramanagara"]
+  },
+  {
+    "id": "RD030",
+    "name": "Yelahanka–Doddajala Road (KIAL Bypass Spur)",
+    "from_locality": "Yelahanka",
+    "to_locality": "Doddajala",
+    "distance_km": 18.5,
+    "typical_speed_kmh": 70,
+    "peak_hour_speed_kmh": 50,
+    "road_type": "NH",
+    "lanes": 4,
+    "has_signal_preemption": true,
+    "emergency_route": true,
+    "known_bottlenecks": [
+      "Yelahanka CRPF gate junction",
+      "Doddajala toll booth"
+    ],
+    "alternate_routes": ["Bellary Road (NH44) – Hebbal to Devanahalli", "Doddaballapur Road – Yelahanka to Doddaballapur"]
+  }
+]

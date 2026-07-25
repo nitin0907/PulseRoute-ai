@@ -14,17 +14,24 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 
 // ---------------------------------------------------------------------------
-// Path resolution — walk up from build/src/types/ to the workspace root
+// Path resolution — walk up from build/src/types/ to the mcp-server root
+//
+// At runtime the compiled file is at:
+//   <mcp-server-root>/build/src/types/schemas.js
+//
+// Three levels up  →  <mcp-server-root>/
+// data/ and PulseRoute_Bengaluru_KB.json live here regardless of whether
+// Railway is given Root Directory = "mcp-server" or the repo root.
 // ---------------------------------------------------------------------------
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// build/src/types  →  build/src  →  build  →  mcp-server  →  workspace root
-const WORKSPACE_ROOT = resolve(__dirname, "..", "..", "..", "..");
+// build/src/types  →  build/src  →  build  →  mcp-server root
+const SERVER_ROOT = resolve(__dirname, "..", "..", "..");
 
-export const DATA_DIR = resolve(WORKSPACE_ROOT, "data");
-export const KB_FILE = resolve(WORKSPACE_ROOT, "PulseRoute_Bengaluru_KB.json");
+export const DATA_DIR = resolve(SERVER_ROOT, "data");
+export const KB_FILE = resolve(SERVER_ROOT, "PulseRoute_Bengaluru_KB.json");
 
 // ---------------------------------------------------------------------------
 // Domain types — mirrors data/*.json schemas

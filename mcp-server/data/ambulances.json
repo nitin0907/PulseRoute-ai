@@ -1,0 +1,1160 @@
+[
+  {
+    "id": "AMB-001",
+    "call_sign": "KA-108-N01",
+    "type": "ALS",
+    "registration_number": "KA-01-FA-1082",
+    "home_hospital_id": "HOSP-012",
+    "current_locality": "Hebbal",
+    "current_lat": 13.0450,
+    "current_lng": 77.5946,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Rajesh Kumar", "emt_name": "Suresh Naik" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Bag-Valve Mask",
+      "Advanced Airway Kit",
+      "Drug Box (ALS Tier)"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2021,
+    "comms_channel": "CH-04",
+    "response_zone": "North"
+  },
+  {
+    "id": "AMB-002",
+    "call_sign": "KA-108-N02",
+    "type": "BLS",
+    "registration_number": "KA-01-FB-2108",
+    "home_hospital_id": "HOSP-012",
+    "current_locality": "Yelahanka",
+    "current_lat": 13.1004,
+    "current_lng": 77.5963,
+    "status": "dispatched",
+    "crew": [
+      { "paramedic_name": "Anand Murthy", "emt_name": "Deepak Shetty" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2020,
+    "comms_channel": "CH-04",
+    "response_zone": "North"
+  },
+  {
+    "id": "AMB-003",
+    "call_sign": "KA-108-N03",
+    "type": "MICU",
+    "registration_number": "KA-02-FA-3301",
+    "home_hospital_id": "HOSP-007",
+    "current_locality": "Hebbal",
+    "current_lat": 13.0389,
+    "current_lng": 77.5917,
+    "status": "standby",
+    "crew": [
+      { "paramedic_name": "Venkatesh Rao", "emt_name": "Priya Kumari" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Transport Ventilator",
+      "Syringe Pump (x2)",
+      "IV Infusion Pump",
+      "Suction Unit",
+      "Intubation Kit",
+      "Drug Box (MICU Tier)",
+      "Oxygen Cylinder (10L)",
+      "Pulse Oximeter",
+      "End-Tidal CO2 Monitor"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-05",
+    "response_zone": "North"
+  },
+  {
+    "id": "AMB-004",
+    "call_sign": "KA-108-N04",
+    "type": "BLS",
+    "registration_number": "KA-01-FC-4210",
+    "home_hospital_id": "HOSP-003",
+    "current_locality": "Yelahanka",
+    "current_lat": 13.1066,
+    "current_lng": 77.5938,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Kiran Gowda", "emt_name": "Ravi Shankar" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Glucometer",
+      "Pulse Oximeter"
+    ],
+    "vehicle_make": "Maruti Eeco",
+    "year": 2019,
+    "comms_channel": "CH-04",
+    "response_zone": "North"
+  },
+  {
+    "id": "AMB-005",
+    "call_sign": "KA-108-C01",
+    "type": "ALS",
+    "registration_number": "KA-03-FA-5512",
+    "home_hospital_id": "HOSP-001",
+    "current_locality": "Rajajinagar",
+    "current_lat": 12.9897,
+    "current_lng": 77.5525,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Mohan Das", "emt_name": "Lakshmi Devi" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Bag-Valve Mask",
+      "Advanced Airway Kit",
+      "Drug Box (ALS Tier)",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-02",
+    "response_zone": "Central"
+  },
+  {
+    "id": "AMB-006",
+    "call_sign": "KA-108-C02",
+    "type": "BLS",
+    "registration_number": "KA-03-FB-6108",
+    "home_hospital_id": "HOSP-001",
+    "current_locality": "Rajajinagar",
+    "current_lat": 12.9854,
+    "current_lng": 77.5499,
+    "status": "maintenance",
+    "crew": [
+      { "paramedic_name": "Santosh Reddy", "emt_name": "Geeta Nair" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2018,
+    "comms_channel": "CH-02",
+    "response_zone": "Central"
+  },
+  {
+    "id": "AMB-007",
+    "call_sign": "KA-108-E01",
+    "type": "ALS",
+    "registration_number": "KA-04-FA-7201",
+    "home_hospital_id": "HOSP-009",
+    "current_locality": "Whitefield",
+    "current_lat": 12.9698,
+    "current_lng": 77.7499,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Ramesh Babu", "emt_name": "Sanjay Mehta" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Oxygen Cylinder (10L)",
+      "Bag-Valve Mask",
+      "Advanced Airway Kit",
+      "Drug Box (ALS Tier)",
+      "Trauma Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2021,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-008",
+    "call_sign": "KA-108-E02",
+    "type": "BLS",
+    "registration_number": "KA-04-FB-8108",
+    "home_hospital_id": "HOSP-009",
+    "current_locality": "KR Puram",
+    "current_lat": 13.0089,
+    "current_lng": 77.6908,
+    "status": "dispatched",
+    "crew": [
+      { "paramedic_name": "Nagaraj S", "emt_name": "Bhavana Reddy" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Glucometer",
+      "Pulse Oximeter"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2020,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-009",
+    "call_sign": "KA-108-E03",
+    "type": "MICU",
+    "registration_number": "KA-04-FA-9305",
+    "home_hospital_id": "HOSP-014",
+    "current_locality": "Marathahalli",
+    "current_lat": 12.9591,
+    "current_lng": 77.6974,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Arun Kumar", "emt_name": "Meena Pillai" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Transport Ventilator",
+      "Syringe Pump (x2)",
+      "IV Infusion Pump",
+      "Suction Unit",
+      "Intubation Kit",
+      "Drug Box (MICU Tier)",
+      "Oxygen Cylinder (10L)",
+      "End-Tidal CO2 Monitor",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2023,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-010",
+    "call_sign": "KA-108-E04",
+    "type": "BLS",
+    "registration_number": "KA-04-FC-1084",
+    "home_hospital_id": "HOSP-014",
+    "current_locality": "Bellandur",
+    "current_lat": 12.9253,
+    "current_lng": 77.6784,
+    "status": "standby",
+    "crew": [
+      { "paramedic_name": "Prakash Rao", "emt_name": "Sunita Joshi" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter",
+      "Blood Pressure Cuff",
+      "Burn Kit"
+    ],
+    "vehicle_make": "Maruti Eeco",
+    "year": 2021,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-011",
+    "call_sign": "KA-108-E05",
+    "type": "ALS",
+    "registration_number": "KA-04-FA-1105",
+    "home_hospital_id": "HOSP-009",
+    "current_locality": "Sarjapur",
+    "current_lat": 12.8604,
+    "current_lng": 77.7890,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Harish Nair", "emt_name": "Divya Krishnan" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit",
+      "Trauma Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2020,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-012",
+    "call_sign": "KA-108-S01",
+    "type": "ALS",
+    "registration_number": "KA-05-FA-1201",
+    "home_hospital_id": "HOSP-005",
+    "current_locality": "Electronic City",
+    "current_lat": 12.8399,
+    "current_lng": 77.6770,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Sunil Patil", "emt_name": "Rekha Sharma" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Bag-Valve Mask",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-07",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-013",
+    "call_sign": "KA-108-S02",
+    "type": "BLS",
+    "registration_number": "KA-05-FB-1308",
+    "home_hospital_id": "HOSP-005",
+    "current_locality": "Electronic City",
+    "current_lat": 12.8456,
+    "current_lng": 77.6631,
+    "status": "dispatched",
+    "crew": [
+      { "paramedic_name": "Raju Verma", "emt_name": "Kavitha Menon" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter",
+      "Glucometer"
+    ],
+    "vehicle_make": "Maruti Eeco",
+    "year": 2020,
+    "comms_channel": "CH-07",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-014",
+    "call_sign": "KA-108-S03",
+    "type": "BLS",
+    "registration_number": "KA-05-FC-1408",
+    "home_hospital_id": "HOSP-006",
+    "current_locality": "Banashankari",
+    "current_lat": 12.9278,
+    "current_lng": 77.5510,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Ashok Kumar", "emt_name": "Anitha Bai" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2019,
+    "comms_channel": "CH-07",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-015",
+    "call_sign": "KA-108-S04",
+    "type": "MICU",
+    "registration_number": "KA-05-FA-1504",
+    "home_hospital_id": "HOSP-006",
+    "current_locality": "Jayanagar",
+    "current_lat": 12.9250,
+    "current_lng": 77.5938,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Vijay Srinivas", "emt_name": "Usha Rani" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Transport Ventilator",
+      "Syringe Pump (x2)",
+      "IV Infusion Pump",
+      "Suction Unit",
+      "Intubation Kit",
+      "Drug Box (MICU Tier)",
+      "Oxygen Cylinder (10L)",
+      "End-Tidal CO2 Monitor"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-07",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-016",
+    "call_sign": "KA-108-S05",
+    "type": "ALS",
+    "registration_number": "KA-05-FA-1605",
+    "home_hospital_id": "HOSP-005",
+    "current_locality": "Banashankari",
+    "current_lat": 12.9301,
+    "current_lng": 77.5472,
+    "status": "standby",
+    "crew": [
+      { "paramedic_name": "Naveen Kumar", "emt_name": "Padma Latha" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Oxygen Cylinder (10L)",
+      "Bag-Valve Mask",
+      "Drug Box (ALS Tier)",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2021,
+    "comms_channel": "CH-07",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-017",
+    "call_sign": "KA-108-SE01",
+    "type": "BLS",
+    "registration_number": "KA-05-FB-1708",
+    "home_hospital_id": "HOSP-010",
+    "current_locality": "Koramangala",
+    "current_lat": 12.9352,
+    "current_lng": 77.6245,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Girish Hegde", "emt_name": "Sneha Rao" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2020,
+    "comms_channel": "CH-03",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-018",
+    "call_sign": "KA-108-SE02",
+    "type": "ALS",
+    "registration_number": "KA-05-FA-1801",
+    "home_hospital_id": "HOSP-010",
+    "current_locality": "HSR Layout",
+    "current_lat": 12.9116,
+    "current_lng": 77.6389,
+    "status": "dispatched",
+    "crew": [
+      { "paramedic_name": "Vinod Sharma", "emt_name": "Chitra Balan" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit",
+      "Trauma Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-03",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-019",
+    "call_sign": "KA-108-SE03",
+    "type": "BLS",
+    "registration_number": "KA-05-FC-1908",
+    "home_hospital_id": "HOSP-010",
+    "current_locality": "HSR Layout",
+    "current_lat": 12.9082,
+    "current_lng": 77.6405,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Manjunath G", "emt_name": "Rohini Desai" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Glucometer",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Maruti Eeco",
+    "year": 2021,
+    "comms_channel": "CH-03",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-020",
+    "call_sign": "KA-108-W01",
+    "type": "ALS",
+    "registration_number": "KA-06-FA-2001",
+    "home_hospital_id": "HOSP-002",
+    "current_locality": "Rajajinagar",
+    "current_lat": 12.9921,
+    "current_lng": 77.5556,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Thimma Reddy", "emt_name": "Sarala Devi" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Bag-Valve Mask",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2021,
+    "comms_channel": "CH-01",
+    "response_zone": "West"
+  },
+  {
+    "id": "AMB-021",
+    "call_sign": "KA-108-W02",
+    "type": "BLS",
+    "registration_number": "KA-06-FB-2108",
+    "home_hospital_id": "HOSP-002",
+    "current_locality": "Peenya",
+    "current_lat": 13.0284,
+    "current_lng": 77.5221,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Basavaraj M", "emt_name": "Nirmala Kumari" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2019,
+    "comms_channel": "CH-01",
+    "response_zone": "West"
+  },
+  {
+    "id": "AMB-022",
+    "call_sign": "KA-108-W03",
+    "type": "MICU",
+    "registration_number": "KA-06-FA-2203",
+    "home_hospital_id": "HOSP-002",
+    "current_locality": "Peenya",
+    "current_lat": 13.0312,
+    "current_lng": 77.5198,
+    "status": "dispatched",
+    "crew": [
+      { "paramedic_name": "Ramamurthy S", "emt_name": "Jyothi Kaur" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Transport Ventilator",
+      "Syringe Pump (x2)",
+      "IV Infusion Pump",
+      "Suction Unit",
+      "Intubation Kit",
+      "Drug Box (MICU Tier)",
+      "Oxygen Cylinder (10L)",
+      "End-Tidal CO2 Monitor",
+      "Portable Ultrasound"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2023,
+    "comms_channel": "CH-01",
+    "response_zone": "West"
+  },
+  {
+    "id": "AMB-023",
+    "call_sign": "KA-108-W04",
+    "type": "BLS",
+    "registration_number": "KA-06-FC-2308",
+    "home_hospital_id": "HOSP-011",
+    "current_locality": "Peenya",
+    "current_lat": 13.0255,
+    "current_lng": 77.5233,
+    "status": "standby",
+    "crew": [
+      { "paramedic_name": "Chakravarthy T", "emt_name": "Sumitra Nair" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Blood Pressure Cuff",
+      "Glucometer"
+    ],
+    "vehicle_make": "Maruti Eeco",
+    "year": 2020,
+    "comms_channel": "CH-01",
+    "response_zone": "West"
+  },
+  {
+    "id": "AMB-024",
+    "call_sign": "KA-PVT-C01",
+    "type": "ALS",
+    "registration_number": "KA-03-HA-2401",
+    "home_hospital_id": "HOSP-001",
+    "current_locality": "Indiranagar",
+    "current_lat": 12.9784,
+    "current_lng": 77.6408,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Sathish Kumar", "emt_name": "Asha Rani" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "12-Lead ECG Machine",
+      "Advanced Airway Kit",
+      "Needle Decompression Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2023,
+    "comms_channel": "CH-08",
+    "response_zone": "Central"
+  },
+  {
+    "id": "AMB-025",
+    "call_sign": "KA-PVT-C02",
+    "type": "MICU",
+    "registration_number": "KA-03-HA-2503",
+    "home_hospital_id": "HOSP-001",
+    "current_locality": "Indiranagar",
+    "current_lat": 12.9762,
+    "current_lng": 77.6428,
+    "status": "standby",
+    "crew": [
+      { "paramedic_name": "Ganesh Prasad", "emt_name": "Kamala Devi" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Transport Ventilator",
+      "Syringe Pump (x3)",
+      "IV Infusion Pump",
+      "Suction Unit",
+      "Intubation Kit",
+      "Drug Box (MICU Tier)",
+      "Oxygen Cylinder (10L)",
+      "End-Tidal CO2 Monitor",
+      "Portable Ultrasound",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2023,
+    "comms_channel": "CH-08",
+    "response_zone": "Central"
+  },
+  {
+    "id": "AMB-026",
+    "call_sign": "KA-NEO-S01",
+    "type": "Neonatal",
+    "registration_number": "KA-05-HB-2601",
+    "home_hospital_id": "HOSP-005",
+    "current_locality": "Electronic City",
+    "current_lat": 12.8421,
+    "current_lng": 77.6752,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Dr. Savitha Reddy", "emt_name": "Padmini Nair" }
+    ],
+    "equipment": [
+      "Neonatal Incubator/Transport Warmer",
+      "Neonatal Ventilator",
+      "Pulse Oximeter (Neonatal)",
+      "IV Pump (Neonatal)",
+      "Phototherapy Unit",
+      "Suction Unit (Neonatal)",
+      "Oxygen Blender",
+      "Resuscitation Kit (Neonatal)",
+      "Drug Box (Neonatal Tier)",
+      "Cardiac Monitor (Neonatal)"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-09",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-027",
+    "call_sign": "KA-NEO-N01",
+    "type": "Neonatal",
+    "registration_number": "KA-01-HB-2701",
+    "home_hospital_id": "HOSP-007",
+    "current_locality": "Hebbal",
+    "current_lat": 13.0422,
+    "current_lng": 77.5955,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Dr. Rekha Pillai", "emt_name": "Sumana Gowda" }
+    ],
+    "equipment": [
+      "Neonatal Incubator/Transport Warmer",
+      "Neonatal Ventilator",
+      "Pulse Oximeter (Neonatal)",
+      "IV Pump (Neonatal)",
+      "Suction Unit (Neonatal)",
+      "Oxygen Blender",
+      "Resuscitation Kit (Neonatal)",
+      "Drug Box (Neonatal Tier)",
+      "Cardiac Monitor (Neonatal)"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2021,
+    "comms_channel": "CH-09",
+    "response_zone": "North"
+  },
+  {
+    "id": "AMB-028",
+    "call_sign": "KA-108-SE04",
+    "type": "ALS",
+    "registration_number": "KA-04-FA-2801",
+    "home_hospital_id": "HOSP-014",
+    "current_locality": "Koramangala",
+    "current_lat": 12.9380,
+    "current_lng": 77.6270,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Subramaniam K", "emt_name": "Indira Bai" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit",
+      "Trauma Kit",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2021,
+    "comms_channel": "CH-03",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-029",
+    "call_sign": "KA-PVT-E01",
+    "type": "ALS",
+    "registration_number": "KA-04-HA-2901",
+    "home_hospital_id": "HOSP-009",
+    "current_locality": "Whitefield",
+    "current_lat": 12.9662,
+    "current_lng": 77.7468,
+    "status": "dispatched",
+    "crew": [
+      { "paramedic_name": "Pramod Joshi", "emt_name": "Shwetha Gowda" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-030",
+    "call_sign": "KA-PVT-E02",
+    "type": "BLS",
+    "registration_number": "KA-04-HB-3002",
+    "home_hospital_id": "HOSP-009",
+    "current_locality": "Bellandur",
+    "current_lat": 12.9279,
+    "current_lng": 77.6763,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Lakshminarayana V", "emt_name": "Preeti Shetty" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter",
+      "Glucometer"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2021,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-031",
+    "call_sign": "KA-108-C03",
+    "type": "BLS",
+    "registration_number": "KA-03-FB-3108",
+    "home_hospital_id": "HOSP-008",
+    "current_locality": "Indiranagar",
+    "current_lat": 12.9799,
+    "current_lng": 77.6388,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Chandrashekar P", "emt_name": "Vanitha Sharma" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Maruti Eeco",
+    "year": 2020,
+    "comms_channel": "CH-02",
+    "response_zone": "Central"
+  },
+  {
+    "id": "AMB-032",
+    "call_sign": "KA-PVT-N01",
+    "type": "ALS",
+    "registration_number": "KA-01-HA-3201",
+    "home_hospital_id": "HOSP-012",
+    "current_locality": "Yelahanka",
+    "current_lat": 13.1015,
+    "current_lng": 77.5950,
+    "status": "maintenance",
+    "crew": [
+      { "paramedic_name": "Srinivasa Murthy", "emt_name": "Lalitha Bai" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2019,
+    "comms_channel": "CH-04",
+    "response_zone": "North"
+  },
+  {
+    "id": "AMB-033",
+    "call_sign": "KA-108-E06",
+    "type": "ALS",
+    "registration_number": "KA-04-FA-3301",
+    "home_hospital_id": "HOSP-013",
+    "current_locality": "KR Puram",
+    "current_lat": 13.0071,
+    "current_lng": 77.6920,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Manjappa R", "emt_name": "Geetha Pillai" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "Trauma Kit"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-034",
+    "call_sign": "KA-108-E07",
+    "type": "BLS",
+    "registration_number": "KA-04-FC-3408",
+    "home_hospital_id": "HOSP-013",
+    "current_locality": "Marathahalli",
+    "current_lat": 12.9568,
+    "current_lng": 77.6987,
+    "status": "standby",
+    "crew": [
+      { "paramedic_name": "Shivarama N", "emt_name": "Pushpa Lata" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2020,
+    "comms_channel": "CH-06",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-035",
+    "call_sign": "KA-PVT-S01",
+    "type": "MICU",
+    "registration_number": "KA-05-HA-3503",
+    "home_hospital_id": "HOSP-006",
+    "current_locality": "Jayanagar",
+    "current_lat": 12.9232,
+    "current_lng": 77.5922,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Devaraja M", "emt_name": "Roopa Singh" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Transport Ventilator",
+      "Syringe Pump (x2)",
+      "IV Infusion Pump",
+      "Suction Unit",
+      "Intubation Kit",
+      "Drug Box (MICU Tier)",
+      "Oxygen Cylinder (10L)",
+      "End-Tidal CO2 Monitor",
+      "12-Lead ECG Machine",
+      "Portable Ultrasound"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2023,
+    "comms_channel": "CH-07",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-036",
+    "call_sign": "KA-PVT-W01",
+    "type": "ALS",
+    "registration_number": "KA-06-HA-3601",
+    "home_hospital_id": "HOSP-011",
+    "current_locality": "Rajajinagar",
+    "current_lat": 12.9942,
+    "current_lng": 77.5543,
+    "status": "dispatched",
+    "crew": [
+      { "paramedic_name": "Gopalakrishna H", "emt_name": "Sudha Rao" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Oxygen Cylinder (10L)",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2021,
+    "comms_channel": "CH-01",
+    "response_zone": "West"
+  },
+  {
+    "id": "AMB-037",
+    "call_sign": "KA-108-SE05",
+    "type": "BLS",
+    "registration_number": "KA-05-FB-3708",
+    "home_hospital_id": "HOSP-010",
+    "current_locality": "HSR Layout",
+    "current_lat": 12.9143,
+    "current_lng": 77.6371,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Rudresh Kumar", "emt_name": "Meenakshi Iyer" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Glucometer",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Maruti Eeco",
+    "year": 2022,
+    "comms_channel": "CH-03",
+    "response_zone": "South"
+  },
+  {
+    "id": "AMB-038",
+    "call_sign": "KA-NEO-E01",
+    "type": "Neonatal",
+    "registration_number": "KA-04-HB-3801",
+    "home_hospital_id": "HOSP-013",
+    "current_locality": "Whitefield",
+    "current_lat": 12.9720,
+    "current_lng": 77.7512,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Dr. Ananya Krishnan", "emt_name": "Suneetha Bhat" }
+    ],
+    "equipment": [
+      "Neonatal Incubator/Transport Warmer",
+      "Neonatal Ventilator",
+      "Pulse Oximeter (Neonatal)",
+      "IV Pump (Neonatal)",
+      "Suction Unit (Neonatal)",
+      "Oxygen Blender",
+      "Resuscitation Kit (Neonatal)",
+      "Drug Box (Neonatal Tier)",
+      "Cardiac Monitor (Neonatal)",
+      "Temperature Probe"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2022,
+    "comms_channel": "CH-09",
+    "response_zone": "East"
+  },
+  {
+    "id": "AMB-039",
+    "call_sign": "KA-PVT-C03",
+    "type": "BLS",
+    "registration_number": "KA-03-HB-3902",
+    "home_hospital_id": "HOSP-008",
+    "current_locality": "Indiranagar",
+    "current_lat": 12.9776,
+    "current_lng": 77.6415,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Shivakumar G", "emt_name": "Rekha Verma" }
+    ],
+    "equipment": [
+      "AED",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (7L)",
+      "Bag-Valve Mask",
+      "First Aid Kit",
+      "Stretcher",
+      "Pulse Oximeter",
+      "Glucometer",
+      "Blood Pressure Cuff"
+    ],
+    "vehicle_make": "Force Traveller",
+    "year": 2021,
+    "comms_channel": "CH-08",
+    "response_zone": "Central"
+  },
+  {
+    "id": "AMB-040",
+    "call_sign": "KA-108-S06",
+    "type": "ALS",
+    "registration_number": "KA-05-FA-4001",
+    "home_hospital_id": "HOSP-015",
+    "current_locality": "Electronic City",
+    "current_lat": 12.8388,
+    "current_lng": 77.6748,
+    "status": "available",
+    "crew": [
+      { "paramedic_name": "Nagabhushan T", "emt_name": "Swathi Menon" }
+    ],
+    "equipment": [
+      "Cardiac Monitor/Defibrillator",
+      "Ventilator",
+      "IV Infusion Pump",
+      "Spinal Board",
+      "Cervical Collar Set",
+      "Oxygen Cylinder (10L)",
+      "Bag-Valve Mask",
+      "Drug Box (ALS Tier)",
+      "Advanced Airway Kit",
+      "12-Lead ECG Machine"
+    ],
+    "vehicle_make": "Tata Winger",
+    "year": 2023,
+    "comms_channel": "CH-07",
+    "response_zone": "South"
+  }
+]
