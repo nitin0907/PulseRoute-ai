@@ -750,10 +750,13 @@ const KB = {
   ],
   ambulances: [
     {id:"AMB-001",call_sign:"KA-108-N01",type:"ALS",locality:"Hebbal",lat:13.0450,lng:77.5946,status:"available",paramedic:"Rajesh Kumar",emt:"Suresh Naik",channel:"CH-04"},
-    {id:"AMB-003",call_sign:"KA-108-N03",type:"MICU",locality:"Hebbal",lat:13.0389,lng:77.5917,status:"standby",paramedic:"Venkatesh Rao",emt:"Priya Kumari",channel:"CH-04"},
+    {id:"AMB-003",call_sign:"KA-108-N03",type:"MICU",locality:"Hebbal",lat:13.0389,lng:77.5917,status:"available",paramedic:"Venkatesh Rao",emt:"Priya Kumari",channel:"CH-04"},
     {id:"AMB-005",call_sign:"KA-108-W01",type:"ALS",locality:"Rajajinagar",lat:12.9904,lng:77.5541,status:"available",paramedic:"Mohan Das",emt:"Lakshmi Devi",channel:"CH-05"},
     {id:"AMB-007",call_sign:"KA-108-SE02",type:"ALS",locality:"Koramangala",lat:12.9352,lng:77.6245,status:"available",paramedic:"Srinivas Rao",emt:"Pradeep Kumar",channel:"CH-07"},
-    {id:"AMB-010",call_sign:"KA-108-SW01",type:"BLS",locality:"Jayanagar",lat:12.9253,lng:77.5912,status:"available",paramedic:"Ravi Shankar",emt:"Meena Patil",channel:"CH-06"}
+    {id:"AMB-010",call_sign:"KA-108-SW01",type:"BLS",locality:"Jayanagar",lat:12.9253,lng:77.5912,status:"available",paramedic:"Ravi Shankar",emt:"Meena Patil",channel:"CH-06"},
+    {id:"AMB-012",call_sign:"KA-108-SE03",type:"ALS",locality:"HSR Layout",lat:12.9116,lng:77.6473,status:"available",paramedic:"Divya Menon",emt:"Arun Patel",channel:"CH-07"},
+    {id:"AMB-015",call_sign:"KA-108-NE01",type:"ALS",locality:"Whitefield",lat:12.9698,lng:77.7500,status:"available",paramedic:"Kiran Bhat",emt:"Suma Rao",channel:"CH-08"},
+    {id:"AMB-018",call_sign:"KA-108-C01",type:"MICU",locality:"MG Road",lat:12.9756,lng:77.6197,status:"available",paramedic:"Naveen Gowda",emt:"Rekha Singh",channel:"CH-03"}
   ],
   specialists: [
     {id:"SPEC-001",name:"Dr. Ramesh Venkataraman",specialty:"Cardiologist",hospital:"Manipal Hospital",on_call:true,subspecialty:"Interventional Cardiology"},
@@ -1158,13 +1161,15 @@ async function runSimulation(formInputs, skipReset){
     return score;
   }
 
+  // NOTE: KB hospitals may not have emergency_dept field — treat all as eligible
   const scoredHospitals = KB.hospitals
-    .filter(h => h.emergency_dept && h.beds_available >= (isMCI?15:3))
+    .filter(h => h.beds_available >= (isMCI?15:3))
     .map(h => ({ ...h, _score: scoreHospital(h), _dist: distKm(h) }))
     .sort((a,b) => b._score - a._score);
 
-  const top3 = scoredHospitals.slice(0, 3);
-  const h1   = top3[0];
+  // Always have at least 3 — if filter produced fewer, use all and sort anyway
+  const top3 = (scoredHospitals.length >= 3 ? scoredHospitals : KB.hospitals.map(h=>({...h,_score:0,_dist:distKm(h)})).sort((a,b)=>a._dist-b._dist)).slice(0,3);
+  const h1   = top3[0] || KB.hospitals[0]; // absolute fallback: first hospital in KB
 
   // ── AMBULANCE DISPATCH: scale count to casualty load ─────
   // MCI: 1 unit per 3 casualties; non-MCI: always primary + 1 backup
@@ -1260,7 +1265,7 @@ async function runSimulation(formInputs, skipReset){
     `{\n  emergency_type: "${type}",\n  required_specialties: ${JSON.stringify(needSpecs)},\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng}${isMCI?',\n  min_bed_capacity: '+minBedsForMCI:''}\n}`);
   await wait(1200);
   toolLog('resp','Hospital Selection',
-    top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds avail: ${h.beds_available} · Score: ${h._score.toFixed(0)} · Dist: ${h._dist.toFixed(1)} km · Trauma L${h.trauma_level}`).join('\n'));
+    top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds avail: ${h.beds_available||'?'} · Score: ${h._score!=null?h._score.toFixed(0):'—'} · Dist: ${h._dist!=null?h._dist.toFixed(1):'?'} km · Trauma L${h.trauma_level}`).join('\n'));
   setAgentState('a6','done','Hospitals ranked',
     `1. ${top3[0].name} · 2. ${top3[1]?.name||'—'}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   addMapBadge(`Destination: ${top3[0].name}`,'#2f81f7');
@@ -1321,10 +1326,10 @@ async function runSimulation(formInputs, skipReset){
     eta_minutes: a._eta, distance_km: a._dist.toFixed(1)
   }));
   const simHosps = top3.map(h=>({
-    name: h.name, readiness: h.readiness, trauma_level: h.trauma_level,
-    available_beds: h.beds_available,
-    distance_km: h._dist.toFixed(1),
-    eta: Math.round(h._dist*2.2)+3
+    name: h.name, readiness: h.readiness||75, trauma_level: h.trauma_level,
+    available_beds: h.beds_available||h.beds_total||'?',
+    distance_km: h._dist!=null?h._dist.toFixed(1):'?',
+    eta: h._dist!=null?Math.round(h._dist*2.2)+3:10
   }));
   const simSpecs = onCall.map(s=>({
     name: s.name, specialty: s.specialty,
@@ -1348,7 +1353,7 @@ async function runSimulation(formInputs, skipReset){
     {label:'Units Dispatched',val:dispatchedAmbs.length+' Ambulances',
      sub:dispatchedAmbs.map(a=>a.call_sign).join(' · '),color:'var(--accent)'},
     {label:'Primary Hospital',val:h1.name,
-     sub:`${h1.locality} · ${h1.beds_available} beds · Score ${h1._score.toFixed(0)}`,color:'var(--green)'},
+     sub:`${h1.locality} · ${h1.beds_available||h1.beds_total||'?'} beds · Score ${h1._score!=null?h1._score.toFixed(0):'—'}`,color:'var(--green)'},
     {label:'Total ETA',val:etaAfter+' min',
      sub:`Saved ${etaBefore-etaAfter} min vs standard`,color:'var(--green)'},
     {label:'Priority',val:sopCode,sub:priority,color:'var(--red)'},
