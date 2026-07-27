@@ -646,12 +646,89 @@ async function startHttpServer(): Promise<void> {
       // ── Serve premium command center at GET /demo ────────────────────────
       if (req.method === "GET" && url.pathname === "/demo") {
         if (existsSync(COMMAND_CENTER_PATH)) {
+          let html = readFileSync(COMMAND_CENTER_PATH, "utf-8");
+          // Rewrite proxy URL to relative so it calls this same server
+          html = html.replace(
+            /const ORCHESTRATE_PROXY_URL\s*=\s*['"][^'"]*['"]/,
+            "const ORCHESTRATE_PROXY_URL = '/api/dispatch'"
+          );
           res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-          res.end(readFileSync(COMMAND_CENTER_PATH, "utf-8"));
+          res.end(html);
         } else {
           res.writeHead(404, { "Content-Type": "text/plain" });
           res.end("pulseroute-command-center.html not found");
         }
+        return;
+      }
+
+      // ── ADK / watsonx Orchestrate extension — MCP discovery ─────────────
+      // GET /.well-known/mcp.json  →  ADK standard service discovery doc
+      if (req.method === "GET" && url.pathname === "/.well-known/mcp.json") {
+        const discovery = {
+          schema_version: "1.0",
+          name:           "PulseRoute AI — Emergency Dispatch MCP",
+          description:    "MCP server for Bengaluru emergency dispatch: ambulance routing, hospital selection, traffic assessment, and route calculation.",
+          version:        "1.0.0",
+          mcp_endpoint:   "/mcp",
+          protocol:       "streamable-http",
+          tools: [
+            "find_nearest_available_ambulance",
+            "select_hospital",
+            "traffic_assessment",
+            "calculate_route",
+          ],
+          agents: [
+            {
+              agent_id:    ORCHESTRATE_AGENT_ID,
+              name:        "PulseRoute Mission Commander",
+              description: "Orchestrates the full emergency dispatch pipeline — intake, ambulance dispatch, route optimisation, hospital selection, green corridor activation and specialist alerting.",
+              env_id:      ORCHESTRATE_ENV_ID,
+              instance_id: ORCHESTRATE_INSTANCE_ID,
+              chat_url:    `https://ca-tor.watson-orchestrate.cloud.ibm.com/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,
+            },
+          ],
+          links: {
+            demo:   "/demo",
+            health: "/health",
+            token:  "/api/token",
+          },
+        };
+        res.writeHead(200, {
+          "Content-Type":                "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control":               "no-store",
+        });
+        res.end(JSON.stringify(discovery, null, 2));
+        return;
+      }
+
+      // ── ADK agent info — returns agent connection details ────────────────
+      // GET /api/agent-info  →  used by ADK extension to identify the agent
+      if (req.method === "GET" && url.pathname === "/api/agent-info") {
+        const info = {
+          agent_id:        ORCHESTRATE_AGENT_ID,
+          agent_name:      "PulseRoute Mission Commander",
+          instance_id:     ORCHESTRATE_INSTANCE_ID,
+          env_id:          ORCHESTRATE_ENV_ID,
+          orchestrate_host: ORCHESTRATE_HOST_PRIMARY,
+          chat_url:        `https://${ORCHESTRATE_HOST_PRIMARY}/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,
+          chat_ui_url:     `https://ca-tor.watson-orchestrate.cloud.ibm.com/chat?agentId=${ORCHESTRATE_AGENT_ID}`,
+          mcp_server_url:  `https://pulseroute-ai-production-3f9f.up.railway.app/mcp`,
+          dispatch_api:    `https://pulseroute-ai-production-3f9f.up.railway.app/api/dispatch`,
+          demo_url:        `https://pulseroute-ai-production-3f9f.up.railway.app/demo`,
+          tools: [
+            "find_nearest_available_ambulance",
+            "select_hospital",
+            "traffic_assessment",
+            "calculate_route",
+          ],
+        };
+        res.writeHead(200, {
+          "Content-Type":                "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control":               "no-store",
+        });
+        res.end(JSON.stringify(info, null, 2));
         return;
       }
 

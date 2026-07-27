@@ -1,0 +1,39 @@
+{
+  // ── watsonx Orchestrate ADK Extension ───────────────────────────────────
+  // Connects the ADK extension to the live PulseRoute MCP server on Railway
+  // and to the PulseRoute Mission Commander agent on watsonx Orchestrate.
+  "orchestrate.mcpServers": {
+    "pulseroute-mcp": {
+      "url": "https://pulseroute-ai-production-3f9f.up.railway.app/mcp",
+      "transport": "streamable-http",
+      "description": "PulseRoute AI — Bengaluru Emergency Dispatch MCP Server (Railway)"
+    }
+  },
+
+  // Default agent to open in the ADK chat panel
+  "orchestrate.defaultAgentId": "f5bb4d34-12e0-466b-9858-6304e52bc4b7",
+
+  // Orchestrate instance (Toronto region)
+  "orchestrate.instanceId":    "9291f63d-e948-4929-9c62-56eecfb515ad",
+  "orchestrate.envId":         "2681c726-3962-4c10-8382-a7dd1acb1762",
+  "orchestrate.region":        "ca-tor",
+  "orchestrate.host":          "ca-tor.watson-orchestrate.cloud.ibm.com",
+
+  // Agent chat URL — used by ADK's "Open in Chat" command
+  "orchestrate.agentChatUrl":  "https://ca-tor.watson-orchestrate.cloud.ibm.com/chat?agentId=f5bb4d34-12e0-466b-9858-6304e52bc4b7",
+
+  // ── Editor conveniences ──────────────────────────────────────────────────
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.tsdk": "mcp-server/node_modules/typescript/lib",
+
+  // ── Files to exclude from Explorer sidebar ──────────────────────────────
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/build":        true,
+    "**/.bob":         true
+  }
+}

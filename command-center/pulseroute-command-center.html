@@ -32,6 +32,9 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .b-purple{background:rgba(188,140,255,.15);color:var(--purple);border-color:rgba(188,140,255,.3)}
 .b-cyan{background:rgba(57,197,207,.15);color:var(--cyan);border-color:rgba(57,197,207,.3)}
 #clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+/* ── ADK / Mission Commander button ── */
+#adk-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(188,140,255,.12);color:var(--purple);border:1px solid rgba(188,140,255,.35);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:background .18s,box-shadow .18s;white-space:nowrap}
+#adk-btn:hover{background:rgba(188,140,255,.22);box-shadow:0 0 0 3px rgba(188,140,255,.15)}
 
 /* ── LAYOUT ── */
 #layout{display:grid;grid-template-columns:300px 1fr 300px;height:calc(100vh - 52px);gap:1px;background:var(--border)}
@@ -137,6 +140,56 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .ba-arrow{color:var(--green);font-size:18px;flex-shrink:0;margin:0 8px}
 .ba-saving{text-align:center;font-size:12px;font-weight:700;color:var(--teal);margin-top:4px}
 
+/* ── BOTTOM PANEL ── */
+#bottom-panel{overflow-y:auto;max-height:420px}
+.stat-cell{background:var(--surface);padding:14px 18px;display:flex;align-items:center;gap:12px}
+.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
+.stat-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+
+/* pipeline step tiles */
+.pipe-step{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;transition:all .3s}
+.pipe-step .ps-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 6px;transition:all .3s}
+.pipe-step .ps-name{font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pipe-step .ps-sub{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pipe-step.ps-pending .ps-icon{background:var(--border);color:var(--muted)}
+.pipe-step.ps-running .ps-icon{background:rgba(88,166,255,.2);color:var(--accent);animation:iconGlow .8s infinite alternate}
+.pipe-step.ps-done .ps-icon{background:rgba(57,211,83,.2);color:var(--green)}
+.pipe-step.ps-done{border-color:rgba(57,211,83,.3)}
+
+/* ambulance row */
+.amb-row{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px}
+.amb-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0}
+.amb-primary{background:rgba(57,197,207,.2);color:var(--cyan);border:1px solid rgba(57,197,207,.4)}
+.amb-backup{background:rgba(139,148,158,.15);color:var(--muted);border:1px solid var(--border)}
+.amb-info{flex:1;min-width:0}
+.amb-id{font-size:11px;font-weight:700;color:var(--text)}
+.amb-detail{font-size:10px;color:var(--muted);margin-top:1px}
+.amb-eta{font-size:11px;font-weight:700;color:var(--green);flex-shrink:0;text-align:right}
+
+/* hospital card */
+.hosp-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 11px;transition:border-color .3s}
+.hosp-card.primary{border-color:rgba(57,211,83,.5)}
+.hosp-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hosp-dist{font-size:10px;color:var(--muted);margin-bottom:7px}
+.hosp-score{font-size:10px;font-weight:700;color:var(--green);float:right;margin-top:-18px;background:rgba(57,211,83,.15);border:1px solid rgba(57,211,83,.3);padding:1px 6px;border-radius:5px}
+.hosp-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+.hosp-stat{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 7px}
+.hosp-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.hosp-stat-val{font-size:12px;font-weight:700;color:var(--green)}
+
+/* specialist row */
+.spec-row{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px}
+.spec-avatar{width:34px;height:34px;border-radius:50%;background:rgba(88,166,255,.15);border:1px solid rgba(88,166,255,.3);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.spec-info{flex:1;min-width:0}
+.spec-role{font-size:11px;font-weight:700;color:var(--text)}
+.spec-name{font-size:10px;color:var(--accent);margin-top:1px}
+.spec-station{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spec-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;flex-shrink:0}
+.spec-oncall{background:rgba(57,211,83,.15);color:var(--green);border:1px solid rgba(57,211,83,.3)}
+.spec-enroute{background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.3)}
+.spec-available{background:rgba(57,197,207,.15);color:var(--cyan);border:1px solid rgba(57,197,207,.3)}
+
 /* scrollbar */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -159,6 +212,10 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <span id="mcp-badge" class="badge b-blue">MCP ONLINE</span>
     <span id="mci-badge" class="badge b-red" style="display:none">⚠ MCI ACTIVE</span>
     <span id="corridor-badge" class="badge b-green" style="display:none">🟢 GREEN CORRIDOR</span>
+    <!-- ADK / watsonx Orchestrate Mission Commander button -->
+    <button id="adk-btn" onclick="openMissionCommander()" title="Open PulseRoute Mission Commander in watsonx Orchestrate">
+      <span style="font-size:13px">🤖</span> Mission Commander
+    </button>
     <span id="clock">--:--:-- IST</span>
   </div>
 </div>
@@ -598,6 +655,78 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     </div>
   </div>
 </div><!-- end layout -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     BOTTOM PANEL — Pipeline · Ambulances · Hospitals · Specialists
+     Hidden until dispatch runs, then revealed section by section
+═══════════════════════════════════════════════════════════ -->
+<div id="bottom-panel" style="display:none;background:var(--bg);border-top:1px solid var(--border)">
+
+  <!-- ── ROW 1: stat bar ── -->
+  <div id="stat-bar" style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(248,81,73,.15);color:var(--red)">🚨</div><div><div class="stat-lbl">Total Casualties</div><div class="stat-val" id="stat-casualties" style="color:var(--red)">—</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,197,207,.15);color:var(--cyan)">🚑</div><div><div class="stat-lbl">Ambulances Fleet</div><div class="stat-val" id="stat-ambulances" style="color:var(--cyan)">—</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,211,83,.15);color:var(--green)">🏥</div><div><div class="stat-lbl">Allocated Hospitals</div><div class="stat-val" id="stat-hospitals" style="color:var(--green)">—</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(227,179,65,.15);color:var(--amber)">⚡</div><div><div class="stat-lbl">Green Corridors</div><div class="stat-val" id="stat-corridors" style="color:var(--amber)">—</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(188,140,255,.15);color:var(--purple)">⏱</div><div><div class="stat-lbl">Time Saved</div><div class="stat-val" id="stat-saved" style="color:var(--purple)">—</div></div></div>
+  </div>
+
+  <!-- ── ROW 2: agent pipeline ── -->
+  <div style="padding:16px 20px 14px;border-bottom:1px solid var(--border)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">AI Multi-Agent Execution Pipeline</div>
+      <div id="pipeline-step-badge" style="background:rgba(57,211,83,.15);color:var(--green);border:1px solid rgba(57,211,83,.3);padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600">Awaiting dispatch</div>
+    </div>
+    <div id="pipeline-steps" style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px"></div>
+  </div>
+
+  <!-- ── ROW 3: ambulances + hospitals + specialists ── -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
+
+    <!-- Ambulances -->
+    <div style="padding:16px 18px;background:var(--bg)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:15px">🚑</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Ambulance Fleet Dispatch</span>
+        </div>
+        <span id="amb-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,197,207,.15);color:var(--cyan);border:1px solid rgba(57,197,207,.3)">STANDBY</span>
+      </div>
+      <div id="ambulance-list" style="display:flex;flex-direction:column;gap:7px">
+        <div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting dispatch...</div>
+      </div>
+    </div>
+
+    <!-- Hospitals -->
+    <div style="padding:16px 18px;background:var(--bg)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:15px">🏥</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Hospital Readiness & ER</span>
+        </div>
+        <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,211,83,.12);color:var(--green);border:1px solid rgba(57,211,83,.25)">LIVE BED RESERVATION</span>
+      </div>
+      <div id="hospital-list" style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+        <div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0;grid-column:1/-1">Awaiting selection...</div>
+      </div>
+    </div>
+
+    <!-- Specialists -->
+    <div style="padding:16px 18px;background:var(--bg)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:15px">👨‍⚕️</span>
+          <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Specialist On-Call Dispatch</span>
+        </div>
+        <span id="spec-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.25)">STANDBY</span>
+      </div>
+      <div id="specialist-list" style="display:flex;flex-direction:column;gap:7px">
+        <div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting specialist assignment...</div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- end bottom-panel -->
 
 <script>
 // ═══════════════════════════════════════════════════════════
@@ -1065,6 +1194,30 @@ async function runSimulation(formInputs, skipReset){
   );
   setAgentState('a8','done','DEPLOYMENT READY',`Confidence: ${confidence}% · ETA: ${etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
 
+  // ── Bottom panel (simulation data from KB) ────────────────
+  showBottomPanel();
+  for (let i = 0; i < 8; i++) setPipelineStep(i, 'done');
+  updatePipelineBadge(8, 8);
+  const simAmbs = [nearest, backup].filter(Boolean).map((a, i) => ({
+    id: a.id, ambulance_id: a.id, call_sign: a.call_sign, sign: a.call_sign,
+    type: a.type, locality: a.locality, paramedic: a.paramedic,
+    eta_minutes: i === 0 ? ambEta : ambEta + 4, distance_km: (ambEta * 0.7).toFixed(1)
+  }));
+  const simHosps = top3.map((h, i) => ({
+    name: h.name, hospital_name: h.name, readiness: h.readiness,
+    trauma_level: h.trauma_level, available_beds: h.beds_available,
+    distance_km: (Math.hypot(h.lat - iLoc.lat, h.lng - iLoc.lng) * 111).toFixed(1),
+    eta: Math.round(Math.hypot(h.lat - iLoc.lat, h.lng - iLoc.lng) * 65) + 3
+  }));
+  const simSpecs = onCall.map(s => ({ name: s.name, specialty: s.specialty, hospital: s.hospital, on_call: true, eta: Math.floor(Math.random()*10)+5 }));
+  populateBottomPanel({
+    count: count + ' patients',
+    ambulances: simAmbs, hospitals: simHosps, specialists: simSpecs,
+    corridor: highCongestion ? '1 ACTIVE' : 'NONE',
+    saved: highCongestion ? (etaBefore - etaAfter) : null,
+  });
+  document.getElementById('stat-casualties').textContent = count + ' patients';
+
   // Animate ambulance movement
   animateAmbulance(ax,ay,ix,iy,hx,hy);
 
@@ -1269,6 +1422,8 @@ async function runDispatch() {
   document.getElementById('sys-badge').className = 'badge b-blue';
   document.getElementById('sys-badge').textContent = '● CONNECTING...';
   AGENTS.forEach(a => setAgentState(a.id, 'idle', a.sub, ''));
+  resetBottomPanel();
+  showBottomPanel();
 
   // ── Read form inputs ───────────────────────────────────────
   const desc  = document.getElementById('f-desc').value.trim()  || 'Emergency incident reported';
@@ -1377,7 +1532,11 @@ async function runDispatch() {
             if (toolCallCount === 1) {
               setAgentState('a1', 'done', 'Incident classified', `SOP assigned · ${priority}`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               setAgentState('a2', 'done', 'Intake report generated', `${loc} · ${count} patient(s)`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
+              setPipelineStep(0, 'done'); setPipelineStep(1, 'done');
             }
+            // Advance pipeline tile for this tool
+            const pipeMap = {'traffic_assessment':3,'find_nearest_available_ambulance':2,'select_hospital':4,'calculate_route':5};
+            if (pipeMap[tName] !== undefined) { setPipelineStep(pipeMap[tName], 'running'); updatePipelineBadge(toolCallCount + 1, 8); }
 
             // Label each tool with a human-readable step name
             const toolLabels = {
@@ -1460,6 +1619,18 @@ async function runDispatch() {
               await new Promise(r => setTimeout(r, 400)); // brief pause for visual effect
 
               renderFromResponse(result, formInputs);
+
+              // ── Populate bottom panel from live response ──
+              setPipelineStep(6, 'done'); setPipelineStep(7, 'done'); updatePipelineBadge(8, 8);
+              const allAmbs = [result.ambulance, ...(result.backup_ambulances || [])].filter(Boolean);
+              populateBottomPanel({
+                count: count + ' patients',
+                ambulances: allAmbs.map(a => ({...a, eta: a.eta_minutes, dist: a.distance_km})),
+                hospitals: [result.hospital, result.alternate_hospital].filter(Boolean).map(h => ({...h, eta: Math.round((h.distance_km||0)*2+5), dist: h.distance_km})),
+                specialists: (result.specialists || []).map(s => ({...s, status: s.on_call ? 'On Call' : 'Available', eta: '10'})),
+                corridor: result.corridor && result.corridor.active ? '1 ACTIVE' : 'NONE',
+                saved: result.corridor ? result.corridor.time_saved_minutes : null,
+              });
             } else {
               toolLog('error', 'Final event parse failed', String(ev.result || '(empty)'));
               // Still render what we can from simulation fallback
@@ -1500,9 +1671,211 @@ async function runDispatch() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// BOTTOM PANEL RENDER FUNCTIONS
+// ═══════════════════════════════════════════════════════════
+
+// Pipeline step definitions (mirrors AGENTS array)
+const PIPELINE_STEPS = [
+  {icon:'🎯', name:'Mission Cmd',    sub:'Orchestrator'},
+  {icon:'🩺', name:'Triage',         sub:'Medical Eval'},
+  {icon:'🚑', name:'Dispatch',       sub:'Ambulance'},
+  {icon:'🚦', name:'Traffic Intel',  sub:'Congestion'},
+  {icon:'🏥', name:'Hospital Re...', sub:'ICU & Beds'},
+  {icon:'📡', name:'Route Opt',      sub:'Best Path'},
+  {icon:'🟢', name:'Green Corri...', sub:'Signal Sync'},
+  {icon:'⭐', name:'Decision A...',  sub:'Final Command'},
+];
+
+function buildPipelineSteps() {
+  const el = document.getElementById('pipeline-steps');
+  el.innerHTML = PIPELINE_STEPS.map((s, i) => `
+    <div class="pipe-step ps-pending" id="ps-${i}">
+      <div class="ps-icon">${s.icon}</div>
+      <div class="ps-name">${s.name}</div>
+      <div class="ps-sub">${s.sub}</div>
+    </div>`).join('');
+}
+
+function setPipelineStep(idx, state) {
+  const el = document.getElementById(`ps-${idx}`);
+  if (!el) return;
+  el.className = `pipe-step ps-${state}`;
+}
+
+function updatePipelineBadge(doneCount, total) {
+  const b = document.getElementById('pipeline-step-badge');
+  if (!b) return;
+  if (doneCount >= total) {
+    b.textContent = `Step ${total} of ${total} Active`;
+    b.style.background = 'rgba(57,211,83,.15)';
+    b.style.color = 'var(--green)';
+    b.style.borderColor = 'rgba(57,211,83,.3)';
+  } else {
+    b.textContent = `Step ${doneCount + 1} of ${total} Active`;
+    b.style.background = 'rgba(88,166,255,.15)';
+    b.style.color = 'var(--accent)';
+    b.style.borderColor = 'rgba(88,166,255,.3)';
+  }
+}
+
+function showBottomPanel() {
+  const p = document.getElementById('bottom-panel');
+  p.style.display = 'block';
+  // Scroll to it smoothly
+  setTimeout(() => p.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+function resetBottomPanel() {
+  document.getElementById('bottom-panel').style.display = 'none';
+  document.getElementById('ambulance-list').innerHTML =
+    '<div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting dispatch...</div>';
+  document.getElementById('hospital-list').innerHTML =
+    '<div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0;grid-column:1/-1">Awaiting selection...</div>';
+  document.getElementById('specialist-list').innerHTML =
+    '<div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting specialist assignment...</div>';
+  document.getElementById('stat-casualties').textContent = '—';
+  document.getElementById('stat-ambulances').textContent = '—';
+  document.getElementById('stat-hospitals').textContent = '—';
+  document.getElementById('stat-corridors').textContent = '—';
+  document.getElementById('stat-saved').textContent = '—';
+  document.getElementById('amb-status-badge').textContent = 'STANDBY';
+  document.getElementById('spec-status-badge').textContent = 'STANDBY';
+  document.getElementById('pipeline-step-badge').textContent = 'Awaiting dispatch';
+  buildPipelineSteps();
+}
+
+function renderAmbulances(ambList) {
+  const el = document.getElementById('ambulance-list');
+  if (!ambList || !ambList.length) return;
+  el.innerHTML = ambList.map((a, i) => `
+    <div class="amb-row">
+      <span class="amb-badge ${i === 0 ? 'amb-primary' : 'amb-backup'}">${i === 0 ? 'PRIMARY' : 'BACKUP'}</span>
+      <div class="amb-info">
+        <div class="amb-id">${a.id || a.ambulance_id || '—'} · ${a.call_sign || a.sign || '—'}</div>
+        <div class="amb-detail">${a.type || 'ALS'} · ${a.locality || a.current_locality || '—'} · Crew: ${a.paramedic || (a.crew && a.crew[0]) || '—'}</div>
+      </div>
+      <div class="amb-eta">${a.eta_minutes || a.eta || '?'} min<br/><span style="font-size:9px;color:var(--muted);font-weight:400">${(a.distance_km || a.dist || '?')} km</span></div>
+    </div>`).join('');
+  const b = document.getElementById('amb-status-badge');
+  b.textContent = 'DISPATCHED';
+  b.style.background = 'rgba(57,211,83,.15)';
+  b.style.color = 'var(--green)';
+  b.style.borderColor = 'rgba(57,211,83,.3)';
+  document.getElementById('stat-ambulances').textContent = ambList.length + ' Units';
+}
+
+function renderHospitals(hospList) {
+  const el = document.getElementById('hospital-list');
+  if (!hospList || !hospList.length) return;
+  el.innerHTML = hospList.map((h, i) => `
+    <div class="hosp-card ${i === 0 ? 'primary' : ''}">
+      <div class="hosp-name">${h.name || h.hospital_name || '—'}</div>
+      <div class="hosp-score">${h.readiness ? h.readiness + '% SCORE' : (i === 0 ? 'PRIMARY' : 'ALT')}</div>
+      <div class="hosp-dist">Distance: ${h.distance_km || h.dist || '?'} km · ETA: ${h.eta || '?'} min</div>
+      <div class="hosp-stats">
+        <div class="hosp-stat">
+          <div class="hosp-stat-lbl">Trauma Bays</div>
+          <div class="hosp-stat-val">${h.trauma_bays || (h.trauma_level ? 'L' + h.trauma_level : '—')}</div>
+        </div>
+        <div class="hosp-stat">
+          <div class="hosp-stat-lbl">ICU Beds Free</div>
+          <div class="hosp-stat-val">${h.available_beds || h.beds_available || '?'}</div>
+        </div>
+      </div>
+    </div>`).join('');
+  document.getElementById('stat-hospitals').textContent = hospList.length + ' Facilities';
+}
+
+function renderSpecialists(specList) {
+  const el = document.getElementById('specialist-list');
+  if (!specList || !specList.length) return;
+  const statusClass = s => s === 'En Route' ? 'spec-enroute' : s === 'On Call' ? 'spec-oncall' : 'spec-available';
+  el.innerHTML = specList.map(s => `
+    <div class="spec-row">
+      <div class="spec-avatar">👨‍⚕️</div>
+      <div class="spec-info">
+        <div class="spec-role">${s.specialty || s.role || '—'}</div>
+        <div class="spec-name">${s.name || '—'}</div>
+        <div class="spec-station">${s.hospital || s.station || '—'} · ETA: ${s.eta || '?'} min</div>
+      </div>
+      <span class="spec-status ${statusClass(s.status || (s.on_call ? 'On Call' : 'Available'))}">${s.status || (s.on_call ? 'On Call' : 'Available')}</span>
+    </div>`).join('');
+  const b = document.getElementById('spec-status-badge');
+  b.textContent = 'TEAMS NOTIFIED';
+  b.style.background = 'rgba(57,211,83,.15)';
+  b.style.color = 'var(--green)';
+  b.style.borderColor = 'rgba(57,211,83,.3)';
+}
+
+function populateBottomPanel(opts) {
+  const { count, ambulances, hospitals, specialists, corridor, saved } = opts;
+  document.getElementById('stat-casualties').textContent = count || '—';
+  if (corridor) {
+    document.getElementById('stat-corridors').textContent = corridor;
+    document.getElementById('stat-saved').textContent = (saved || '—') + ' min';
+  }
+  if (ambulances && ambulances.length) renderAmbulances(ambulances);
+  if (hospitals  && hospitals.length)  renderHospitals(hospitals);
+  if (specialists && specialists.length) renderSpecialists(specialists);
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADK / watsonx Orchestrate — Mission Commander integration
+// ═══════════════════════════════════════════════════════════
+
+const WXO_AGENT_ID   = 'f5bb4d34-12e0-466b-9858-6304e52bc4b7';
+const WXO_INSTANCE_ID= '9291f63d-e948-4929-9c62-56eecfb515ad';
+const WXO_ENV_ID     = '2681c726-3962-4c10-8382-a7dd1acb1762';
+const WXO_HOST       = 'ca-tor.watson-orchestrate.cloud.ibm.com';
+// Build incident message from form values for pre-filling Mission Commander
+function buildIncidentMessage() {
+  const type  = document.getElementById('f-type')  ? document.getElementById('f-type').value   : 'Major Trauma';
+  const sev   = document.getElementById('f-sev')   ? document.getElementById('f-sev').value    : 'Critical (S1)';
+  const loc   = document.getElementById('f-loc')   ? document.getElementById('f-loc').value    : 'Silk Board Junction';
+  const count = document.getElementById('f-count') ? document.getElementById('f-count').value  : '2';
+  const notes = document.getElementById('f-notes') ? document.getElementById('f-notes').value  : '';
+  return `EMERGENCY DISPATCH REQUEST — PulseRoute AI\n` +
+         `Incident Type: ${type}\nSeverity: ${sev}\nLocation: ${loc}, Bengaluru\n` +
+         `Casualties: ${count}\nAdditional: ${notes || 'None'}\n` +
+         `Request: Dispatch nearest ALS unit, select optimal hospital, activate green corridor.`;
+}
+
+// Open the Mission Commander agent in watsonx Orchestrate (new tab)
+// If the ADK extension is installed it will intercept this URL
+function openMissionCommander(prefillMessage) {
+  const msg = prefillMessage || buildIncidentMessage();
+  // Deep-link to the agent's chat UI — ADK extension or browser will open it
+  const chatUrl = `https://${WXO_HOST}/chat`
+    + `?agentId=${encodeURIComponent(WXO_AGENT_ID)}`
+    + `&message=${encodeURIComponent(msg)}`;
+  window.open(chatUrl, 'pulseroute-mission-commander');
+
+  // Update the ADK button to show "Opened"
+  const btn = document.getElementById('adk-btn');
+  if (btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<span style="font-size:13px">✅</span> Agent Opened';
+    btn.style.background = 'rgba(57,211,83,.15)';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'rgba(57,211,83,.3)';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 3000);
+  }
+
+  // Also surface the URL in the tool console so it's visible
+  toolLog('thought', '🤖 Mission Commander ADK',
+    `Opening agent in watsonx Orchestrate ADK:\n${chatUrl}\n\nAgent ID: ${WXO_AGENT_ID}\nInstance: ${WXO_INSTANCE_ID}`);
+}
+
+// ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
 buildAgentList();
+buildPipelineSteps();
 document.getElementById('run-btn').addEventListener('click', runDispatch);
 </script>
 </body>
