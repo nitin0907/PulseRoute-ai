@@ -79,15 +79,27 @@ const ORCHESTRATE_AGENT_ID       = "f5bb4d34-12e0-466b-9858-6304e52bc4b7";
 const ORCHESTRATE_ENV_ID         = "2681c726-3962-4c10-8382-a7dd1acb1762";
 const IAM_TOKEN_URL              = "https://iam.cloud.ibm.com/identity/token";
 
-// Candidate API paths against confirmed api.ca-tor host
-const ORCHESTRATE_API_CANDIDATES = [
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
-  `/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,
-  `/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,
-  `/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,
+// Candidate API paths — tried in order, first 2xx/non-404 wins.
+// Each entry is [path, bodyVariant] where bodyVariant controls which
+// request body shape is sent to that particular endpoint.
+//   "chat"  → { messages: [{role:"user", content}] }   (OpenAI-style)
+//   "runs"  → { input: { text }, agent_id, agent_environment_id }
+const ORCHESTRATE_API_CANDIDATES: Array<[string, "chat" | "runs"]> = [
+  // ── v1 chat (preferred — standard watsonx Orchestrate chat endpoint)
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,        "chat"],
+  // ── v2 chat
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,        "chat"],
+  // ── v1 runs with runs-style body
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,        "runs"],
+  // ── v2 runs
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,        "runs"],
+  // ── agent-scoped endpoints (no environment)
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,                 "runs"],
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,                 "runs"],
+  // ── root-relative fallbacks
+  [`/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,                                             "chat"],
+  [`/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,                                             "runs"],
+  [`/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,                                                       "runs"],
 ];
 
 // IAM token cache
@@ -130,7 +142,10 @@ function httpsPost(url: string, body: string, headers: Record<string, string>): 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
 // build/index.js → mcp-server root → command-center/app.html
-const APP_HTML_PATH = resolve(__dirname, "..", "..", "command-center", "app.html");
+const APP_HTML_PATH      = resolve(__dirname, "..", "..", "command-center", "app.html");
+const COMMAND_CENTER_PATH = resolve(__dirname, "..", "..", "command-center", "pulseroute-command-center.html");
+// build/index.js → mcp-server root → workflows/
+const WORKFLOWS_DIR = resolve(__dirname, "..", "..", "workflows");
 let   _appHtml      = "";
 function getAppHtml(): string {
   if (_appHtml) return _appHtml;
@@ -151,45 +166,93 @@ function getAppHtml(): string {
   return _appHtml;
 }
 
-// Normalise an Orchestrate SSE event into the shape app.html expects
+// Normalise an Orchestrate SSE event into the shape the UI expects.
+// Handles both the /runs event schema and the /chat (OpenAI-style) schema.
 function normaliseOrchestrateEvent(ev: Record<string, unknown>, stepCounter: number): Record<string, unknown> | null {
-  const now     = new Date().toISOString().slice(11, 19);
-  const evType  = (ev.event ?? ev.type ?? "") as string;
-  const evData  = (ev.data  ?? ev) as Record<string, unknown>;
+  const now    = new Date().toISOString().slice(11, 19);
+  const evType = (ev.event ?? ev.type ?? "") as string;
+  // /chat responses nest their payload under ev.data; /runs put it at the root
+  const evData = (ev.data ?? ev) as Record<string, unknown>;
 
-  if (["agent_message","thought","message"].includes(evType)) {
-    return { type: "thought", ts: evData.ts ?? now, content: evData.content ?? evData.text ?? JSON.stringify(evData) };
+  // ── Agent reasoning / thought ────────────────────────────────────────────
+  if (["agent_message", "thought", "message", "text"].includes(evType)) {
+    const content = evData.content ?? evData.text ?? evData.delta ?? JSON.stringify(evData);
+    return { type: "thought", ts: evData.ts ?? now, content };
   }
-  if (["tool_invocation","tool_call","function_call"].includes(evType)) {
+
+  // ── OpenAI-style chat.completion.chunk (streaming /chat endpoint) ─────────
+  // shape: { type: "chat.completion.chunk", data: { choices: [{ delta: { content } }] } }
+  if (evType === "chat.completion.chunk" || evType === "chunk") {
+    const choices = (evData.choices ?? []) as Array<Record<string, Record<string, unknown>>>;
+    const delta   = choices[0]?.delta ?? {};
+    const content = delta.content;
+    if (content) return { type: "thought", ts: now, content };
+    // tool_calls delta
+    const tc = (delta.tool_calls ?? []) as Array<Record<string, unknown>>;
+    if (tc.length) {
+      const t     = tc[0] as Record<string, unknown>;
+      const fn    = (t.function ?? {}) as Record<string, unknown>;
+      const tName = (fn.name ?? t.name ?? "tool") as string;
+      const args  = (fn.arguments ?? t.arguments ?? "{}") as string;
+      return { type: "tool_call", ts: now, tool_name: tName,
+               input: args, step: String(stepCounter + 1) };
+    }
+    return null; // empty delta (role-only chunk), skip
+  }
+
+  // ── OpenAI-style final chat.completion (non-streaming /chat endpoint) ─────
+  // shape: { type: "chat.completion", data: { choices: [{ message: { content } }] } }
+  if (evType === "chat.completion" || evType === "message.completed") {
+    const choices = (evData.choices ?? []) as Array<Record<string, Record<string, unknown>>>;
+    const msg     = choices[0]?.message ?? evData;
+    const rawText = (msg.content ?? evData.content ?? evData.text ?? "") as string;
+    let result: unknown;
+    try   { result = JSON.parse(rawText as string); }
+    catch { result = { status: "error", notes: rawText, confidence: 0,
+                       ambulance: null, hospital: null, route: null, traffic: null,
+                       corridor: null, specialists: [] }; }
+    return { type: "final", ts: now, result: JSON.stringify(result) };
+  }
+
+  // ── Tool invocation ───────────────────────────────────────────────────────
+  if (["tool_invocation", "tool_call", "function_call", "tool_use"].includes(evType)) {
     const toolName = evData.tool ?? evData.tool_name ?? evData.name ?? "unknown";
     const input    = evData.input ?? evData.arguments ?? evData.parameters ?? {};
     return { type: "tool_call", ts: evData.ts ?? now, tool_name: toolName,
              input: typeof input === "string" ? input : JSON.stringify(input, null, 2),
              step: String(stepCounter + 1) };
   }
-  if (["tool_response","tool_result","function_response"].includes(evType)) {
+
+  // ── Tool response ─────────────────────────────────────────────────────────
+  if (["tool_response", "tool_result", "function_response", "tool_result_block"].includes(evType)) {
     const toolName = evData.tool ?? evData.tool_name ?? evData.name ?? "unknown";
     const output   = evData.output ?? evData.result ?? evData.content ?? {};
     return { type: "tool_result", ts: evData.ts ?? now, tool_name: toolName,
              output: typeof output === "string" ? output : JSON.stringify(output, null, 2) };
   }
-  if (["final_response","final","completion"].includes(evType)) {
-    const text = (evData as Record<string,Record<string,unknown>>)?.output?.text ??
-                 (evData as Record<string,Record<string,unknown>>)?.output?.content ??
+
+  // ── Final / completion ────────────────────────────────────────────────────
+  if (["final_response", "final", "completion", "done"].includes(evType)) {
+    const text = (evData as Record<string, Record<string, unknown>>)?.output?.text ??
+                 (evData as Record<string, Record<string, unknown>>)?.output?.content ??
                  evData?.result ?? evData?.content ?? JSON.stringify(evData);
     let result: unknown;
-    try   { result = typeof text === "string" ? JSON.parse(text) : text; }
+    try   { result = typeof text === "string" ? JSON.parse(text as string) : text; }
     catch { result = { status: "error", notes: String(text), confidence: 0,
                        ambulance: null, hospital: null, route: null, traffic: null,
                        corridor: null, specialists: [] }; }
     return { type: "final", ts: evData.ts ?? now, result: JSON.stringify(result) };
   }
+
+  // ── Error ─────────────────────────────────────────────────────────────────
   if (evType === "error") {
     return { type: "error", ts: evData.ts ?? now,
              message: evData.message ?? evData.error ?? JSON.stringify(evData) };
   }
+
+  // ── Anything else — surface as a thought so it's visible in the console ───
   if (evType) {
-    return { type: "thought", ts: now, content: `[${evType}] ${JSON.stringify(evData).slice(0, 300)}` };
+    return { type: "thought", ts: now, content: `[${evType}] ${JSON.stringify(evData).slice(0, 400)}` };
   }
   return null;
 }
@@ -232,43 +295,62 @@ async function handleDispatch(req: IncomingMessage, res: ServerResponse): Promis
     sseDone(); return;
   }
 
-  // Build request body using confirmed agentEnvironmentId from embed code
-  const incidentText = JSON.stringify(payload);
-  const orchBody = JSON.stringify({
-    input:              { text: incidentText },
-    message:            incidentText,
-    agent_id:           ORCHESTRATE_AGENT_ID,
-    agent_environment_id: ORCHESTRATE_ENV_ID,
-    stream:             true,
-  });
+  // The incident payload is serialised to a natural-language message string
+  // so Mission Commander's intake agent can parse it as free-text input.
+  const incidentText = typeof payload.description === "string"
+    ? `${payload.description}. Location: ${JSON.stringify(payload.location ?? {})}. ` +
+      `Type: ${payload.incident_type ?? "Unknown"}. Priority: ${payload.priority ?? "P1"}. ` +
+      `Casualties: ${payload.casualties_count ?? 1}.`
+    : JSON.stringify(payload);
 
   // Delegate to the redirect-following multi-candidate function
-  postToOrchestrate(orchBody, token, sseWrite, sseDone, now, 0);
+  postToOrchestrate(incidentText, token, sseWrite, sseDone, now, 0);
 }
 
 // ---------------------------------------------------------------------------
 // Try Orchestrate API candidate paths in order.
-// Follows 301/302/307/308 redirects. Falls through to next candidate on 404.
+// Follows 301/302/307/308 redirects. Falls through to next candidate on 404/500.
 // ---------------------------------------------------------------------------
+function buildOrchBody(incidentText: string, variant: "chat" | "runs"): string {
+  if (variant === "chat") {
+    // OpenAI-style chat format — the standard watsonx Orchestrate chat endpoint
+    return JSON.stringify({
+      messages: [{ role: "user", content: incidentText }],
+    });
+  }
+  // /runs-style body
+  return JSON.stringify({
+    input:                { text: incidentText },
+    agent_id:             ORCHESTRATE_AGENT_ID,
+    agent_environment_id: ORCHESTRATE_ENV_ID,
+  });
+}
+
 function postToOrchestrate(
-  orchBody: string,
+  incidentText: string,
   token: string,
   sseWrite: (type: string, data: Record<string, unknown>) => void,
   sseDone: () => void,
   now: () => string,
   candidateIndex: number,
   overridePath?: string,
-  overrideHost?: string        // set when a redirect points to a different hostname
+  overrideHost?: string,        // set when a redirect points to a different hostname
+  overrideVariant?: "chat" | "runs"
 ): void {
-  const apiPath  = overridePath ?? ORCHESTRATE_API_CANDIDATES[candidateIndex];
-  const apiHost  = overrideHost ?? ORCHESTRATE_HOST;
+  const candidate = ORCHESTRATE_API_CANDIDATES[candidateIndex];
+  const apiPath   = overridePath ?? candidate?.[0];
+  const variant   = overrideVariant ?? candidate?.[1] ?? "chat";
+  const apiHost   = overrideHost ?? ORCHESTRATE_HOST;
+
   if (!apiPath) {
     sseWrite("error", { ts: now(), message: "All Orchestrate API path candidates exhausted. Check Railway logs for the correct URL." });
     sseDone();
     return;
   }
 
-  console.error(`[Proxy] POST https://${apiHost}${apiPath}`);
+  const orchBody = buildOrchBody(incidentText, variant);
+
+  console.error(`[Proxy] POST https://${apiHost}${apiPath}  (body-variant: ${variant})`);
   sseWrite("thought", { ts: now(), content: `[proxy] Calling Orchestrate: https://${apiHost}${apiPath}` });
 
   const orchReq = https.request({
@@ -302,15 +384,24 @@ function postToOrchestrate(
         } catch {
           nextPath = location;
         }
-        postToOrchestrate(orchBody, token, sseWrite, sseDone, now, candidateIndex, nextPath, nextHost);
+        postToOrchestrate(incidentText, token, sseWrite, sseDone, now, candidateIndex, nextPath, nextHost, variant);
       });
       return;
     }
 
     // On 404 try next candidate
-    if (status === 404 && !overridePath && candidateIndex + 1 < ORCHESTRATE_API_CANDIDATES.length) {
-      orchRes.on("data", () => {});
-      orchRes.on("end", () => { postToOrchestrate(orchBody, token, sseWrite, sseDone, now, candidateIndex + 1); });
+    // Fall through to next candidate on 404 OR 500 (bad body shape), but not on 401/403
+    const shouldFallThrough = (status === 404 || status === 500) &&
+                              !overridePath &&
+                              candidateIndex + 1 < ORCHESTRATE_API_CANDIDATES.length;
+    if (shouldFallThrough) {
+      let errBody = "";
+      orchRes.on("data", (c: Buffer) => (errBody += c));
+      orchRes.on("end", () => {
+        console.error(`[Proxy] ${status} on candidate ${candidateIndex} — trying next. Body: ${errBody.slice(0, 400)}`);
+        sseWrite("thought", { ts: now(), content: `[proxy] ${status} on candidate ${candidateIndex}, trying next path...` });
+        postToOrchestrate(incidentText, token, sseWrite, sseDone, now, candidateIndex + 1);
+      });
       return;
     }
 
@@ -318,8 +409,8 @@ function postToOrchestrate(
       let errBody = "";
       orchRes.on("data", (c: Buffer) => (errBody += c));
       orchRes.on("end", () => {
-        // Show full error body so the correct API path is visible in MCP console
-        sseWrite("thought", { ts: now(), content: `Orchestrate ${status} body: ${errBody.slice(0, 800)}` });
+        // Log full error body (no truncation) so the exact failure reason is visible
+        sseWrite("thought", { ts: now(), content: `Orchestrate ${status} body:\n${errBody}` });
         sseWrite("error",   { ts: now(), message: `Orchestrate ${status} on https://${apiHost}${apiPath}` });
         sseDone();
       });
@@ -546,6 +637,18 @@ async function startHttpServer(): Promise<void> {
         return;
       }
 
+      // ── Serve premium command center at GET /demo ────────────────────────
+      if (req.method === "GET" && url.pathname === "/demo") {
+        if (existsSync(COMMAND_CENTER_PATH)) {
+          res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+          res.end(readFileSync(COMMAND_CENTER_PATH, "utf-8"));
+        } else {
+          res.writeHead(404, { "Content-Type": "text/plain" });
+          res.end("pulseroute-command-center.html not found");
+        }
+        return;
+      }
+
       // ── Webhook receiver — Orchestrate posts Mission Commander output here ─
       // POST /api/result   { ...mission commander JSON response... }
       // GET  /api/result   app.html polls this to get the latest result
@@ -633,6 +736,46 @@ async function startHttpServer(): Promise<void> {
       // ── Orchestrate proxy ────────────────────────────────────────────────
       if (req.method === "POST" && url.pathname === "/api/dispatch") {
         await handleDispatch(req, res);
+        return;
+      }
+
+      // ── GET /workflows — list available workflow IDs ─────────────────────
+      if (req.method === "GET" && url.pathname === "/workflows") {
+        const ids = [
+          "emergency-dispatch-workflow",
+          "green-corridor-workflow",
+          "mci-escalation-workflow",
+        ];
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-store",
+        });
+        res.end(JSON.stringify({
+          workflows: ids.map((id) => ({
+            workflow_id: id,
+            url: `/workflows/${id}`,
+          })),
+        }));
+        return;
+      }
+
+      // ── GET /workflows/:id — serve a workflow YAML file ──────────────────
+      if (req.method === "GET" && url.pathname.startsWith("/workflows/")) {
+        const workflowId = url.pathname.slice("/workflows/".length).replace(/[^a-z0-9-]/g, "");
+        const yamlPath = resolve(WORKFLOWS_DIR, `${workflowId}.yaml`);
+        if (workflowId && existsSync(yamlPath)) {
+          res.writeHead(200, {
+            "Content-Type": "text/yaml; charset=utf-8",
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "no-store",
+            "Content-Disposition": `inline; filename="${workflowId}.yaml"`,
+          });
+          res.end(readFileSync(yamlPath, "utf-8"));
+        } else {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ error: `Workflow not found: ${workflowId}` }));
+        }
         return;
       }
 
