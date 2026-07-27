@@ -74,32 +74,36 @@ let _resultTimestamp: number  = 0;
 // ---------------------------------------------------------------------------
 
 const ORCHESTRATE_INSTANCE_ID    = "9291f63d-e948-4929-9c62-56eecfb515ad";
-const ORCHESTRATE_HOST           = "api.ca-tor.watson-orchestrate.cloud.ibm.com";
 const ORCHESTRATE_AGENT_ID       = "f5bb4d34-12e0-466b-9858-6304e52bc4b7";
 const ORCHESTRATE_ENV_ID         = "2681c726-3962-4c10-8382-a7dd1acb1762";
 const IAM_TOKEN_URL              = "https://iam.cloud.ibm.com/identity/token";
 
-// Candidate API paths — tried in order, first 2xx/non-404 wins.
-// Each entry is [path, bodyVariant] where bodyVariant controls which
-// request body shape is sent to that particular endpoint.
-//   "chat"  → { messages: [{role:"user", content}] }   (OpenAI-style)
-//   "runs"  → { input: { text }, agent_id, agent_environment_id }
-const ORCHESTRATE_API_CANDIDATES: Array<[string, "chat" | "runs"]> = [
-  // ── v1 chat (preferred — standard watsonx Orchestrate chat endpoint)
-  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,        "chat"],
-  // ── v2 chat
-  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,        "chat"],
-  // ── v1 runs with runs-style body
-  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,        "runs"],
-  // ── v2 runs
-  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,        "runs"],
-  // ── agent-scoped endpoints (no environment)
-  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,                 "runs"],
-  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agents/${ORCHESTRATE_AGENT_ID}/runs`,                 "runs"],
-  // ── root-relative fallbacks
-  [`/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,                                             "chat"],
-  [`/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,                                             "runs"],
-  [`/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,                                                       "runs"],
+// Correct host — no "api." prefix (confirmed from embed code in app.html)
+const ORCHESTRATE_HOST_PRIMARY   = "ca-tor.watson-orchestrate.cloud.ibm.com";
+// Fallback host with "api." prefix (some endpoint versions use this)
+const ORCHESTRATE_HOST_API       = "api.ca-tor.watson-orchestrate.cloud.ibm.com";
+// Keep a single ORCHESTRATE_HOST alias so the rest of the code compiles unchanged
+const ORCHESTRATE_HOST           = ORCHESTRATE_HOST_PRIMARY;
+
+// Candidate API paths — tried in order, first 2xx/non-404/non-503 wins.
+// Each entry is [path, bodyVariant, host?] where:
+//   "chat" → { messages: [{role:"user", content}] }  (OpenAI-style)
+//   "runs" → { input: { text }, agent_id, agent_environment_id }
+// host overrides ORCHESTRATE_HOST when set.
+const ORCHESTRATE_API_CANDIDATES: Array<[string, "chat" | "runs", string?]> = [
+  // ── Primary host, v1 chat (confirmed working URL pattern from app.html)
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,  "chat", ORCHESTRATE_HOST_PRIMARY],
+  // ── Primary host, v2 chat
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v2/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,  "chat", ORCHESTRATE_HOST_PRIMARY],
+  // ── Primary host, v1 runs
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,  "runs", ORCHESTRATE_HOST_PRIMARY],
+  // ── Primary host, agent-scoped
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/chat`,            "chat", ORCHESTRATE_HOST_PRIMARY],
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,            "runs", ORCHESTRATE_HOST_PRIMARY],
+  // ── api. host variants (fallback)
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/chat`,  "chat", ORCHESTRATE_HOST_API],
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agent_environments/${ORCHESTRATE_ENV_ID}/runs`,  "runs", ORCHESTRATE_HOST_API],
+  [`/instances/${ORCHESTRATE_INSTANCE_ID}/v1/agents/${ORCHESTRATE_AGENT_ID}/runs`,            "runs", ORCHESTRATE_HOST_API],
 ];
 
 // IAM token cache
@@ -340,7 +344,9 @@ function postToOrchestrate(
   const candidate = ORCHESTRATE_API_CANDIDATES[candidateIndex];
   const apiPath   = overridePath ?? candidate?.[0];
   const variant   = overrideVariant ?? candidate?.[1] ?? "chat";
-  const apiHost   = overrideHost ?? ORCHESTRATE_HOST;
+  // Per-candidate host override (third tuple element) takes priority,
+  // then redirect-supplied overrideHost, then global ORCHESTRATE_HOST
+  const apiHost   = overrideHost ?? candidate?.[2] ?? ORCHESTRATE_HOST;
 
   if (!apiPath) {
     sseWrite("error", { ts: now(), message: "All Orchestrate API path candidates exhausted. Check Railway logs for the correct URL." });
@@ -389,9 +395,9 @@ function postToOrchestrate(
       return;
     }
 
-    // On 404 try next candidate
-    // Fall through to next candidate on 404 OR 500 (bad body shape), but not on 401/403
-    const shouldFallThrough = (status === 404 || status === 500) &&
+    // Fall through on 404 (not found), 500 (bad body shape), 503 (CDN/gateway — wrong host)
+    // Never fall through on 401/403 (auth failures — no point trying more paths)
+    const shouldFallThrough = (status === 404 || status === 500 || status === 503) &&
                               !overridePath &&
                               candidateIndex + 1 < ORCHESTRATE_API_CANDIDATES.length;
     if (shouldFallThrough) {
