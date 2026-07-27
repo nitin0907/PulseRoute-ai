@@ -1104,143 +1104,263 @@ async function runSimulation(formInputs, skipReset){
   setAgentState('a2','done','Structured report generated',`${count} patients · ${sev} · SOP ${sopCode}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   await wait(300);
 
+  // ── HELPERS: sort available units by distance to incident ─
+  function distKm(a){ return Math.hypot(a.lat-iLoc.lat,a.lng-iLoc.lng)*111; }
+  function etaMin(a){ return Math.round(distKm(a)*2.2)+3; } // ~27 km/h avg with lights
+
+  // ── SPEC MATCHING: map incident type → required specialties ──
+  const SPEC_MAP = {
+    'Cardiac Arrest':     ['Cardiologist','Critical Care Specialist'],
+    'Acute Stroke':       ['Neurologist','Neurosurgeon'],
+    'Major Trauma':       ['Trauma Surgeon','Orthopedic Surgeon','Neurosurgeon'],
+    'Road Accident':      ['Trauma Surgeon','Orthopedic Surgeon','Neurosurgeon'],
+    'Major Burns':        ['Plastic Surgeon','Critical Care Specialist'],
+    'Mass Casualty (MCI)':['Trauma Surgeon','Orthopedic Surgeon','Neurosurgeon','Critical Care Specialist'],
+    'Polytrauma':         ['Trauma Surgeon','Orthopedic Surgeon','Neurosurgeon'],
+    'Obstetric Emergency':['Obstetric Specialist','Neonatologist'],
+    'Pediatric Emergency':['Pediatric Intensivist','Pediatric Surgeon'],
+    'Poisoning':          ['Critical Care Specialist','Nephrologist'],
+  };
+  const requiredSpecs = SPEC_MAP[type] || ['Trauma Surgeon','Critical Care Specialist'];
+
+  // ── HOSPITAL SCORING: matches Orchestrate select_hospital logic ──
+  const HOSP_SPEC_MAP = {
+    'Cardiac Arrest':     ['Cardiology','Cardiac Surgery'],
+    'Acute Stroke':       ['Neurology','Neurosurgery'],
+    'Major Trauma':       ['Trauma & Critical Care','Neurosurgery','Orthopedics'],
+    'Road Accident':      ['Trauma & Critical Care','Neurosurgery','Orthopedics'],
+    'Major Burns':        ['Burns & Reconstructive Surgery','Plastic Surgery'],
+    'Mass Casualty (MCI)':['Trauma & Critical Care'],
+    'Polytrauma':         ['Trauma & Critical Care','Neurosurgery'],
+    'Obstetric Emergency':['Obstetrics & Gynecology','Neonatology'],
+    'Pediatric Emergency':['Pediatrics','Pediatric Surgery'],
+    'Poisoning':          ['Critical Care','Nephrology'],
+  };
+  const needSpecs = HOSP_SPEC_MAP[type] || ['Trauma & Critical Care'];
+  const minBedsForMCI = isMCI ? Math.max(20, parseInt(count)*2) : 5;
+
+  function scoreHospital(h){
+    const dist = distKm(h);
+    let score = 0;
+    // Specialty match
+    const matched = needSpecs.filter(s => (h.specialties||[]).some(hs => hs.toLowerCase().includes(s.toLowerCase())));
+    score += matched.length * 25;
+    // Trauma level
+    if(h.trauma_level===1) score += 30;
+    else if(h.trauma_level===2) score += 15;
+    // Bed availability
+    if(h.beds_available >= minBedsForMCI) score += 20;
+    else if(h.beds_available >= 10) score += 10;
+    // Distance penalty (closer = better)
+    score -= Math.min(dist * 2, 20);
+    // readiness bonus
+    score += (h.readiness||75)*0.1;
+    return score;
+  }
+
+  const scoredHospitals = KB.hospitals
+    .filter(h => h.emergency_dept && h.beds_available >= (isMCI?15:3))
+    .map(h => ({ ...h, _score: scoreHospital(h), _dist: distKm(h) }))
+    .sort((a,b) => b._score - a._score);
+
+  const top3 = scoredHospitals.slice(0, 3);
+  const h1   = top3[0];
+
+  // ── AMBULANCE DISPATCH: scale count to casualty load ─────
+  // MCI: 1 unit per 3 casualties; non-MCI: always primary + 1 backup
+  const ambsNeeded = isMCI ? Math.max(2, Math.ceil(parseInt(count)/3)) : 2;
+  const availAmbs  = KB.ambulances
+    .filter(a => a.status==='available')
+    .map(a => ({ ...a, _dist: distKm(a), _eta: etaMin(a) }))
+    .sort((a,b) => a._dist - b._dist);
+
+  // Primary = nearest ALS; fill remaining slots with closest available (any type)
+  const alsPool = availAmbs.filter(a => a.type==='ALS');
+  const allPool = availAmbs;
+  const dispatchedAmbs = [];
+  // Always prefer ALS for primary
+  if(alsPool.length) dispatchedAmbs.push(alsPool[0]);
+  // Fill remaining slots from all available, skip already picked
+  for(const a of allPool){
+    if(dispatchedAmbs.length >= ambsNeeded) break;
+    if(!dispatchedAmbs.find(x=>x.id===a.id)) dispatchedAmbs.push(a);
+  }
+  // For MCI also add MICU
+  if(isMCI){
+    const micu = availAmbs.find(a=>a.type==='MICU'&&!dispatchedAmbs.find(x=>x.id===a.id));
+    if(micu && dispatchedAmbs.length < ambsNeeded+1) dispatchedAmbs.push(micu);
+  }
+
+  const nearest = dispatchedAmbs[0];
+  const ambEta  = nearest._eta;
+
   // ── AGENT 3: Ambulance Coordination ─────────────────────
-  setAgentState('a3','run','Invoking find_nearest_available_ambulance...');
-  toolLog('call','find_nearest_available_ambulance',`{\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng},\n  ambulance_type: "ALS"\n}`);
+  setAgentState('a3','run',`Dispatching ${dispatchedAmbs.length} unit(s)...`);
+  toolLog('call','find_nearest_available_ambulance',
+    `{\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng},\n  ambulance_type: "ALS"${isMCI?',\n  count_needed: '+ambsNeeded:''}\n}`);
   await wait(1300);
-  // Pick nearest ALS from KB
-  const alsUnits=KB.ambulances.filter(a=>a.type==='ALS'&&a.status==='available');
-  const nearest=alsUnits.reduce((b,a)=>{
-    const d=Math.hypot(a.lat-iLoc.lat,a.lng-iLoc.lng);
-    const bd=Math.hypot(b.lat-iLoc.lat,b.lng-iLoc.lng);
-    return d<bd?a:b;
-  });
-  const backup=alsUnits.find(a=>a.id!==nearest.id)||KB.ambulances.find(a=>a.type==='MICU');
-  const ambEta=Math.round(Math.hypot(nearest.lat-iLoc.lat,nearest.lng-iLoc.lng)*65)+5;
-  toolLog('resp','Ambulance Selected',`Primary: ${nearest.id} (${nearest.call_sign})\nType: ${nearest.type} · Status: ${nearest.status}\nLocation: ${nearest.locality}\nCrew: ${nearest.paramedic} / ${nearest.emt}\nETA to scene: ~${ambEta} min\nBackup: ${backup.id} (${backup.call_sign})`);
-  setAgentState('a3','done','Dispatched',`${nearest.id} · ${nearest.locality} · ETA ~${ambEta} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  toolLog('resp','Ambulances Dispatched',
+    dispatchedAmbs.map((a,i)=>`${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign})\n  Type: ${a.type} · ${a.locality} · ETA ~${a._eta} min · ${a._dist.toFixed(1)} km`).join('\n'));
+  setAgentState('a3','done',`${dispatchedAmbs.length} unit(s) dispatched`,
+    dispatchedAmbs.slice(0,2).map(a=>`${a.id}·${a.type}`).join(' + '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  // Plot all ambulances on map
+  dispatchedAmbs.forEach((a,i)=>{ const ax=MAP.x(a.lng),ay=MAP.y(a.lat); plotAmbulance(ax,ay,a.call_sign); });
   const ax=MAP.x(nearest.lng), ay=MAP.y(nearest.lat);
-  plotAmbulance(ax,ay,nearest.call_sign);
   await wait(300);
 
   // ── AGENT 4: Route Intelligence ──────────────────────────
   setAgentState('a4','run','Invoking traffic_assessment + calculate_route...');
-  toolLog('call','traffic_assessment',`{\n  incident_location: { locality: "${loc}", lat: ${iLoc.lat}, lng: ${iLoc.lng} },\n  radius_km: 10\n}`);
+  toolLog('call','traffic_assessment',
+    `{\n  incident_location: { locality: "${loc}", lat: ${iLoc.lat}, lng: ${iLoc.lng} },\n  radius_km: 10\n}`);
   await wait(800);
-  const congScore=highCongestion?9.8:5.2;
-  const congLevel=congScore>=9?'CRITICAL':congScore>=7?'SEVERE':congScore>=5?'HIGH':'MODERATE';
-  const delay=highCongestion?7:2;
-  const peakHour=new Date().getHours()>=8&&new Date().getHours()<=10||new Date().getHours()>=17&&new Date().getHours()<=20;
-  toolLog('resp','Traffic Assessment',`Congestion: ${congLevel} (${congScore}/10)\nPeak hour: ${peakHour}\nExpected delay: ${delay} min\nPreemptible signals: Trinity Circle (TS020), Domlur Jn (TS023)\nRecommendation: ${highCongestion?'Use NICE Road (RD002) bypass':'ORR via signal preemption'}`);
+  const congScore = highCongestion?9.8:5.2;
+  const congLevel = congScore>=9?'CRITICAL':congScore>=7?'SEVERE':congScore>=5?'HIGH':'MODERATE';
+  const delay     = highCongestion?7:2;
+  const peakHour  = new Date().getHours()>=8&&new Date().getHours()<=10||new Date().getHours()>=17&&new Date().getHours()<=20;
+  toolLog('resp','Traffic Assessment',
+    `Congestion: ${congLevel} (${congScore}/10)\nPeak hour: ${peakHour}\nExpected delay: ${delay} min\nPreemptible signals: Trinity Circle (TS020), Domlur Jn (TS023)\nRecommendation: ${highCongestion?'Use NICE Road (RD002) bypass':'ORR via signal preemption'}`);
   await wait(400);
-  toolLog('call','calculate_route (Leg A)',`{\n  source: { locality: "${nearest.locality}" },\n  destination: { locality: "${loc}" }\n}`);
+  toolLog('call','calculate_route (Leg A)',
+    `{\n  source: { locality: "${nearest.locality}" },\n  destination: { locality: "${loc}" }\n}`);
   await wait(900);
-  const etaBefore=ambEta+delay+(highCongestion?8:2);
-  const legAeta=ambEta;
-  toolLog('resp','Route Leg A',`${nearest.locality} → ${loc}\nRoad: ORR (RD001) · ${(ambEta*0.7).toFixed(1)} km\nETA: ${legAeta} min · Emergency route: YES`);
-  setAgentState('a4','done','Routes computed',`Leg A: ${legAeta} min · Congestion: ${congLevel}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  const etaBefore = ambEta+delay+(highCongestion?8:2);
+  toolLog('resp','Route Leg A',
+    `${nearest.locality} → ${loc}\nRoad: ORR (RD001) · ${(ambEta*0.7).toFixed(1)} km\nETA: ${ambEta} min · Emergency route: YES`);
+  setAgentState('a4','done','Routes computed',
+    `Leg A: ${ambEta} min · Congestion: ${congLevel}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   drawRoute(ax,ay,ix,iy,'#f0883e','arr-r');
   await wait(300);
 
   // ── AGENT 5: Green Corridor ──────────────────────────────
   setAgentState('a5','run','Activating green corridor — ERSS-112 preemption...');
-  toolLog('thought','Green Corridor Agent',`Identifying preemptible signals on route...\nTriggering: Trinity Circle (TS020), Domlur Flyover Jn (TS023)`);
+  toolLog('thought','Green Corridor Agent',
+    `Identifying preemptible signals on route...\nTriggering: Trinity Circle (TS020), Domlur Flyover Jn (TS023)`);
   await wait(700);
   flashSignal('ts-trinity','#3fb950');
   await wait(400);
-  // Select hospital for corridor endpoint
-  const h1=KB.hospitals.find(h=>h.id==='hosp_001'); // Manipal
   const hx=MAP.x(h1.lng), hy=MAP.y(h1.lat);
   drawCorridor(ix,iy,hx,hy);
   const etaAfter=Math.round(etaBefore*0.68);
-  toolLog('call','calculate_route (Leg B)',`{\n  source: { locality: "${loc}" },\n  destination: { locality: "${h1.locality}" }\n}`);
+  toolLog('call','calculate_route (Leg B)',
+    `{\n  source: { locality: "${loc}" },\n  destination: { locality: "${h1.locality}" }\n}`);
   await wait(700);
-  const legBeta=etaAfter-legAeta;
-  toolLog('resp','Green Corridor Activated',`Signals preempted: TS020 (Trinity Circle), TS023 (Domlur Jn)\nCorridor: ${loc} → Manipal Hospital\nLeg B ETA: ${legBeta} min (was ${legBeta+6} min)\nETA reduction: 32%`);
-  setAgentState('a5','done','GREEN CORRIDOR ACTIVE',`TS020 + TS023 preempted · ETA −${etaBefore-etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  const legBeta=etaAfter-ambEta;
+  toolLog('resp','Green Corridor Activated',
+    `Signals preempted: TS020 (Trinity Circle), TS023 (Domlur Jn)\nCorridor: ${loc} → ${h1.name}\nLeg B ETA: ${legBeta} min\nETA reduction: 32%`);
+  setAgentState('a5','done','GREEN CORRIDOR ACTIVE',
+    `TS020+TS023 preempted · ETA −${etaBefore-etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   document.getElementById('corridor-badge').style.display='';
   setEta(etaBefore,etaAfter);
-  addMapBadge(`Silk Board → Manipal: ${etaAfter} min`,'#3fb950');
+  addMapBadge(`${loc} → ${h1.name}: ${etaAfter} min`,'#3fb950');
   await wait(300);
 
   // ── AGENT 6: Hospital Readiness ──────────────────────────
-  setAgentState('a6','run','Invoking select_hospital — scoring readiness...');
-  toolLog('call','select_hospital',`{\n  emergency_type: "${type}",\n  required_specialties: ["Trauma & Critical Care","Neurosurgery"],\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng}\n}`);
+  setAgentState('a6','run','Scoring hospitals — readiness & specialty match...');
+  toolLog('call','select_hospital',
+    `{\n  emergency_type: "${type}",\n  required_specialties: ${JSON.stringify(needSpecs)},\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng}${isMCI?',\n  min_bed_capacity: '+minBedsForMCI:''}\n}`);
   await wait(1200);
-  const top3=KB.hospitals.filter(h=>h.trauma_level===1).slice(0,3);
-  toolLog('resp','Hospital Selection',top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds: ${h.beds_available} · Readiness: ${h.readiness}% · Trauma L${h.trauma_level}`).join('\n'));
-  setAgentState('a6','done','Hospitals ranked',`1. ${top3[0].name} (${top3[0].readiness}%) · 2. ${top3[1].name} (${top3[1].readiness}%)`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  toolLog('resp','Hospital Selection',
+    top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds avail: ${h.beds_available} · Score: ${h._score.toFixed(0)} · Dist: ${h._dist.toFixed(1)} km · Trauma L${h.trauma_level}`).join('\n'));
+  setAgentState('a6','done','Hospitals ranked',
+    `1. ${top3[0].name} · 2. ${top3[1]?.name||'—'}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   addMapBadge(`Destination: ${top3[0].name}`,'#2f81f7');
   await wait(300);
 
   // ── AGENT 7: Specialist Coordination ────────────────────
   setAgentState('a7','run','Matching on-call specialists by incident type...');
-  toolLog('thought','Specialist Coordination',`Filtering specialists for: ${type}\nRequired: Trauma Surgeon, Neurosurgeon, Orthopedic Surgeon`);
+  toolLog('thought','Specialist Coordination',
+    `Incident: ${type}\nRequired specialties: ${requiredSpecs.join(', ')}`);
   await wait(1000);
-  const onCall=KB.specialists.filter(s=>s.on_call).slice(0,3);
-  toolLog('resp','Specialists On-Call',onCall.map(s=>`${s.name} · ${s.specialty}\n   ${s.hospital} · On-call`).join('\n\n'));
-  setAgentState('a7','done','Specialists notified',`${onCall.map(s=>s.specialty).join(' · ')}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  // Match specialists by specialty keyword from required list, prioritise on-call
+  const matchedSpecs = [];
+  for(const req of requiredSpecs){
+    const match = KB.specialists
+      .filter(s => s.specialty.toLowerCase().includes(req.toLowerCase().split(' ')[0]))
+      .sort((a,b) => (b.on_call?1:0)-(a.on_call?1:0))[0];
+    if(match && !matchedSpecs.find(x=>x.id===match.id)) matchedSpecs.push(match);
+  }
+  // Always have at least 2 on-call specs regardless
+  if(matchedSpecs.length<2){
+    KB.specialists.filter(s=>s.on_call&&!matchedSpecs.find(x=>x.id===s.id))
+      .slice(0,3-matchedSpecs.length).forEach(s=>matchedSpecs.push(s));
+  }
+  const onCall = matchedSpecs.slice(0, isMCI?6:3);
+  toolLog('resp','Specialists Notified',
+    onCall.map(s=>`${s.name} · ${s.specialty}\n   ${s.hospital} · ${s.on_call?'ON CALL 🟢':'Available'}`).join('\n\n'));
+  setAgentState('a7','done','Teams notified',
+    onCall.slice(0,3).map(s=>s.specialty).join(' · '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   await wait(300);
 
   // ── AGENT 8: Mission Commander Final ────────────────────
   setAgentState('a8','run','Synthesising final deployment recommendation...');
-  toolLog('thought','Mission Commander (Synthesis)','Consolidating all agent outputs...\nComputing deployment confidence score...');
+  toolLog('thought','Mission Commander (Synthesis)',
+    'Consolidating all agent outputs...\nComputing deployment confidence score...');
   await wait(1500);
   const deployId='PRDEP-'+new Date(Date.now()+5.5*3600000).toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(Math.random()*900+100);
-  const confidence=highCongestion?74:88;
-  const confLabel=confidence>=85?'HIGH':confidence>=65?'MODERATE':'LOW';
+  const confidence = isMCI?68:highCongestion?74:88;
+  const confLabel  = confidence>=85?'HIGH':confidence>=65?'MODERATE':'LOW';
   toolLog('resp','MISSION DEPLOYMENT READY',
-    `Deployment ID: ${deployId}\nIncident: ${incidentId}\nStatus: READY_WITH_WARNINGS\n\nAmbulance: ${nearest.id} (${nearest.call_sign}) · ALS\nCrew: ${nearest.paramedic} / ${nearest.emt}\nPrimary Hospital: ${top3[0].name}\nTotal ETA: ${etaAfter} min (with green corridor)\nWithout PulseRoute: ${etaBefore} min\nTime saved: ${etaBefore-etaAfter} min\n\nGreen corridor: ACTIVE\nSignal preemption: ERSS-112\nPre-alert sent: YES\nHospital readiness: ${top3[0].readiness}%\n\nDeployment Confidence: ${confidence}% (${confLabel})`
-  );
-  setAgentState('a8','done','DEPLOYMENT READY',`Confidence: ${confidence}% · ETA: ${etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `Deployment ID: ${deployId}\nIncident: ${incidentId}\nPriority: ${priority}\nStatus: ${isMCI?'MCI_ACTIVE':'READY_WITH_WARNINGS'}\n\n` +
+    `Units dispatched: ${dispatchedAmbs.length}\n`+
+    dispatchedAmbs.map((a,i)=>`  ${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign}) · ${a.type} · ETA ~${a._eta} min`).join('\n')+'\n\n'+
+    `Primary Hospital: ${h1.name} (${h1.locality}) · Score: ${h1._score.toFixed(0)}\n`+
+    `Alternate: ${top3[1]?.name||'—'}\n`+
+    `Total ETA: ${etaAfter} min (with green corridor)\nWithout PulseRoute: ${etaBefore} min\nTime saved: ${etaBefore-etaAfter} min\n\n`+
+    `Specialists notified: ${onCall.length}\n${onCall.map(s=>`  ${s.specialty}: ${s.name}`).join('\n')}\n\n`+
+    `Green corridor: ACTIVE · TS020+TS023 preempted\nDeployment Confidence: ${confidence}% (${confLabel})`);
+  setAgentState('a8','done','DEPLOYMENT READY',
+    `Confidence: ${confidence}% · ETA: ${etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
 
-  // ── Bottom panel (simulation data from KB) ────────────────
+  // ── Bottom panel ──────────────────────────────────────────
   showBottomPanel();
-  for (let i = 0; i < 8; i++) setPipelineStep(i, 'done');
-  updatePipelineBadge(8, 8);
-  const simAmbs = [nearest, backup].filter(Boolean).map((a, i) => ({
-    id: a.id, ambulance_id: a.id, call_sign: a.call_sign, sign: a.call_sign,
-    type: a.type, locality: a.locality, paramedic: a.paramedic,
-    eta_minutes: i === 0 ? ambEta : ambEta + 4, distance_km: (ambEta * 0.7).toFixed(1)
+  for(let i=0;i<8;i++) setPipelineStep(i,'done');
+  updatePipelineBadge(8,8);
+  const simAmbs = dispatchedAmbs.map((a,i)=>({
+    id: a.id, ambulance_id: a.id, call_sign: a.call_sign, type: a.type,
+    locality: a.locality, paramedic: a.paramedic,
+    eta_minutes: a._eta, distance_km: a._dist.toFixed(1)
   }));
-  const simHosps = top3.map((h, i) => ({
-    name: h.name, hospital_name: h.name, readiness: h.readiness,
-    trauma_level: h.trauma_level, available_beds: h.beds_available,
-    distance_km: (Math.hypot(h.lat - iLoc.lat, h.lng - iLoc.lng) * 111).toFixed(1),
-    eta: Math.round(Math.hypot(h.lat - iLoc.lat, h.lng - iLoc.lng) * 65) + 3
+  const simHosps = top3.map(h=>({
+    name: h.name, readiness: h.readiness, trauma_level: h.trauma_level,
+    available_beds: h.beds_available,
+    distance_km: h._dist.toFixed(1),
+    eta: Math.round(h._dist*2.2)+3
   }));
-  const simSpecs = onCall.map(s => ({ name: s.name, specialty: s.specialty, hospital: s.hospital, on_call: true, eta: Math.floor(Math.random()*10)+5 }));
+  const simSpecs = onCall.map(s=>({
+    name: s.name, specialty: s.specialty,
+    hospital: s.hospital||s.hospital_name,
+    on_call: s.on_call, status: s.on_call?'On Call':'Available',
+    eta: Math.floor(Math.random()*10)+5
+  }));
   populateBottomPanel({
-    count: count + ' patients',
+    count: count+' patients'+(isMCI?' (MCI)':''),
     ambulances: simAmbs, hospitals: simHosps, specialists: simSpecs,
-    corridor: highCongestion ? '1 ACTIVE' : 'NONE',
-    saved: highCongestion ? (etaBefore - etaAfter) : null,
+    corridor: highCongestion?'1 ACTIVE':'NONE',
+    saved: highCongestion?(etaBefore-etaAfter):null,
   });
-  document.getElementById('stat-casualties').textContent = count + ' patients';
+  document.getElementById('stat-casualties').textContent=count+(isMCI?' patients (MCI)':' patients');
 
-  // Animate ambulance movement
+  // Animate primary ambulance
   animateAmbulance(ax,ay,ix,iy,hx,hy);
-
-  // Show confidence ring
   setConfidence(confidence);
-
-  // Show before/after
   setBa(etaBefore,etaAfter);
-
-  // Show mission summary cards
   showMissionSummary([
-    {label:'Ambulance',val:nearest.id,sub:`${nearest.call_sign} · ALS · ${nearest.locality}`,color:'var(--accent)'},
-    {label:'Hospital',val:top3[0].name,sub:`${top3[0].locality} · ${top3[0].readiness}% ready`,color:'var(--green)'},
-    {label:'Total ETA',val:etaAfter+' min',sub:`Saved ${etaBefore-etaAfter} min vs standard`,color:'var(--green)'},
+    {label:'Units Dispatched',val:dispatchedAmbs.length+' Ambulances',
+     sub:dispatchedAmbs.map(a=>a.call_sign).join(' · '),color:'var(--accent)'},
+    {label:'Primary Hospital',val:h1.name,
+     sub:`${h1.locality} · ${h1.beds_available} beds · Score ${h1._score.toFixed(0)}`,color:'var(--green)'},
+    {label:'Total ETA',val:etaAfter+' min',
+     sub:`Saved ${etaBefore-etaAfter} min vs standard`,color:'var(--green)'},
     {label:'Priority',val:sopCode,sub:priority,color:'var(--red)'},
-    {label:'Corridor',val:'ACTIVE',sub:'TS020 + TS023 preempted',color:'var(--cyan)'},
-    {label:'Confidence',val:confidence+'%',sub:confLabel+' — '+confLabel.toLowerCase()+' deployment quality',color:confidence>=85?'var(--green)':confidence>=65?'var(--amber)':'var(--red)'}
+    {label:'Green Corridor',val:'ACTIVE',sub:'TS020 + TS023 preempted',color:'var(--cyan)'},
+    {label:'Confidence',val:confidence+'%',
+     sub:confLabel+' · '+onCall.length+' specialists notified',
+     color:confidence>=85?'var(--green)':confidence>=65?'var(--amber)':'var(--red)'}
   ]);
 
   document.getElementById('sys-badge').className='badge b-amber';
   document.getElementById('sys-badge').textContent='● MISSION ACTIVE';
 
-  // Only release the lock + re-enable the button when this function owns them
   if(!skipReset){
     running=false;
     document.getElementById('run-btn').disabled=false;
@@ -1620,14 +1740,62 @@ async function runDispatch() {
 
               renderFromResponse(result, formInputs);
 
-              // ── Populate bottom panel from live response ──
+              // ── Populate bottom panel — Orchestrate result + KB fallback ──
               setPipelineStep(6, 'done'); setPipelineStep(7, 'done'); updatePipelineBadge(8, 8);
-              const allAmbs = [result.ambulance, ...(result.backup_ambulances || [])].filter(Boolean);
+
+              // Ambulances: primary from result + backups; pad with KB nearest if <2
+              const orchAmbs = [result.ambulance, ...(result.backup_ambulances || [])].filter(Boolean);
+              let panelAmbs  = orchAmbs.map(a => ({...a, eta_minutes: a.eta_minutes||a.eta, distance_km: a.distance_km||a.dist}));
+              if (panelAmbs.length < 2) {
+                const _dA = a => Math.hypot(a.lat-iLoc.lat,a.lng-iLoc.lng)*111;
+                const kbA = KB.ambulances.filter(a=>a.status==='available'&&!orchAmbs.find(x=>x.ambulance_id===a.id||x.id===a.id))
+                  .map(a=>({...a,_d:_dA(a)})).sort((a,b)=>a._d-b._d).slice(0,3-panelAmbs.length)
+                  .map(a=>({...a,eta_minutes:Math.round(a._d*2.2)+3,distance_km:a._d.toFixed(1)}));
+                panelAmbs = [...panelAmbs,...kbA];
+              }
+
+              // Hospitals: primary + alternate from result; pad with KB scored if <2
+              let panelHosps = [result.hospital, result.alternate_hospital].filter(Boolean)
+                .map(h=>({...h, eta: Math.round(((h.distance_km||0))*2+5)}));
+              if (panelHosps.length < 2) {
+                const _dH = h => Math.hypot(h.lat-iLoc.lat,h.lng-iLoc.lng)*111;
+                const kbH2 = KB.hospitals.filter(h=>h.emergency_dept&&!panelHosps.find(p=>p.name===h.name))
+                  .map(h=>({...h,_d:_dH(h),available_beds:h.beds_available}))
+                  .sort((a,b)=>b.readiness-a.readiness).slice(0,2-panelHosps.length)
+                  .map(h=>({...h,distance_km:h._d.toFixed(1),eta:Math.round(h._d*2.2)+3}));
+                panelHosps = [...panelHosps,...kbH2];
+              }
+
+              // Specialists: from result OR build from KB matching incident type
+              const SPEC_MAP_LIVE = {
+                'Cardiac Arrest':['Cardiologist','Critical Care Specialist'],
+                'Acute Stroke':['Neurologist','Neurosurgeon'],
+                'Major Trauma':['Trauma Surgeon','Orthopedic Surgeon','Neurosurgeon'],
+                'Road Accident':['Trauma Surgeon','Orthopedic Surgeon','Neurosurgeon'],
+                'Major Burns':['Plastic Surgeon','Critical Care Specialist'],
+                'Mass Casualty (MCI)':['Trauma Surgeon','Orthopedic Surgeon','Neurosurgeon','Critical Care Specialist'],
+              };
+              let panelSpecs = (result.specialists||[]).map(s=>({...s,status:s.on_call?'On Call':'Available',eta:'10'}));
+              if (!panelSpecs.length) {
+                const reqS = SPEC_MAP_LIVE[type]||['Trauma Surgeon','Critical Care Specialist'];
+                const ms = [];
+                for(const req of reqS){
+                  const m = KB.specialists.filter(s=>s.specialty.toLowerCase().includes(req.toLowerCase().split(' ')[0]))
+                    .sort((a,b)=>(b.on_call?1:0)-(a.on_call?1:0))[0];
+                  if(m&&!ms.find(x=>x.id===m.id)) ms.push(m);
+                }
+                if(ms.length<2) KB.specialists.filter(s=>s.on_call&&!ms.find(x=>x.id===s.id)).slice(0,2).forEach(s=>ms.push(s));
+                panelSpecs = ms.slice(0,parseInt(count)>=10?6:3).map(s=>({
+                  name:s.name,specialty:s.specialty,hospital:s.hospital||s.hospital_name,
+                  on_call:s.on_call,status:s.on_call?'On Call':'Available',eta:String(Math.floor(Math.random()*10)+5)
+                }));
+              }
+
               populateBottomPanel({
-                count: count + ' patients',
-                ambulances: allAmbs.map(a => ({...a, eta: a.eta_minutes, dist: a.distance_km})),
-                hospitals: [result.hospital, result.alternate_hospital].filter(Boolean).map(h => ({...h, eta: Math.round((h.distance_km||0)*2+5), dist: h.distance_km})),
-                specialists: (result.specialists || []).map(s => ({...s, status: s.on_call ? 'On Call' : 'Available', eta: '10'})),
+                count: count+' patients'+(parseInt(count)>=10?' (MCI)':''),
+                ambulances: panelAmbs,
+                hospitals:  panelHosps,
+                specialists: panelSpecs,
                 corridor: result.corridor && result.corridor.active ? '1 ACTIVE' : 'NONE',
                 saved: result.corridor ? result.corridor.time_saved_minutes : null,
               });
