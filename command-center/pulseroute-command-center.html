@@ -141,54 +141,69 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .ba-saving{text-align:center;font-size:12px;font-weight:700;color:var(--teal);margin-top:4px}
 
 /* ── BOTTOM PANEL ── */
-#bottom-panel{overflow-y:auto;max-height:420px}
-.stat-cell{background:var(--surface);padding:14px 18px;display:flex;align-items:center;gap:12px}
-.stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:3px}
-.stat-val{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+#bottom-panel{background:var(--bg);border-top:2px solid var(--border)}
 
-/* pipeline step tiles */
-.pipe-step{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;transition:all .3s}
-.pipe-step .ps-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin:0 auto 6px;transition:all .3s}
-.pipe-step .ps-name{font-size:10px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Stat bar */
+#bp-stat-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)}
+.stat-cell{background:var(--surface);padding:10px 16px;display:flex;flex-direction:column;justify-content:center}
+.stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:3px;font-weight:600}
+.stat-val{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+
+/* Pipeline row */
+#bp-pipeline{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface)}
+#bp-pipeline-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#bp-pipeline-title{font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase}
+#pipeline-step-badge{font-size:10px;font-weight:600;padding:2px 10px;border-radius:10px;border:1px solid rgba(57,211,83,.3);background:rgba(57,211,83,.12);color:var(--green)}
+#pipeline-steps{display:grid;grid-template-columns:repeat(8,1fr);gap:6px}
+.pipe-step{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 6px;text-align:center;transition:all .3s}
+.pipe-step .ps-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;margin:0 auto 5px;transition:all .3s}
+.pipe-step .ps-name{font-size:10px;font-weight:700;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pipe-step .ps-sub{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pipe-step.ps-pending .ps-icon{background:var(--border);color:var(--muted)}
-.pipe-step.ps-running .ps-icon{background:rgba(88,166,255,.2);color:var(--accent);animation:iconGlow .8s infinite alternate}
-.pipe-step.ps-done .ps-icon{background:rgba(57,211,83,.2);color:var(--green)}
-.pipe-step.ps-done{border-color:rgba(57,211,83,.3)}
+.pipe-step.ps-pending .ps-num{background:var(--border);color:var(--muted)}
+.pipe-step.ps-running{border-color:rgba(88,166,255,.4)}
+.pipe-step.ps-running .ps-num{background:rgba(88,166,255,.2);color:var(--accent);animation:iconGlow .8s infinite alternate}
+.pipe-step.ps-done{border-color:rgba(57,211,83,.35)}
+.pipe-step.ps-done .ps-num{background:rgba(57,211,83,.2);color:var(--green)}
+
+/* 3-column dispatch grid */
+#bp-dispatch{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)}
+.bp-col{padding:14px 16px;background:var(--bg);overflow-y:auto;max-height:260px}
+.bp-col-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-shrink:0}
+.bp-col-title{font-size:10px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase}
+.bp-badge{font-size:9px;font-weight:600;padding:2px 7px;border-radius:6px;border:1px solid}
 
 /* ambulance row */
-.amb-row{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 12px;display:flex;align-items:center;gap:10px}
-.amb-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px;flex-shrink:0}
-.amb-primary{background:rgba(57,197,207,.2);color:var(--cyan);border:1px solid rgba(57,197,207,.4)}
-.amb-backup{background:rgba(139,148,158,.15);color:var(--muted);border:1px solid var(--border)}
+.amb-row{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.amb-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;flex-shrink:0;letter-spacing:.3px}
+.amb-primary{background:rgba(57,197,207,.18);color:var(--cyan);border:1px solid rgba(57,197,207,.4)}
+.amb-backup{background:rgba(139,148,158,.12);color:var(--muted);border:1px solid var(--border)}
 .amb-info{flex:1;min-width:0}
 .amb-id{font-size:11px;font-weight:700;color:var(--text)}
 .amb-detail{font-size:10px;color:var(--muted);margin-top:1px}
-.amb-eta{font-size:11px;font-weight:700;color:var(--green);flex-shrink:0;text-align:right}
+.amb-eta{font-size:12px;font-weight:700;color:var(--green);flex-shrink:0;text-align:right;line-height:1.2}
 
 /* hospital card */
-.hosp-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 11px;transition:border-color .3s}
-.hosp-card.primary{border-color:rgba(57,211,83,.5)}
+.hosp-card{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px 10px;margin-bottom:6px;transition:border-color .3s}
+.hosp-card.primary{border-color:rgba(57,211,83,.5);border-left:3px solid var(--green)}
 .hosp-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hosp-dist{font-size:10px;color:var(--muted);margin-bottom:7px}
-.hosp-score{font-size:10px;font-weight:700;color:var(--green);float:right;margin-top:-18px;background:rgba(57,211,83,.15);border:1px solid rgba(57,211,83,.3);padding:1px 6px;border-radius:5px}
-.hosp-stats{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
-.hosp-stat{background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:5px 7px}
-.hosp-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
-.hosp-stat-val{font-size:12px;font-weight:700;color:var(--green)}
+.hosp-dist{font-size:10px;color:var(--muted);margin-bottom:5px}
+.hosp-score{display:inline-block;font-size:9px;font-weight:700;color:var(--green);background:rgba(57,211,83,.12);border:1px solid rgba(57,211,83,.3);padding:1px 6px;border-radius:4px;margin-bottom:4px}
+.hosp-stats{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.hosp-stat{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:4px 6px}
+.hosp-stat-lbl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px;margin-bottom:1px}
+.hosp-stat-val{font-size:11px;font-weight:700;color:var(--green)}
 
 /* specialist row */
-.spec-row{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:10px}
-.spec-avatar{width:34px;height:34px;border-radius:50%;background:rgba(88,166,255,.15);border:1px solid rgba(88,166,255,.3);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.spec-row{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.spec-avatar{width:30px;height:30px;border-radius:50%;background:rgba(88,166,255,.12);border:1px solid rgba(88,166,255,.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);flex-shrink:0}
 .spec-info{flex:1;min-width:0}
 .spec-role{font-size:11px;font-weight:700;color:var(--text)}
 .spec-name{font-size:10px;color:var(--accent);margin-top:1px}
 .spec-station{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.spec-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;flex-shrink:0}
-.spec-oncall{background:rgba(57,211,83,.15);color:var(--green);border:1px solid rgba(57,211,83,.3)}
-.spec-enroute{background:rgba(88,166,255,.15);color:var(--accent);border:1px solid rgba(88,166,255,.3)}
-.spec-available{background:rgba(57,197,207,.15);color:var(--cyan);border:1px solid rgba(57,197,207,.3)}
+.spec-status{font-size:9px;font-weight:600;padding:2px 7px;border-radius:6px;flex-shrink:0;border:1px solid}
+.spec-oncall{background:rgba(57,211,83,.12);color:var(--green);border-color:rgba(57,211,83,.3)}
+.spec-enroute{background:rgba(88,166,255,.12);color:var(--accent);border-color:rgba(88,166,255,.3)}
+.spec-available{background:rgba(57,197,207,.12);color:var(--cyan);border-color:rgba(57,197,207,.3)}
 
 /* scrollbar */
 ::-webkit-scrollbar{width:5px;height:5px}
@@ -211,7 +226,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <span id="sys-badge" class="badge b-green">● SYSTEM READY</span>
     <span id="mcp-badge" class="badge b-blue">MCP ONLINE</span>
     <span id="mci-badge" class="badge b-red" style="display:none">MCI ACTIVE</span>
-    <span id="corridor-badge" class="badge b-green" style="display:none">�GREEN CORRIDOR</span>
+    <span id="corridor-badge" class="badge b-green" style="display:none">GREEN CORRIDOR ACTIVE</span>
     <!-- ADK / watsonx Orchestrate Mission Commander button -->
     <button id="adk-btn" onclick="openMissionCommander()" title="Open PulseRoute Mission Commander in watsonx Orchestrate">
       Mission Commander
@@ -660,72 +675,78 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
      BOTTOM PANEL - Pipeline . Ambulances . Hospitals . Specialists
      Hidden until dispatch runs, then revealed section by section
 ═══════════════════════════════════════════════════════════ -->
-<div id="bottom-panel" style="display:none;background:var(--bg);border-top:1px solid var(--border)">
+<div id="bottom-panel" style="display:none">
 
-  <!-- ── ROW 1: stat bar ── -->
-  <div id="stat-bar" style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
-    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Total Casualties</div><div class="stat-val" id="stat-casualties" style="color:var(--red)">-</div></div></div>
-    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Ambulances Fleet</div><div class="stat-val" id="stat-ambulances" style="color:var(--cyan)">-</div></div></div>
-    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Allocated Hospitals</div><div class="stat-val" id="stat-hospitals" style="color:var(--green)">-</div></div></div>
-    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Green Corridors</div><div class="stat-val" id="stat-corridors" style="color:var(--amber)">-</div></div></div>
-    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Time Saved</div><div class="stat-val" id="stat-saved" style="color:var(--purple)">-</div></div></div>
+  <!-- ROW 1: Stat Bar -->
+  <div id="bp-stat-bar">
+    <div class="stat-cell">
+      <div class="stat-lbl">Total Casualties</div>
+      <div class="stat-val" id="stat-casualties" style="color:var(--red)">-</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-lbl">Ambulances Dispatched</div>
+      <div class="stat-val" id="stat-ambulances" style="color:var(--cyan)">-</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-lbl">Hospitals Allocated</div>
+      <div class="stat-val" id="stat-hospitals" style="color:var(--green)">-</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-lbl">Green Corridors</div>
+      <div class="stat-val" id="stat-corridors" style="color:var(--amber)">-</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-lbl">Time Saved</div>
+      <div class="stat-val" id="stat-saved" style="color:var(--purple)">-</div>
+    </div>
   </div>
 
-  <!-- ── ROW 2: agent pipeline ── -->
-  <div style="padding:16px 20px 14px;border-bottom:1px solid var(--border)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">AI Multi-Agent Execution Pipeline</div>
-      <div id="pipeline-step-badge" style="background:rgba(57,211,83,.15);color:var(--green);border:1px solid rgba(57,211,83,.3);padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600">Awaiting dispatch</div>
+  <!-- ROW 2: Pipeline + mini badge — single horizontal bar -->
+  <div id="bp-pipeline">
+    <div id="bp-pipeline-header">
+      <div id="bp-pipeline-title">AI Multi-Agent Execution Pipeline</div>
+      <div id="pipeline-step-badge">Awaiting dispatch</div>
     </div>
-    <div id="pipeline-steps" style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px"></div>
+    <div id="pipeline-steps"></div>
   </div>
 
-  <!-- ── ROW 3: ambulances + hospitals + specialists ── -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
+  <!-- ROW 3: 3-Column Dispatch Grid -->
+  <div id="bp-dispatch">
 
-    <!-- Ambulances -->
-    <div style="padding:16px 18px;background:var(--bg)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">🚑</span>
-          <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Ambulance Fleet Dispatch</span>
-        </div>
-        <span id="amb-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,197,207,.15);color:var(--cyan);border:1px solid rgba(57,197,207,.3)">STANDBY</span>
+    <!-- Ambulance Fleet Dispatch -->
+    <div class="bp-col">
+      <div class="bp-col-header">
+        <span class="bp-col-title">Ambulance Fleet Dispatch</span>
+        <span id="amb-status-badge" class="bp-badge" style="color:var(--cyan);border-color:rgba(57,197,207,.35);background:rgba(57,197,207,.1)">STANDBY</span>
       </div>
-      <div id="ambulance-list" style="display:flex;flex-direction:column;gap:7px">
-        <div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting dispatch...</div>
+      <div id="ambulance-list">
+        <div style="color:var(--muted);font-size:11px;text-align:center;padding:16px 0">Awaiting dispatch...</div>
       </div>
     </div>
 
-    <!-- Hospitals -->
-    <div style="padding:16px 18px;background:var(--bg)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">🏥</span>
-          <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Hospital Readiness & ER</span>
-        </div>
-        <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,211,83,.12);color:var(--green);border:1px solid rgba(57,211,83,.25)">LIVE BED RESERVATION</span>
+    <!-- Hospital Readiness & ER -->
+    <div class="bp-col">
+      <div class="bp-col-header">
+        <span class="bp-col-title">Hospital Readiness &amp; ER</span>
+        <span class="bp-badge" style="color:var(--green);border-color:rgba(57,211,83,.35);background:rgba(57,211,83,.1)">LIVE BED RESERVATION</span>
       </div>
-      <div id="hospital-list" style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
-        <div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0;grid-column:1/-1">Awaiting selection...</div>
+      <div id="hospital-list">
+        <div style="color:var(--muted);font-size:11px;text-align:center;padding:16px 0">Awaiting selection...</div>
       </div>
     </div>
 
-    <!-- Specialists -->
-    <div style="padding:16px 18px;background:var(--bg)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">👨‍⚕️</span>
-          <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Specialist On-Call Dispatch</span>
-        </div>
-        <span id="spec-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.25)">STANDBY</span>
+    <!-- Specialist On-Call Dispatch -->
+    <div class="bp-col">
+      <div class="bp-col-header">
+        <span class="bp-col-title">Specialist On-Call Dispatch</span>
+        <span id="spec-status-badge" class="bp-badge" style="color:var(--accent);border-color:rgba(88,166,255,.35);background:rgba(88,166,255,.1)">STANDBY</span>
       </div>
-      <div id="specialist-list" style="display:flex;flex-direction:column;gap:7px">
-        <div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting specialist assignment...</div>
+      <div id="specialist-list">
+        <div style="color:var(--muted);font-size:11px;text-align:center;padding:16px 0">Awaiting specialist assignment...</div>
       </div>
     </div>
 
-  </div>
+  </div><!-- end bp-dispatch -->
 </div><!-- end bottom-panel -->
 
 <script>
@@ -891,7 +912,7 @@ function plotAmbulance(x,y,id){
   const g=svgEl('g',{filter:'url(#glow-b)'});
   g.appendChild(svgEl('circle',{cx:x,cy:y,r:'9',fill:'rgba(47,129,247,.25)',stroke:'#2f81f7','stroke-width':'1.5'}));
   const t=svgEl('text',{x:x,y:y+4,fill:'#2f81f7','font-size':'10','text-anchor':'middle'});
-  t.textContent='🚑'; g.appendChild(t);
+  t.textContent='+'; g.appendChild(t);
   const lbl=svgEl('text',{x:x,y:y-14,fill:'#2f81f7','font-size':'8','text-anchor':'middle','font-weight':'700'});
   lbl.textContent=id; g.appendChild(lbl);
   document.getElementById('ambulance-layer').appendChild(g);
@@ -1731,7 +1752,7 @@ async function runDispatch() {
             catch { result = null; }
 
             if (result) {
-              toolLog('resp', '✅  MISSION DEPLOYMENT READY',
+              toolLog('resp', 'MISSION DEPLOYMENT READY',
                 JSON.stringify(result, null, 2).slice(0, 1200) + (JSON.stringify(result).length > 1200 ? '\n...(truncated)' : ''));
 
               // Mark specialist agent done (Orchestrate handles specialists internally)
@@ -1764,7 +1785,7 @@ async function runDispatch() {
                 .map(h=>({...h, eta: Math.round(((h.distance_km||0))*2+5)}));
               if (panelHosps.length < 2) {
                 const _dH = h => Math.hypot(h.lat-iLoc.lat,h.lng-iLoc.lng)*111;
-                const kbH2 = KB.hospitals.filter(h=>h.emergency_dept&&!panelHosps.find(p=>p.name===h.name))
+                const kbH2 = KB.hospitals.filter(h=>!panelHosps.find(p=>p.name===h.name))
                   .map(h=>({...h,_d:_dH(h),available_beds:h.beds_available}))
                   .sort((a,b)=>b.readiness-a.readiness).slice(0,2-panelHosps.length)
                   .map(h=>({...h,distance_km:h._d.toFixed(1),eta:Math.round(h._d*2.2)+3}));
@@ -1863,7 +1884,7 @@ function buildPipelineSteps() {
   const el = document.getElementById('pipeline-steps');
   el.innerHTML = PIPELINE_STEPS.map((s, i) => `
     <div class="pipe-step ps-pending" id="ps-${i}">
-      <div class="ps-icon">${s.icon}</div>
+      <div class="ps-num">${s.icon}</div>
       <div class="ps-name">${s.name}</div>
       <div class="ps-sub">${s.sub}</div>
     </div>`).join('');
@@ -2027,7 +2048,7 @@ function openMissionCommander(prefillMessage) {
   const btn = document.getElementById('adk-btn');
   if (btn) {
     const orig = btn.innerHTML;
-    btn.innerHTML = '<span style="font-size:13px">✅</span> Agent Opened';
+    btn.innerHTML = 'Agent Opened';
     btn.style.background = 'rgba(57,211,83,.15)';
     btn.style.color = 'var(--green)';
     btn.style.borderColor = 'rgba(57,211,83,.3)';
@@ -2040,7 +2061,7 @@ function openMissionCommander(prefillMessage) {
   }
 
   // Also surface the URL in the tool console so it's visible
-  toolLog('thought', '🤖 Mission Commander ADK',
+  toolLog('thought', 'Mission Commander ADK',
     `Opening agent in watsonx Orchestrate ADK:\n${chatUrl}\n\nAgent ID: ${WXO_AGENT_ID}\nInstance: ${WXO_INSTANCE_ID}`);
 }
 
