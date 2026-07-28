@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="app-version" content="enc-fix-2"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>PulseRoute AI ΓÇö Emergency Operations Command Center</title>
+<title>PulseRoute AI - Emergency Operations Command Center</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -16,7 +15,7 @@
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px}
 
-/* ΓöÇΓöÇ TOPBAR ΓöÇΓöÇ */
+/* ── TOPBAR ── */
 #topbar{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .brand{display:flex;align-items:center;gap:12px}
 .brand-pulse{width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;animation:pulseRing 1.6s infinite;font-size:14px}
@@ -33,19 +32,19 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .b-purple{background:rgba(188,140,255,.15);color:var(--purple);border-color:rgba(188,140,255,.3)}
 .b-cyan{background:rgba(57,197,207,.15);color:var(--cyan);border-color:rgba(57,197,207,.3)}
 #clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-/* ΓöÇΓöÇ ADK / Mission Commander button ΓöÇΓöÇ */
+/* ── ADK / Mission Commander button ── */
 #adk-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(188,140,255,.12);color:var(--purple);border:1px solid rgba(188,140,255,.35);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:background .18s,box-shadow .18s;white-space:nowrap}
 #adk-btn:hover{background:rgba(188,140,255,.22);box-shadow:0 0 0 3px rgba(188,140,255,.15)}
 
-/* ΓöÇΓöÇ LAYOUT ΓöÇΓöÇ */
+/* ── LAYOUT ── */
 #layout{display:grid;grid-template-columns:300px 1fr 300px;height:calc(100vh - 52px);gap:1px;background:var(--border)}
 #layout>*{background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
 
-/* ΓöÇΓöÇ PANEL HEADER ΓöÇΓöÇ */
+/* ── PANEL HEADER ── */
 .ph{padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:7px;flex-shrink:0}
 .ph-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-/* ΓöÇΓöÇ LEFT PANEL ΓöÇΓöÇ */
+/* ── LEFT PANEL ── */
 #left{overflow-y:auto}
 #input-section{padding:14px;border-bottom:1px solid var(--border);flex-shrink:0}
 .field{margin-bottom:10px}
@@ -62,7 +61,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #run-btn .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ΓöÇΓöÇ AGENT TIMELINE ΓöÇΓöÇ */
+/* ── AGENT TIMELINE ── */
 #agent-list{padding:14px;flex-shrink:0}
 .agent-row{display:flex;gap:10px;position:relative;padding-bottom:10px}
 .agent-row:last-child{padding-bottom:0}
@@ -79,7 +78,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .state-done .ag-icon{background:rgba(57,211,83,.2);color:var(--green)}
 .state-tool .ag-icon{background:rgba(188,140,255,.2);color:var(--purple)}
 
-/* ΓöÇΓöÇ CENTER MAP ΓöÇΓöÇ */
+/* ── CENTER MAP ── */
 #map-wrap{flex:1;position:relative;min-height:0;overflow:hidden}
 #bmap{width:100%;height:100%}
 .map-overlay-badges{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:7px}
@@ -90,14 +89,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .leg-line{width:18px;height:3px;border-radius:2px;flex-shrink:0}
 
-/* ΓöÇΓöÇ ETA BAR ΓöÇΓöÇ */
+/* ── ETA BAR ── */
 #eta-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);flex-shrink:0}
 .eta-cell{background:var(--surface);padding:12px 14px;text-align:center}
 .eta-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
 .eta-val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .eta-unit{font-size:11px;color:var(--muted);margin-left:3px}
 
-/* ΓöÇΓöÇ RIGHT PANEL ΓöÇΓöÇ */
+/* ── RIGHT PANEL ── */
 #right{overflow:hidden}
 #tool-console{flex:1;overflow-y:auto;padding:10px 12px;font-family:'Consolas','Courier New',monospace;font-size:11px;line-height:1.7;min-height:0}
 .tc-entry{margin-bottom:10px;border-left:2px solid var(--border);padding-left:10px}
@@ -113,7 +112,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .tc-lbl.err{color:var(--red)}
 .tc-body{color:#c9d1d9;white-space:pre-wrap;word-break:break-all;margin-top:2px;font-size:11px}
 
-/* ΓöÇΓöÇ MISSION SUMMARY ΓöÇΓöÇ */
+/* ── MISSION SUMMARY ── */
 #mission-summary{flex-shrink:0;padding:14px;border-top:1px solid var(--border);background:var(--surface)}
 .ms-title{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -122,7 +121,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .ms-card-val{font-size:12px;font-weight:600}
 .ms-card-sub{font-size:10px;color:var(--muted);margin-top:2px}
 
-/* ΓöÇΓöÇ CONFIDENCE RING ΓöÇΓöÇ */
+/* ── CONFIDENCE RING ── */
 #confidence-wrap{text-align:center;padding:12px 14px;border-top:1px solid var(--border)}
 .conf-ring{position:relative;width:80px;height:80px;margin:0 auto}
 .conf-ring svg{transform:rotate(-90deg)}
@@ -131,7 +130,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .conf-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
 .conf-label{font-size:10px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
 
-/* ΓöÇΓöÇ BEFORE/AFTER WIDGET ΓöÇΓöÇ */
+/* ── BEFORE/AFTER WIDGET ── */
 #ba-widget{padding:12px 14px;border-top:1px solid var(--border)}
 .ba-title{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .ba-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -141,7 +140,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .ba-arrow{color:var(--green);font-size:18px;flex-shrink:0;margin:0 8px}
 .ba-saving{text-align:center;font-size:12px;font-weight:700;color:var(--teal);margin-top:4px}
 
-/* ΓöÇΓöÇ BOTTOM PANEL ΓöÇΓöÇ */
+/* ── BOTTOM PANEL ── */
 #bottom-panel{overflow-y:auto;max-height:420px}
 .stat-cell{background:var(--surface);padding:14px 18px;display:flex;align-items:center;gap:12px}
 .stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -199,36 +198,36 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 </head>
 <body>
 
-<!-- ΓòÉΓòÉΓòÉ TOPBAR ΓòÉΓòÉΓòÉ -->
+<!-- ═══ TOPBAR ═══ -->
 <div id="topbar">
   <div class="brand">
-    <div class="brand-pulse">≡ƒÜ¿</div>
+    <div class="brand-pulse">+</div>
     <div>
       <h1>PulseRoute AI <span>/ Emergency Operations Command Center</span></h1>
-      <div class="brand-sub">Bengaluru Emergency Dispatch Intelligence ┬╖ watsonx Orchestrate ┬╖ pulseroute-mcp v1.1.0</div>
+      <div class="brand-sub">Bengaluru Emergency Dispatch Intelligence . watsonx Orchestrate . pulseroute-mcp v1.1.0</div>
     </div>
   </div>
   <div class="top-status">
-    <span id="sys-badge" class="badge b-green">ΓùÅ SYSTEM READY</span>
+    <span id="sys-badge" class="badge b-green">● SYSTEM READY</span>
     <span id="mcp-badge" class="badge b-blue">MCP ONLINE</span>
-    <span id="mci-badge" class="badge b-red" style="display:none">ΓÜá MCI ACTIVE</span>
-    <span id="corridor-badge" class="badge b-green" style="display:none">≡ƒƒó GREEN CORRIDOR</span>
+    <span id="mci-badge" class="badge b-red" style="display:none">MCI ACTIVE</span>
+    <span id="corridor-badge" class="badge b-green" style="display:none">�GREEN CORRIDOR</span>
     <!-- ADK / watsonx Orchestrate Mission Commander button -->
     <button id="adk-btn" onclick="openMissionCommander()" title="Open PulseRoute Mission Commander in watsonx Orchestrate">
-      <span style="font-size:13px">≡ƒñû</span> Mission Commander
+      Mission Commander
     </button>
     <span id="clock">--:--:-- IST</span>
   </div>
 </div>
 
-<!-- ΓòÉΓòÉΓòÉ MAIN LAYOUT ΓòÉΓòÉΓòÉ -->
+<!-- ═══ MAIN LAYOUT ═══ -->
 <div id="layout">
 
-  <!-- ΓöÇΓöÇ LEFT: INPUT + AGENT TIMELINE ΓöÇΓöÇ -->
+  <!-- ── LEFT: INPUT + AGENT TIMELINE ── -->
   <div id="left">
     <div class="ph"><div class="ph-dot" style="background:var(--red)"></div>Incident Input</div>
     <div id="input-section">
-      <button id="demo-btn">ΓÜí Load Demo Scenario</button>
+      <button id="demo-btn">Load Demo Scenario</button>
       <div class="field">
         <label>Incident Description</label>
         <textarea id="f-desc" placeholder="Describe the emergency..."></textarea>
@@ -270,7 +269,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <input id="f-notes" type="text" placeholder="Multiple trauma..."/>
         </div>
       </div>
-      <button id="run-btn"><span>Γû╢ ACTIVATE DISPATCH</span><div class="spin" id="btn-spin"></div></button>
+      <button id="run-btn"><span>ACTIVATE DISPATCH</span><div class="spin" id="btn-spin"></div></button>
     </div>
 
     <div class="ph"><div class="ph-dot" style="background:var(--accent)"></div>Agent Execution Timeline</div>
@@ -279,7 +278,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     </div>
   </div>
 
-  <!-- ΓöÇΓöÇ CENTER: MAP + ETA ΓöÇΓöÇ -->
+  <!-- ── CENTER: MAP + ETA ── -->
   <div id="center" style="display:flex;flex-direction:column">
     <div class="ph"><div class="ph-dot" style="background:var(--cyan)"></div>Bengaluru Tactical Operations Map</div>
     <div id="map-wrap">
@@ -327,7 +326,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           </marker>
         </defs>
 
-        <!-- ΓòÉΓòÉΓòÉ MAP BASE ΓÇö Google Maps dark style ΓòÉΓòÉΓòÉ -->
+        <!-- ═══ MAP BASE - Google Maps dark style ═══ -->
         <rect width="780" height="520" fill="url(#mapBg)"/>
 
         <!-- Water bodies (Bellandur lake area, Ulsoor lake) -->
@@ -342,7 +341,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <rect x="350" y="170" width="18" height="12" rx="2" fill="#1a2b1a" opacity=".5"/>
         <text x="359" y="179" fill="#2d5a2d" font-size="6" text-anchor="middle" opacity=".6">Cubbon</text>
 
-        <!-- ΓòÉΓòÉΓòÉ ROAD NETWORK ΓÇö proper Google Maps style ΓòÉΓòÉΓòÉ -->
+        <!-- ═══ ROAD NETWORK - proper Google Maps style ═══ -->
 
         <!-- TIER-3: Fine local roads (background, darkest) -->
         <line x1="280" y1="180" x2="310" y2="260" stroke="#232a38" stroke-width="2"/>
@@ -384,7 +383,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <line x1="290" y1="190" x2="245" y2="230" stroke="#2d3748" stroke-width="3"/>
 
         <!-- TIER-1: Primary arterials (bright, labelled) -->
-        <!-- Hosur Road NH44 ΓÇö vertical south corridor -->
+        <!-- Hosur Road NH44 - vertical south corridor -->
         <line x1="420" y1="300" x2="422" y2="480" stroke="#3a4a60" stroke-width="5"/>
         <text x="436" y="420" fill="#5a7090" font-size="7.5" font-weight="bold" transform="rotate(86,436,420)">HOSUR RD NH44</text>
 
@@ -392,7 +391,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <line x1="390" y1="138" x2="390" y2="60" stroke="#3a4a60" stroke-width="5"/>
         <text x="404" y="100" fill="#5a7090" font-size="7.5" font-weight="bold" transform="rotate(90,404,100)">BELLARY RD NH44</text>
 
-        <!-- Old Madras Road NH75 ΓÇö northeast diagonal -->
+        <!-- Old Madras Road NH75 - northeast diagonal -->
         <line x1="430" y1="192" x2="570" y2="130" stroke="#3a4a60" stroke-width="4.5"/>
         <text x="505" y="151" fill="#5a7090" font-size="7" font-weight="bold" transform="rotate(-22,505,151)">OLD MADRAS RD NH75</text>
 
@@ -400,7 +399,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <line x1="300" y1="258" x2="160" y2="310" stroke="#3a4a60" stroke-width="4.5"/>
         <text x="225" y="276" fill="#5a7090" font-size="7" font-weight="bold" transform="rotate(-18,225,276)">MYSORE RD NH275</text>
 
-        <!-- ORR ΓÇö Outer Ring Road (thickest, most prominent) -->
+        <!-- ORR - Outer Ring Road (thickest, most prominent) -->
         <!-- Casing (dark outline for road feel) -->
         <path d="M282,90 Q382,68 472,90 Q552,114 582,180 Q608,252 604,322 Q596,384 554,420 Q510,454 448,466 Q382,474 320,458 Q258,440 224,402 Q192,362 182,300 Q176,236 196,180 Q218,130 282,90"
               fill="none" stroke="#1a2535" stroke-width="10"/>
@@ -415,7 +414,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <textPath href="#orr-path" startOffset="10%">OUTER RING ROAD (ORR)</textPath>
         </text>
 
-        <!-- NICE Road (Peripheral Ring Road) ΓÇö outermost -->
+        <!-- NICE Road (Peripheral Ring Road) - outermost -->
         <path id="nice-path" d="M178,188 Q150,268 164,355 Q184,428 250,465 Q320,492 398,492 Q472,486 534,455 Q608,410 638,338 Q662,262 640,192 Q616,120 560,84 Q500,50 432,44 Q354,40 292,64 Q232,87 197,132"
               fill="none" stroke="#1f2d1f" stroke-width="4.5"/>
         <!-- NICE label -->
@@ -427,7 +426,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <line x1="388" y1="60" x2="388" y2="15" stroke="#2a3d55" stroke-width="7"/>
         <text x="403" y="38" fill="#4a6890" font-size="7" font-weight="bold" transform="rotate(90,403,38)">KIAL BYPASS</text>
 
-        <!-- ΓòÉΓòÉΓòÉ COMPASS ΓòÉΓòÉΓòÉ -->
+        <!-- ═══ COMPASS ═══ -->
         <g transform="translate(742,42)">
           <circle r="22" fill="rgba(20,24,32,.92)" stroke="#2d3748" stroke-width="1.5"/>
           <polygon points="0,-16 -4,-4 0,-8 4,-4" fill="#2f81f7"/>
@@ -438,7 +437,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <text x="20" y="4" fill="#4a5568" font-size="7" text-anchor="middle">E</text>
         </g>
 
-        <!-- ΓòÉΓòÉΓòÉ SCALE BAR ΓòÉΓòÉΓòÉ -->
+        <!-- ═══ SCALE BAR ═══ -->
         <g transform="translate(570,504)">
           <rect x="-2" y="-6" width="76" height="10" rx="2" fill="rgba(20,24,32,.7)"/>
           <line x1="0" y1="0" x2="72" y2="0" stroke="#8899aa" stroke-width="1.5"/>
@@ -448,7 +447,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <text x="36" y="-8" fill="#8899aa" font-size="7.5" text-anchor="middle">5 km</text>
         </g>
 
-        <!-- ΓòÉΓòÉΓòÉ DISTRICT / AREA LABELS ΓòÉΓòÉΓòÉ -->
+        <!-- ═══ DISTRICT / AREA LABELS ═══ -->
         <text x="310" y="130" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">RAJAJINAGAR</text>
         <text x="395" y="160" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SHIVAJINAGAR</text>
         <text x="460" y="175" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">HAL</text>
@@ -460,7 +459,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
         <text x="390" y="110" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">HEBBAL</text>
         <text x="540" y="220" fill="#2a3d52" font-size="8" font-weight="700" text-anchor="middle" letter-spacing="1">MARATHAHALLI</text>
 
-        <!-- ΓòÉΓòÉΓòÉ HOSPITALS (Google Maps style pins) ΓòÉΓòÉΓòÉ -->
+        <!-- ═══ HOSPITALS (Google Maps style pins) ═══ -->
         <g id="hospitals-layer">
           <!-- Manipal OAR x:470 y:212 -->
           <g id="hm-manipal">
@@ -468,7 +467,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
             <rect x="455" y="197" width="30" height="5" rx="2" fill="#1a4020"/>
             <text x="470" y="212" fill="#3fb950" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
             <text x="470" y="231" fill="#4ecf68" font-size="7.5" text-anchor="middle" font-weight="600">MANIPAL</text>
-            <text x="470" y="239" fill="#3a5a3a" font-size="6.5" text-anchor="middle">87 beds ┬╖ L1</text>
+            <text x="470" y="239" fill="#3a5a3a" font-size="6.5" text-anchor="middle">87 beds . L1</text>
           </g>
           <!-- Apollo BG Rd x:390 y:300 -->
           <g id="hm-apollo">
@@ -476,7 +475,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
             <rect x="375" y="287" width="30" height="5" rx="2" fill="#1a4020"/>
             <text x="390" y="302" fill="#3fb950" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
             <text x="390" y="321" fill="#4ecf68" font-size="7.5" text-anchor="middle" font-weight="600">APOLLO</text>
-            <text x="390" y="329" fill="#3a5a3a" font-size="6.5" text-anchor="middle">104 beds ┬╖ L1</text>
+            <text x="390" y="329" fill="#3a5a3a" font-size="6.5" text-anchor="middle">104 beds . L1</text>
           </g>
           <!-- Victoria Majestic x:328 y:188 -->
           <g id="hm-victoria">
@@ -484,7 +483,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
             <rect x="313" y="175" width="30" height="5" rx="2" fill="#1a4d20"/>
             <text x="328" y="190" fill="#56d364" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
             <text x="328" y="209" fill="#70e080" font-size="7.5" text-anchor="middle" font-weight="700">VICTORIA</text>
-            <text x="328" y="217" fill="#3a5a3a" font-size="6.5" text-anchor="middle">210 beds ┬╖ MCI-80</text>
+            <text x="328" y="217" fill="#3a5a3a" font-size="6.5" text-anchor="middle">210 beds . MCI-80</text>
           </g>
           <!-- St Johns Koramangala x:444 y:258 -->
           <g id="hm-stjohns">
@@ -492,18 +491,18 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
             <rect x="429" y="245" width="30" height="5" rx="2" fill="#1a4020"/>
             <text x="444" y="260" fill="#3fb950" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
             <text x="444" y="279" fill="#4ecf68" font-size="7.5" text-anchor="middle" font-weight="600">ST JOHN'S</text>
-            <text x="444" y="287" fill="#3a5a3a" font-size="6.5" text-anchor="middle">178 beds ┬╖ L1</text>
+            <text x="444" y="287" fill="#3a5a3a" font-size="6.5" text-anchor="middle">178 beds . L1</text>
           </g>
         </g>
 
-        <!-- ΓòÉΓòÉΓòÉ TRAFFIC LIGHT COMPONENTS ΓòÉΓòÉΓòÉ
+        <!-- ═══ TRAFFIC LIGHT COMPONENTS ═══
              Each signal has:
                - A pole (rect stem)
                - A housing (rounded rect with 3 circles: R / Y / G)
                - id suffixes: -r -y -g for the bulb circles
              Initial state: RED on, Y/G dim
              After corridor activation: GREEN on, R/Y dim
-        ΓòÉΓòÉΓòÉ -->
+        ═══ -->
         <g id="signals-layer">
 
           <!-- TS001 Silk Board Junction x:424 y:302 (HIGH CONGESTION 9.8) -->
@@ -545,7 +544,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
             <text x="0" y="13" fill="#c0603a" font-size="5.5" text-anchor="middle">9.2/10 SEVERE</text>
           </g>
 
-          <!-- TS020 Trinity Circle x:404 y:200 (PREEMPTIBLE Γ£ô) -->
+          <!-- TS020 Trinity Circle x:404 y:200 (PREEMPTIBLE ✓) -->
           <g id="tl-trinity" transform="translate(404,200)">
             <rect x="-1.5" y="-18" width="3" height="18" fill="#3a4558"/>
             <rect x="-9" y="-50" width="18" height="36" rx="3" fill="#1a1f2a" stroke="#39c5cf" stroke-width="1.5"/>
@@ -558,7 +557,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
             <text x="0" y="13" fill="#2a9090" font-size="5.5" text-anchor="middle">PREEMPTIBLE</text>
           </g>
 
-          <!-- TS023 Domlur Flyover x:454 y:228 (PREEMPTIBLE Γ£ô) -->
+          <!-- TS023 Domlur Flyover x:454 y:228 (PREEMPTIBLE ✓) -->
           <g id="tl-domlur" transform="translate(454,228)">
             <rect x="-1.5" y="-18" width="3" height="18" fill="#3a4558"/>
             <rect x="-9" y="-50" width="18" height="36" rx="3" fill="#1a1f2a" stroke="#39c5cf" stroke-width="1.5"/>
@@ -572,7 +571,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 
         </g><!-- end signals-layer -->
 
-        <!-- ΓòÉΓòÉΓòÉ DYNAMIC LAYERS ΓòÉΓòÉΓòÉ -->
+        <!-- ═══ DYNAMIC LAYERS ═══ -->
         <g id="route-layer"></g>
         <g id="corridor-layer"></g>
         <g id="incident-layer"></g>
@@ -597,26 +596,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div id="eta-bar">
       <div class="eta-cell">
         <div class="eta-lbl">ETA Before Corridor</div>
-        <div class="eta-val" id="eta-before" style="color:var(--amber)">ΓÇö</div>
+        <div class="eta-val" id="eta-before" style="color:var(--amber)">-</div>
       </div>
       <div class="eta-cell">
         <div class="eta-lbl">ETA After Corridor</div>
-        <div class="eta-val" id="eta-after" style="color:var(--green)">ΓÇö</div>
+        <div class="eta-val" id="eta-after" style="color:var(--green)">-</div>
       </div>
       <div class="eta-cell" style="background:rgba(57,197,207,.04)">
         <div class="eta-lbl" style="color:var(--cyan)">Time Saved</div>
-        <div class="eta-val" id="eta-saved" style="color:var(--cyan)">ΓÇö</div>
+        <div class="eta-val" id="eta-saved" style="color:var(--cyan)">-</div>
       </div>
     </div>
   </div>
 
-  <!-- ΓöÇΓöÇ RIGHT: TOOL CONSOLE + SUMMARY ΓöÇΓöÇ -->
+  <!-- ── RIGHT: TOOL CONSOLE + SUMMARY ── -->
   <div id="right">
     <div class="ph"><div class="ph-dot" style="background:var(--green)"></div>MCP Tool Invocation Console</div>
     <div id="tool-console">
       <div style="color:var(--muted);font-size:11px;padding:20px 0;text-align:center;line-height:1.8">
         Awaiting dispatch activation...<br/>
-        <span style="font-size:10px;opacity:.5">pulseroute-mcp v1.1.0 ΓÇö http transport</span>
+        <span style="font-size:10px;opacity:.5">pulseroute-mcp v1.1.0 - http transport</span>
       </div>
     </div>
 
@@ -627,7 +626,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <circle class="conf-ring-bg" cx="40" cy="40" r="32"/>
           <circle id="conf-arc" class="conf-ring-fill" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201" stroke="var(--green)"/>
         </svg>
-        <div class="conf-pct" id="conf-pct" style="color:var(--green)">ΓÇö</div>
+        <div class="conf-pct" id="conf-pct" style="color:var(--green)">-</div>
       </div>
       <div class="conf-label" id="conf-label">pending</div>
     </div>
@@ -637,12 +636,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="ba-row">
         <div class="ba-side">
           <div class="lbl">Standard ETA</div>
-          <div class="val" id="ba-before" style="color:var(--red)">ΓÇö</div>
+          <div class="val" id="ba-before" style="color:var(--red)">-</div>
         </div>
-        <div class="ba-arrow">ΓåÆ</div>
+        <div class="ba-arrow">-></div>
         <div class="ba-side">
           <div class="lbl">With PulseRoute</div>
-          <div class="val" id="ba-after" style="color:var(--green)">ΓÇö</div>
+          <div class="val" id="ba-after" style="color:var(--green)">-</div>
         </div>
       </div>
       <div class="ba-saving" id="ba-saving"></div>
@@ -657,22 +656,22 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div><!-- end layout -->
 
-<!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-     BOTTOM PANEL ΓÇö Pipeline ┬╖ Ambulances ┬╖ Hospitals ┬╖ Specialists
+<!-- ═══════════════════════════════════════════════════════════
+     BOTTOM PANEL - Pipeline . Ambulances . Hospitals . Specialists
      Hidden until dispatch runs, then revealed section by section
-ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+═══════════════════════════════════════════════════════════ -->
 <div id="bottom-panel" style="display:none;background:var(--bg);border-top:1px solid var(--border)">
 
-  <!-- ΓöÇΓöÇ ROW 1: stat bar ΓöÇΓöÇ -->
+  <!-- ── ROW 1: stat bar ── -->
   <div id="stat-bar" style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(248,81,73,.15);color:var(--red)">≡ƒÜ¿</div><div><div class="stat-lbl">Total Casualties</div><div class="stat-val" id="stat-casualties" style="color:var(--red)">ΓÇö</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,197,207,.15);color:var(--cyan)">≡ƒÜæ</div><div><div class="stat-lbl">Ambulances Fleet</div><div class="stat-val" id="stat-ambulances" style="color:var(--cyan)">ΓÇö</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,211,83,.15);color:var(--green)">≡ƒÅÑ</div><div><div class="stat-lbl">Allocated Hospitals</div><div class="stat-val" id="stat-hospitals" style="color:var(--green)">ΓÇö</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(227,179,65,.15);color:var(--amber)">ΓÜí</div><div><div class="stat-lbl">Green Corridors</div><div class="stat-val" id="stat-corridors" style="color:var(--amber)">ΓÇö</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(188,140,255,.15);color:var(--purple)">ΓÅ▒</div><div><div class="stat-lbl">Time Saved</div><div class="stat-val" id="stat-saved" style="color:var(--purple)">ΓÇö</div></div></div>
+    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Total Casualties</div><div class="stat-val" id="stat-casualties" style="color:var(--red)">-</div></div></div>
+    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Ambulances Fleet</div><div class="stat-val" id="stat-ambulances" style="color:var(--cyan)">-</div></div></div>
+    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Allocated Hospitals</div><div class="stat-val" id="stat-hospitals" style="color:var(--green)">-</div></div></div>
+    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Green Corridors</div><div class="stat-val" id="stat-corridors" style="color:var(--amber)">-</div></div></div>
+    <div class="stat-cell"><div class="stat-icon"><div><div class="stat-lbl">Time Saved</div><div class="stat-val" id="stat-saved" style="color:var(--purple)">-</div></div></div>
   </div>
 
-  <!-- ΓöÇΓöÇ ROW 2: agent pipeline ΓöÇΓöÇ -->
+  <!-- ── ROW 2: agent pipeline ── -->
   <div style="padding:16px 20px 14px;border-bottom:1px solid var(--border)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">AI Multi-Agent Execution Pipeline</div>
@@ -681,14 +680,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div id="pipeline-steps" style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px"></div>
   </div>
 
-  <!-- ΓöÇΓöÇ ROW 3: ambulances + hospitals + specialists ΓöÇΓöÇ -->
+  <!-- ── ROW 3: ambulances + hospitals + specialists ── -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
 
     <!-- Ambulances -->
     <div style="padding:16px 18px;background:var(--bg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">≡ƒÜæ</span>
+          <span style="font-size:15px">🚑</span>
           <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Ambulance Fleet Dispatch</span>
         </div>
         <span id="amb-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,197,207,.15);color:var(--cyan);border:1px solid rgba(57,197,207,.3)">STANDBY</span>
@@ -702,7 +701,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div style="padding:16px 18px;background:var(--bg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">≡ƒÅÑ</span>
+          <span style="font-size:15px">🏥</span>
           <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Hospital Readiness & ER</span>
         </div>
         <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,211,83,.12);color:var(--green);border:1px solid rgba(57,211,83,.25)">LIVE BED RESERVATION</span>
@@ -716,7 +715,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div style="padding:16px 18px;background:var(--bg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">≡ƒæ¿ΓÇìΓÜò∩╕Å</span>
+          <span style="font-size:15px">👨‍⚕️</span>
           <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Specialist On-Call Dispatch</span>
         </div>
         <span id="spec-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.25)">STANDBY</span>
@@ -730,16 +729,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 </div><!-- end bottom-panel -->
 
 <script>
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-// PROXY CONFIG ΓÇö points at the Railway MCP server.
+// ═══════════════════════════════════════════════════════════
+// PROXY CONFIG - points at the Railway MCP server.
 // When this HTML is served by the MCP server itself at /demo,
 // the server rewrites this to '' (relative) automatically.
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 const ORCHESTRATE_PROXY_URL = 'https://pulseroute-ai-production-3f9f.up.railway.app';
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-// KB DATA ΓÇö embedded from PulseRoute_Bengaluru_KB.json
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
+// KB DATA - embedded from PulseRoute_Bengaluru_KB.json
+// ═══════════════════════════════════════════════════════════
 const KB = {
   hospitals: [
     {id:"hosp_001",name:"Manipal Hospital",locality:"Old Airport Road",lat:12.9592,lng:77.6484,beds_available:87,trauma_level:1,specialties:["Cardiology","Cardiac Surgery","Neurology","Neurosurgery","Trauma & Critical Care"],phone:"+91-80-25023456",readiness:94},
@@ -775,45 +774,45 @@ const KB = {
   ]
 };
 
-// Map coordinate helpers (WGS84 ΓåÆ SVG viewBox 0,0,780,520)
-// Bengaluru bounds: lat 12.83ΓÇô13.11, lng 77.46ΓÇô77.77
+// Map coordinate helpers (WGS84 -> SVG viewBox 0,0,780,520)
+// Bengaluru bounds: lat 12.83-13.11, lng 77.46-77.77
 const MAP = {
   latMin:12.83, latMax:13.11, lngMin:77.46, lngMax:77.77, W:780, H:520,
   x(lng){ return Math.round((lng-this.lngMin)/(this.lngMax-this.lngMin)*this.W); },
   y(lat){ return Math.round((1-(lat-this.latMin)/(this.latMax-this.latMin))*this.H); }
 };
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // AGENT DEFINITIONS
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 const AGENTS = [
   {id:"a1",num:1,name:"Mission Commander",sub:"Incident classification & SOP assignment",color:"red"},
-  {id:"a2",num:2,name:"Emergency Intake Agent",sub:"Priority ┬╖ Category ┬╖ Units required",color:"blue"},
+  {id:"a2",num:2,name:"Emergency Intake Agent",sub:"Priority . Category . Units required",color:"blue"},
   {id:"a3",num:3,name:"Ambulance Coordination",sub:"Nearest ALS + backup selection",color:"purple"},
-  {id:"a4",num:4,name:"Route Intelligence Agent",sub:"Initial ETA ΓåÆ optimised ETA",color:"cyan"},
-  {id:"a5",num:5,name:"Green Corridor Agent",sub:"Signal overrides ┬╖ ERSS-112 preemption",color:"teal"},
+  {id:"a4",num:4,name:"Route Intelligence Agent",sub:"Initial ETA -> optimised ETA",color:"cyan"},
+  {id:"a5",num:5,name:"Green Corridor Agent",sub:"Signal overrides . ERSS-112 preemption",color:"teal"},
   {id:"a6",num:6,name:"Hospital Readiness Agent",sub:"Top-3 hospitals with readiness %",color:"amber"},
   {id:"a7",num:7,name:"Specialist Coordination",sub:"On-call specialists by incident type",color:"orange"},
-  {id:"a8",num:8,name:"Mission Commander",sub:"Final synthesis ┬╖ Confidence score",color:"green"}
+  {id:"a8",num:8,name:"Mission Commander",sub:"Final synthesis . Confidence score",color:"green"}
 ];
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // DEMO SCENARIO (from spec: Road Accident, Silk Board, 4 patients)
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 const DEMO = {
   desc:"Road accident involving 2 vehicles at Silk Board Junction. 4 patients with multiple trauma injuries. One unconscious, one trapped. Heavy traffic.",
   type:"Road Accident", sev:"Critical (S1)", loc:"Silk Board Junction, Outer Ring Road",
   count:"4", notes:"Multiple trauma injuries, one patient trapped in vehicle"
 };
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // STATE
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 let running = false;
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // CLOCK
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function tick(){
   const n=new Date();
   const ist=new Date(n.getTime()+5.5*3600000);
@@ -821,9 +820,9 @@ function tick(){
 }
 setInterval(tick,1000); tick();
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // RENDER AGENT LIST
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function buildAgentList(){
   const el=document.getElementById('agent-list');
   el.innerHTML=AGENTS.map(a=>`
@@ -853,9 +852,9 @@ function setAgentState(id, state, status, result, timing){
   }
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // MCP CONSOLE
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function toolLog(type, label, body){
   const con=document.getElementById('tool-console');
   const ts=new Date(new Date().getTime()+5.5*3600000).toISOString().slice(11,19);
@@ -869,9 +868,9 @@ function toolLog(type, label, body){
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // SVG MAP HELPERS
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function clearLayer(id){ document.getElementById(id).innerHTML=''; }
 function svgEl(tag,attrs){
   const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
@@ -892,7 +891,7 @@ function plotAmbulance(x,y,id){
   const g=svgEl('g',{filter:'url(#glow-b)'});
   g.appendChild(svgEl('circle',{cx:x,cy:y,r:'9',fill:'rgba(47,129,247,.25)',stroke:'#2f81f7','stroke-width':'1.5'}));
   const t=svgEl('text',{x:x,y:y+4,fill:'#2f81f7','font-size':'10','text-anchor':'middle'});
-  t.textContent='≡ƒÜæ'; g.appendChild(t);
+  t.textContent='🚑'; g.appendChild(t);
   const lbl=svgEl('text',{x:x,y:y-14,fill:'#2f81f7','font-size':'8','text-anchor':'middle','font-weight':'700'});
   lbl.textContent=id; g.appendChild(lbl);
   document.getElementById('ambulance-layer').appendChild(g);
@@ -928,7 +927,7 @@ function flashSignal(id,color){
 }
 
 function animateAmbulance(ax,ay,ix,iy,hx,hy){
-  // Animate ambulance dot along: amb ΓåÆ incident ΓåÆ hospital
+  // Animate ambulance dot along: amb -> incident -> hospital
   const anim=document.getElementById('anim-layer');
   anim.innerHTML='';
   const dot=svgEl('circle',{cx:ax,cy:ay,r:'6',fill:'#2f81f7',filter:'url(#glow-b)'});
@@ -952,9 +951,9 @@ function animateAmbulance(ax,ay,ix,iy,hx,hy){
   move();
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // CONFIDENCE RING
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function setConfidence(pct){
   const arc=document.getElementById('conf-arc');
   const pctEl=document.getElementById('conf-pct');
@@ -974,21 +973,21 @@ function setConfidence(pct){
   lbl.textContent=pct>=85?'HIGH CONFIDENCE':pct>=65?'MODERATE':'LOW CONFIDENCE';
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // BEFORE/AFTER
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function setBa(before, after){
   const w=document.getElementById('ba-widget');
   w.style.display='block';
   document.getElementById('ba-before').textContent=before+'m';
   document.getElementById('ba-after').textContent=after+'m';
   const saved=before-after;
-  document.getElementById('ba-saving').textContent=`${saved} minutes saved ┬╖ ${Math.round(saved/before*100)}% faster`;
+  document.getElementById('ba-saving').textContent=`${saved} minutes saved . ${Math.round(saved/before*100)}% faster`;
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // MISSION SUMMARY CARDS
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function showMissionSummary(cards){
   const ms=document.getElementById('mission-summary');
   ms.style.display='block';
@@ -1001,18 +1000,18 @@ function showMissionSummary(cards){
     </div>`).join('');
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // ETA BAR
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function setEta(before,after){
   document.getElementById('eta-before').innerHTML=before+'<span class="eta-unit">min</span>';
   document.getElementById('eta-after').innerHTML=after+'<span class="eta-unit">min</span>';
   document.getElementById('eta-saved').innerHTML=(before-after)+'<span class="eta-unit">min</span>';
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // MAP BADGE
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function addMapBadge(text,color){
   const div=document.createElement('div');
   div.className='map-badge';
@@ -1021,9 +1020,9 @@ function addMapBadge(text,color){
   document.getElementById('map-badges').appendChild(div);
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // DEMO LOAD
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 document.getElementById('demo-btn').addEventListener('click',()=>{
   document.getElementById('f-desc').value=DEMO.desc;
   document.getElementById('f-type').value=DEMO.type;
@@ -1033,19 +1032,19 @@ document.getElementById('demo-btn').addEventListener('click',()=>{
   document.getElementById('f-notes').value=DEMO.notes;
 });
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // DELAY HELPER
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // MAIN SIMULATION ENGINE
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // runSimulation can be called standalone (skipReset=false, default) or as a
 // fallback from runDispatch (skipReset=true, formInputs already provided).
 async function runSimulation(formInputs, skipReset){
   // When called as fallback from runDispatch, running is already true and
-  // the button is already disabled ΓÇö don't touch those.
+  // the button is already disabled - don't touch those.
   if(!skipReset){
     if(running) return;
     running=true;
@@ -1066,7 +1065,7 @@ async function runSimulation(formInputs, skipReset){
     AGENTS.forEach(a=>setAgentState(a.id,'idle',a.sub,''));
   }
 
-  // Get form inputs ΓÇö prefer passed-in values (fallback path), else read DOM
+  // Get form inputs - prefer passed-in values (fallback path), else read DOM
   const type =(formInputs&&formInputs.type) ||document.getElementById('f-type').value ||'Road Accident';
   const sev  =(formInputs&&formInputs.sev)  ||document.getElementById('f-sev').value  ||'Critical (S1)';
   const loc  =(formInputs&&formInputs.loc)  ||document.getElementById('f-loc').value  ||'Silk Board Junction';
@@ -1076,7 +1075,7 @@ async function runSimulation(formInputs, skipReset){
   const isMCI=parseInt(count)>=10;
   if(isMCI){ document.getElementById('mci-badge').style.display=''; }
 
-  // Incident coordinates ΓÇö pick Silk Board for demo, else city centre
+  // Incident coordinates - pick Silk Board for demo, else city centre
   const iLoc=loc.toLowerCase().includes('silk board')?{lat:12.9176,lng:77.6237}:
               loc.toLowerCase().includes('hebbal')?{lat:13.045,lng:77.5946}:
               loc.toLowerCase().includes('koramangala')?{lat:12.9352,lng:77.6245}:
@@ -1086,33 +1085,33 @@ async function runSimulation(formInputs, skipReset){
 
   const startTs=Date.now();
 
-  // ΓöÇΓöÇ AGENT 1: Mission Commander ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── AGENT 1: Mission Commander ──────────────────────────
   setAgentState('a1','run','Classifying incident and assigning SOP...');
-  toolLog('thought','Mission Commander Agent','Analysing incident description: '+type+' ┬╖ '+sev+' ┬╖ '+loc);
+  toolLog('thought','Mission Commander Agent','Analysing incident description: '+type+' . '+sev+' . '+loc);
   await wait(900);
   const sopCode=type==='Cardiac Arrest'?'CA-P1-BLR':type==='Acute Stroke'?'STR-P1-BLR':type==='Major Burns'?'BURN-MJR-P1-BLR':type==='Mass Casualty (MCI)'?'MCI-P1-BLR':'TR-MJR-P1-BLR';
-  const priority=parseInt(count)>=10?'P1 ΓÇö Immediate (MCI Override)':'Critical (S1)'===sev?'P1 ΓÇö Immediate':'P2 ΓÇö Urgent';
+  const priority=parseInt(count)>=10?'P1 - Immediate (MCI Override)':'Critical (S1)'===sev?'P1 - Immediate':'P2 - Urgent';
   const incidentId='PRBLR-'+new Date(Date.now()+5.5*3600000).toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(Math.random()*900+100);
   toolLog('resp','Incident Classified',`ID: ${incidentId}\nSOP: ${sopCode}\nPriority: ${priority}\nLocation verified: ${loc}`);
-  setAgentState('a1','done','Complete',`SOP: ${sopCode} ┬╖ ${priority}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  setAgentState('a1','done','Complete',`SOP: ${sopCode} . ${priority}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   plotIncident(ix,iy);
   await wait(400);
 
-  // ΓöÇΓöÇ AGENT 2: Emergency Intake Agent ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-  setAgentState('a2','run','Processing intake ΓÇö extracting structured data...');
-  toolLog('thought','Emergency Intake Agent',`Extracting: location ┬╖ casualties ┬╖ severity ┬╖ hazards`);
+  // ── AGENT 2: Emergency Intake Agent ─────────────────────
+  setAgentState('a2','run','Processing intake - extracting structured data...');
+  toolLog('thought','Emergency Intake Agent',`Extracting: location . casualties . severity . hazards`);
   await wait(1100);
   const highCongestion=loc.toLowerCase().includes('silk board')||loc.toLowerCase().includes('marathahalli')||loc.toLowerCase().includes('hebbal');
   const congestionFlag=highCongestion?'HIGH (9.8/10)':'MODERATE';
-  toolLog('resp','Intake Report',`Casualties: ${count} patients ┬╖ Severity: ${sev}\nLocation: ${loc} [verified]\nCongestion: ${congestionFlag}\nSOP: ${sopCode} ┬╖ Required unit: ALS`);
-  setAgentState('a2','done','Structured report generated',`${count} patients ┬╖ ${sev} ┬╖ SOP ${sopCode}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  toolLog('resp','Intake Report',`Casualties: ${count} patients . Severity: ${sev}\nLocation: ${loc} [verified]\nCongestion: ${congestionFlag}\nSOP: ${sopCode} . Required unit: ALS`);
+  setAgentState('a2','done','Structured report generated',`${count} patients . ${sev} . SOP ${sopCode}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   await wait(300);
 
-  // ΓöÇΓöÇ HELPERS: sort available units by distance to incident ΓöÇ
+  // ── HELPERS: sort available units by distance to incident ─
   function distKm(a){ return Math.hypot(a.lat-iLoc.lat,a.lng-iLoc.lng)*111; }
   function etaMin(a){ return Math.round(distKm(a)*2.2)+3; } // ~27 km/h avg with lights
 
-  // ΓöÇΓöÇ SPEC MATCHING: map incident type ΓåÆ required specialties ΓöÇΓöÇ
+  // ── SPEC MATCHING: map incident type -> required specialties ──
   const SPEC_MAP = {
     'Cardiac Arrest':     ['Cardiologist','Critical Care Specialist'],
     'Acute Stroke':       ['Neurologist','Neurosurgeon'],
@@ -1127,7 +1126,7 @@ async function runSimulation(formInputs, skipReset){
   };
   const requiredSpecs = SPEC_MAP[type] || ['Trauma Surgeon','Critical Care Specialist'];
 
-  // ΓöÇΓöÇ HOSPITAL SCORING: matches Orchestrate select_hospital logic ΓöÇΓöÇ
+  // ── HOSPITAL SCORING: matches Orchestrate select_hospital logic ──
   const HOSP_SPEC_MAP = {
     'Cardiac Arrest':     ['Cardiology','Cardiac Surgery'],
     'Acute Stroke':       ['Neurology','Neurosurgery'],
@@ -1162,17 +1161,17 @@ async function runSimulation(formInputs, skipReset){
     return score;
   }
 
-  // NOTE: KB hospitals may not have emergency_dept field ΓÇö treat all as eligible
+  // NOTE: KB hospitals may not have emergency_dept field - treat all as eligible
   const scoredHospitals = KB.hospitals
     .filter(h => h.beds_available >= (isMCI?15:3))
     .map(h => ({ ...h, _score: scoreHospital(h), _dist: distKm(h) }))
     .sort((a,b) => b._score - a._score);
 
-  // Always have at least 3 ΓÇö if filter produced fewer, use all and sort anyway
+  // Always have at least 3 - if filter produced fewer, use all and sort anyway
   const top3 = (scoredHospitals.length >= 3 ? scoredHospitals : KB.hospitals.map(h=>({...h,_score:0,_dist:distKm(h)})).sort((a,b)=>a._dist-b._dist)).slice(0,3);
   const h1   = top3[0] || KB.hospitals[0]; // absolute fallback: first hospital in KB
 
-  // ΓöÇΓöÇ AMBULANCE DISPATCH: scale count to casualty load ΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── AMBULANCE DISPATCH: scale count to casualty load ─────
   // MCI: 1 unit per 3 casualties; non-MCI: always primary + 1 backup
   const ambsNeeded = isMCI ? Math.max(2, Math.ceil(parseInt(count)/3)) : 2;
   const availAmbs  = KB.ambulances
@@ -1200,21 +1199,21 @@ async function runSimulation(formInputs, skipReset){
   const nearest = dispatchedAmbs[0];
   const ambEta  = nearest._eta;
 
-  // ΓöÇΓöÇ AGENT 3: Ambulance Coordination ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── AGENT 3: Ambulance Coordination ─────────────────────
   setAgentState('a3','run',`Dispatching ${dispatchedAmbs.length} unit(s)...`);
   toolLog('call','find_nearest_available_ambulance',
     `{\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng},\n  ambulance_type: "ALS"${isMCI?',\n  count_needed: '+ambsNeeded:''}\n}`);
   await wait(1300);
   toolLog('resp','Ambulances Dispatched',
-    dispatchedAmbs.map((a,i)=>`${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign})\n  Type: ${a.type} ┬╖ ${a.locality} ┬╖ ETA ~${a._eta} min ┬╖ ${a._dist.toFixed(1)} km`).join('\n'));
+    dispatchedAmbs.map((a,i)=>`${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign})\n  Type: ${a.type} . ${a.locality} . ETA ~${a._eta} min . ${a._dist.toFixed(1)} km`).join('\n'));
   setAgentState('a3','done',`${dispatchedAmbs.length} unit(s) dispatched`,
-    dispatchedAmbs.slice(0,2).map(a=>`${a.id}┬╖${a.type}`).join(' + '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    dispatchedAmbs.slice(0,2).map(a=>`${a.id}·${a.type}`).join(' + '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   // Plot all ambulances on map
   dispatchedAmbs.forEach((a,i)=>{ const ax=MAP.x(a.lng),ay=MAP.y(a.lat); plotAmbulance(ax,ay,a.call_sign); });
   const ax=MAP.x(nearest.lng), ay=MAP.y(nearest.lat);
   await wait(300);
 
-  // ΓöÇΓöÇ AGENT 4: Route Intelligence ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── AGENT 4: Route Intelligence ──────────────────────────
   setAgentState('a4','run','Invoking traffic_assessment + calculate_route...');
   toolLog('call','traffic_assessment',
     `{\n  incident_location: { locality: "${loc}", lat: ${iLoc.lat}, lng: ${iLoc.lng} },\n  radius_km: 10\n}`);
@@ -1231,14 +1230,14 @@ async function runSimulation(formInputs, skipReset){
   await wait(900);
   const etaBefore = ambEta+delay+(highCongestion?8:2);
   toolLog('resp','Route Leg A',
-    `${nearest.locality} ΓåÆ ${loc}\nRoad: ORR (RD001) ┬╖ ${(ambEta*0.7).toFixed(1)} km\nETA: ${ambEta} min ┬╖ Emergency route: YES`);
+    `${nearest.locality} -> ${loc}\nRoad: ORR (RD001) . ${(ambEta*0.7).toFixed(1)} km\nETA: ${ambEta} min . Emergency route: YES`);
   setAgentState('a4','done','Routes computed',
-    `Leg A: ${ambEta} min ┬╖ Congestion: ${congLevel}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `Leg A: ${ambEta} min . Congestion: ${congLevel}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   drawRoute(ax,ay,ix,iy,'#f0883e','arr-r');
   await wait(300);
 
-  // ΓöÇΓöÇ AGENT 5: Green Corridor ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-  setAgentState('a5','run','Activating green corridor ΓÇö ERSS-112 preemption...');
+  // ── AGENT 5: Green Corridor ──────────────────────────────
+  setAgentState('a5','run','Activating green corridor - ERSS-112 preemption...');
   toolLog('thought','Green Corridor Agent',
     `Identifying preemptible signals on route...\nTriggering: Trinity Circle (TS020), Domlur Flyover Jn (TS023)`);
   await wait(700);
@@ -1252,27 +1251,27 @@ async function runSimulation(formInputs, skipReset){
   await wait(700);
   const legBeta=etaAfter-ambEta;
   toolLog('resp','Green Corridor Activated',
-    `Signals preempted: TS020 (Trinity Circle), TS023 (Domlur Jn)\nCorridor: ${loc} ΓåÆ ${h1.name}\nLeg B ETA: ${legBeta} min\nETA reduction: 32%`);
+    `Signals preempted: TS020 (Trinity Circle), TS023 (Domlur Jn)\nCorridor: ${loc} -> ${h1.name}\nLeg B ETA: ${legBeta} min\nETA reduction: 32%`);
   setAgentState('a5','done','GREEN CORRIDOR ACTIVE',
-    `TS020+TS023 preempted ┬╖ ETA ΓêÆ${etaBefore-etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `TS020+TS023 preempted . ETA −${etaBefore-etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   document.getElementById('corridor-badge').style.display='';
   setEta(etaBefore,etaAfter);
-  addMapBadge(`${loc} ΓåÆ ${h1.name}: ${etaAfter} min`,'#3fb950');
+  addMapBadge(`${loc} -> ${h1.name}: ${etaAfter} min`,'#3fb950');
   await wait(300);
 
-  // ΓöÇΓöÇ AGENT 6: Hospital Readiness ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
-  setAgentState('a6','run','Scoring hospitals ΓÇö readiness & specialty match...');
+  // ── AGENT 6: Hospital Readiness ──────────────────────────
+  setAgentState('a6','run','Scoring hospitals - readiness & specialty match...');
   toolLog('call','select_hospital',
     `{\n  emergency_type: "${type}",\n  required_specialties: ${JSON.stringify(needSpecs)},\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng}${isMCI?',\n  min_bed_capacity: '+minBedsForMCI:''}\n}`);
   await wait(1200);
   toolLog('resp','Hospital Selection',
-    top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds avail: ${h.beds_available||'?'} ┬╖ Score: ${h._score!=null?h._score.toFixed(0):'ΓÇö'} ┬╖ Dist: ${h._dist!=null?h._dist.toFixed(1):'?'} km ┬╖ Trauma L${h.trauma_level}`).join('\n'));
+    top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds avail: ${h.beds_available||'?'} . Score: ${h._score!=null?h._score.toFixed(0):'-'} . Dist: ${h._dist!=null?h._dist.toFixed(1):'?'} km . Trauma L${h.trauma_level}`).join('\n'));
   setAgentState('a6','done','Hospitals ranked',
-    `1. ${top3[0].name} ┬╖ 2. ${top3[1]?.name||'ΓÇö'}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `1. ${top3[0].name} . 2. ${top3[1]?.name||'-'}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   addMapBadge(`Destination: ${top3[0].name}`,'#2f81f7');
   await wait(300);
 
-  // ΓöÇΓöÇ AGENT 7: Specialist Coordination ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── AGENT 7: Specialist Coordination ────────────────────
   setAgentState('a7','run','Matching on-call specialists by incident type...');
   toolLog('thought','Specialist Coordination',
     `Incident: ${type}\nRequired specialties: ${requiredSpecs.join(', ')}`);
@@ -1292,12 +1291,12 @@ async function runSimulation(formInputs, skipReset){
   }
   const onCall = matchedSpecs.slice(0, isMCI?6:3);
   toolLog('resp','Specialists Notified',
-    onCall.map(s=>`${s.name} ┬╖ ${s.specialty}\n   ${s.hospital} ┬╖ ${s.on_call?'ON CALL ≡ƒƒó':'Available'}`).join('\n\n'));
+    onCall.map(s=>`${s.name} . ${s.specialty}\n   ${s.hospital} . ${s.on_call?'ON CALL':'Available'}`).join('\n\n'));
   setAgentState('a7','done','Teams notified',
-    onCall.slice(0,3).map(s=>s.specialty).join(' ┬╖ '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    onCall.slice(0,3).map(s=>s.specialty).join(' . '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   await wait(300);
 
-  // ΓöÇΓöÇ AGENT 8: Mission Commander Final ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── AGENT 8: Mission Commander Final ────────────────────
   setAgentState('a8','run','Synthesising final deployment recommendation...');
   toolLog('thought','Mission Commander (Synthesis)',
     'Consolidating all agent outputs...\nComputing deployment confidence score...');
@@ -1308,16 +1307,16 @@ async function runSimulation(formInputs, skipReset){
   toolLog('resp','MISSION DEPLOYMENT READY',
     `Deployment ID: ${deployId}\nIncident: ${incidentId}\nPriority: ${priority}\nStatus: ${isMCI?'MCI_ACTIVE':'READY_WITH_WARNINGS'}\n\n` +
     `Units dispatched: ${dispatchedAmbs.length}\n`+
-    dispatchedAmbs.map((a,i)=>`  ${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign}) ┬╖ ${a.type} ┬╖ ETA ~${a._eta} min`).join('\n')+'\n\n'+
-    `Primary Hospital: ${h1.name} (${h1.locality}) ┬╖ Score: ${h1._score.toFixed(0)}\n`+
-    `Alternate: ${top3[1]?.name||'ΓÇö'}\n`+
+    dispatchedAmbs.map((a,i)=>`  ${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign}) . ${a.type} . ETA ~${a._eta} min`).join('\n')+'\n\n'+
+    `Primary Hospital: ${h1.name} (${h1.locality}) . Score: ${h1._score.toFixed(0)}\n`+
+    `Alternate: ${top3[1]?.name||'-'}\n`+
     `Total ETA: ${etaAfter} min (with green corridor)\nWithout PulseRoute: ${etaBefore} min\nTime saved: ${etaBefore-etaAfter} min\n\n`+
     `Specialists notified: ${onCall.length}\n${onCall.map(s=>`  ${s.specialty}: ${s.name}`).join('\n')}\n\n`+
-    `Green corridor: ACTIVE ┬╖ TS020+TS023 preempted\nDeployment Confidence: ${confidence}% (${confLabel})`);
+    `Green corridor: ACTIVE . TS020+TS023 preempted\nDeployment Confidence: ${confidence}% (${confLabel})`);
   setAgentState('a8','done','DEPLOYMENT READY',
-    `Confidence: ${confidence}% ┬╖ ETA: ${etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `Confidence: ${confidence}% . ETA: ${etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
 
-  // ΓöÇΓöÇ Bottom panel ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Bottom panel ──────────────────────────────────────────
   showBottomPanel();
   for(let i=0;i<8;i++) setPipelineStep(i,'done');
   updatePipelineBadge(8,8);
@@ -1352,20 +1351,20 @@ async function runSimulation(formInputs, skipReset){
   setBa(etaBefore,etaAfter);
   showMissionSummary([
     {label:'Units Dispatched',val:dispatchedAmbs.length+' Ambulances',
-     sub:dispatchedAmbs.map(a=>a.call_sign).join(' ┬╖ '),color:'var(--accent)'},
+     sub:dispatchedAmbs.map(a=>a.call_sign).join(' . '),color:'var(--accent)'},
     {label:'Primary Hospital',val:h1.name,
-     sub:`${h1.locality} ┬╖ ${h1.beds_available||h1.beds_total||'?'} beds ┬╖ Score ${h1._score!=null?h1._score.toFixed(0):'ΓÇö'}`,color:'var(--green)'},
+     sub:`${h1.locality} . ${h1.beds_available||h1.beds_total||'?'} beds . Score ${h1._score!=null?h1._score.toFixed(0):'-'}`,color:'var(--green)'},
     {label:'Total ETA',val:etaAfter+' min',
      sub:`Saved ${etaBefore-etaAfter} min vs standard`,color:'var(--green)'},
     {label:'Priority',val:sopCode,sub:priority,color:'var(--red)'},
     {label:'Green Corridor',val:'ACTIVE',sub:'TS020 + TS023 preempted',color:'var(--cyan)'},
     {label:'Confidence',val:confidence+'%',
-     sub:confLabel+' ┬╖ '+onCall.length+' specialists notified',
+     sub:confLabel+' . '+onCall.length+' specialists notified',
      color:confidence>=85?'var(--green)':confidence>=65?'var(--amber)':'var(--red)'}
   ]);
 
   document.getElementById('sys-badge').className='badge b-amber';
-  document.getElementById('sys-badge').textContent='ΓùÅ MISSION ACTIVE';
+  document.getElementById('sys-badge').textContent='● MISSION ACTIVE';
 
   if(!skipReset){
     running=false;
@@ -1374,11 +1373,11 @@ async function runSimulation(formInputs, skipReset){
   }
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-// TOOL ΓåÆ AGENT STEP MAPPING
+// ═══════════════════════════════════════════════════════════
+// TOOL -> AGENT STEP MAPPING
 // Maps the MCP tool names Mission Commander calls to the agent
 // row that should light up in the left-panel timeline.
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 const TOOL_AGENT_MAP = {
   'traffic_assessment':               'a4',
   'find_nearest_available_ambulance': 'a3',
@@ -1386,42 +1385,42 @@ const TOOL_AGENT_MAP = {
   'calculate_route':                  'a4',
 };
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // RENDER FROM ORCHESTRATE RESPONSE
 // Receives the parsed OrchestrateResponse object that arrives
 // in the SSE "final" event and populates every UI widget.
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 function renderFromResponse(r, formInputs) {
   const { loc, count, iLoc, startTs } = formInputs;
   const ix = MAP.x(iLoc.lng), iy = MAP.y(iLoc.lat);
 
-  // ΓöÇΓöÇ Incident pin ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Incident pin ─────────────────────────────────────────
   clearLayer('incident-layer');
   plotIncident(ix, iy);
 
-  // ΓöÇΓöÇ Ambulance pin ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Ambulance pin ─────────────────────────────────────────
   clearLayer('ambulance-layer');
   if (r.ambulance) {
     const ax = MAP.x(r.ambulance.longitude), ay = MAP.y(r.ambulance.latitude);
     plotAmbulance(ax, ay, r.ambulance.call_sign);
 
-    // ΓöÇΓöÇ Route Leg A: ambulance ΓåÆ incident ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Route Leg A: ambulance -> incident ─────────────────
     if (r.route && r.route.leg_a) {
       drawRoute(ax, ay, ix, iy, '#f0883e', 'arr-r');
     }
 
-    // ΓöÇΓöÇ Animate ambulance movement ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Animate ambulance movement ─────────────────────────
     const hosp = r.hospital;
     if (hosp) {
       const hx = MAP.x(hosp.longitude), hy = MAP.y(hosp.latitude);
       animateAmbulance(ax, ay, ix, iy, hx, hy);
 
-      // ΓöÇΓöÇ Route Leg B: incident ΓåÆ hospital ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+      // ── Route Leg B: incident -> hospital ──────────────────
       if (r.route && r.route.leg_b) {
         drawRoute(ix, iy, hx, hy, '#2f81f7', 'arr-b');
       }
 
-      // ΓöÇΓöÇ Green corridor overlay ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+      // ─GREEN CORRIDOR overlay ─────────────────────────────
       if (r.corridor && r.corridor.active) {
         drawCorridor(ix, iy, hx, hy);
         document.getElementById('corridor-badge').style.display = '';
@@ -1440,7 +1439,7 @@ function renderFromResponse(r, formInputs) {
         });
       }
 
-      // ΓöÇΓöÇ ETA bar ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+      // ── ETA bar ────────────────────────────────────────────
       const corridor = r.corridor;
       const etaBefore = corridor && corridor.active ? corridor.eta_before_minutes
                       : (r.route ? r.route.total_eta_minutes + 6 : 22);
@@ -1448,26 +1447,26 @@ function renderFromResponse(r, formInputs) {
                       : (r.route ? r.route.total_eta_minutes : 18);
       setEta(etaBefore, etaAfter);
       setBa(etaBefore, etaAfter);
-      addMapBadge(`${loc} ΓåÆ ${hosp.name}: ${etaAfter} min`, '#3fb950');
+      addMapBadge(`${loc} -> ${hosp.name}: ${etaAfter} min`, '#3fb950');
       addMapBadge(`Destination: ${hosp.name}`, '#2f81f7');
     }
   }
 
-  // ΓöÇΓöÇ Confidence ring ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Confidence ring ────────────────────────────────────────
   const confPct = Math.round((r.confidence || 0) * 100);
   setConfidence(confPct);
 
-  // ΓöÇΓöÇ MCI badge ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── MCI badge ─────────────────────────────────────────────
   if (parseInt(count) >= 10) {
     document.getElementById('mci-badge').style.display = '';
   }
 
-  // ΓöÇΓöÇ System badge ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── System badge ──────────────────────────────────────────
   const statusBadge = document.getElementById('sys-badge');
   statusBadge.className = 'badge b-amber';
-  statusBadge.textContent = 'ΓùÅ MISSION ACTIVE';
+  statusBadge.textContent = '● MISSION ACTIVE';
 
-  // ΓöÇΓöÇ Mission summary cards ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Mission summary cards ──────────────────────────────────
   const ambulance = r.ambulance;
   const hospital  = r.hospital;
   const traffic   = r.traffic;
@@ -1478,15 +1477,15 @@ function renderFromResponse(r, formInputs) {
   const cards = [];
   if (ambulance) {
     cards.push({ label: 'Ambulance',  val: ambulance.ambulance_id,
-      sub: `${ambulance.call_sign} ┬╖ ${ambulance.type} ┬╖ ${ambulance.locality}`, color: 'var(--accent)' });
+      sub: `${ambulance.call_sign} . ${ambulance.type} . ${ambulance.locality}`, color: 'var(--accent)' });
   }
   if (hospital) {
     cards.push({ label: 'Hospital', val: hospital.name,
-      sub: `${hospital.locality} ┬╖ ${hospital.available_beds} beds`, color: 'var(--green)' });
+      sub: `${hospital.locality} . ${hospital.available_beds} beds`, color: 'var(--green)' });
   }
   if (route) {
     cards.push({ label: 'Total ETA', val: route.total_eta_minutes + ' min',
-      sub: corridor && corridor.active ? `Saved ${corridor.time_saved_minutes} min ┬╖ green corridor` : 'Optimised route',
+      sub: corridor && corridor.active ? `Saved ${corridor.time_saved_minutes} min . green corridor` : 'Optimised route',
       color: 'var(--green)' });
   }
   if (r.sop_code) {
@@ -1499,32 +1498,32 @@ function renderFromResponse(r, formInputs) {
   }
   if (traffic) {
     cards.push({ label: 'Traffic', val: traffic.congestion_level,
-      sub: `Score ${traffic.congestion_score} ┬╖ delay ${traffic.expected_delay_minutes} min`,
+      sub: `Score ${traffic.congestion_score} . delay ${traffic.expected_delay_minutes} min`,
       color: traffic.congestion_level === 'CRITICAL' ? 'var(--red)' : traffic.congestion_level === 'SEVERE' ? 'var(--amber)' : 'var(--green)' });
   }
   cards.push({ label: 'Confidence', val: confPct + '%',
-    sub: confLabel + ' ΓÇö ' + (r.notes ? r.notes.slice(0, 60) : ''),
+    sub: confLabel + ' - ' + (r.notes ? r.notes.slice(0, 60) : ''),
     color: confPct >= 85 ? 'var(--green)' : confPct >= 65 ? 'var(--amber)' : 'var(--red)' });
 
   if (cards.length) showMissionSummary(cards);
 
-  // ΓöÇΓöÇ Agent 8 final state ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Agent 8 final state ────────────────────────────────────
   const elapsed = ((Date.now() - startTs) / 1000).toFixed(1);
   setAgentState('a8', 'done', 'DEPLOYMENT READY',
-    `Confidence: ${confPct}% ┬╖ ETA: ${route ? route.total_eta_minutes : '?'} min`, `${elapsed}s`);
+    `Confidence: ${confPct}% . ETA: ${route ? route.total_eta_minutes : '?'} min`, `${elapsed}s`);
 
-  // ΓöÇΓöÇ Coordinator note in console ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Coordinator note in console ────────────────────────────
   if (r.notes) {
     toolLog('resp', 'Coordinator Note', r.notes);
   }
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-// LIVE DISPATCH ΓÇö POST /api/dispatch ΓåÆ SSE stream
+// ═══════════════════════════════════════════════════════════
+// LIVE DISPATCH - POST /api/dispatch -> SSE stream
 // Sends the incident payload to the MCP server proxy, which
 // forwards it to watsonx Orchestrate Mission Commander and
 // streams SSE events back in real time.
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 async function runDispatch() {
   if (running) return;
   running = true;
@@ -1534,7 +1533,7 @@ async function runDispatch() {
   btn.disabled = true;
   spin.style.display = 'inline-block';
 
-  // ΓöÇΓöÇ Reset UI ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Reset UI ───────────────────────────────────────────────
   document.getElementById('tool-console').innerHTML = '';
   document.getElementById('map-badges').innerHTML = '';
   clearLayer('route-layer'); clearLayer('corridor-layer');
@@ -1546,12 +1545,12 @@ async function runDispatch() {
   document.getElementById('mci-badge').style.display = 'none';
   document.getElementById('corridor-badge').style.display = 'none';
   document.getElementById('sys-badge').className = 'badge b-blue';
-  document.getElementById('sys-badge').textContent = 'ΓùÅ CONNECTING...';
+  document.getElementById('sys-badge').textContent = '● CONNECTING...';
   AGENTS.forEach(a => setAgentState(a.id, 'idle', a.sub, ''));
   resetBottomPanel();
   showBottomPanel();
 
-  // ΓöÇΓöÇ Read form inputs ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Read form inputs ───────────────────────────────────────
   const desc  = document.getElementById('f-desc').value.trim()  || 'Emergency incident reported';
   const type  = document.getElementById('f-type').value         || 'Road Accident';
   const sev   = document.getElementById('f-sev').value          || 'Critical (S1)';
@@ -1591,9 +1590,9 @@ async function runDispatch() {
     reported_at:     new Date().toISOString(),
   };
 
-  // ΓöÇΓöÇ Mark Stage 1 agents as running ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+  // ── Mark Stage 1 agents as running ────────────────────────
   setAgentState('a1', 'run', 'Connecting to Mission Commander...');
-  toolLog('thought', 'Mission Commander', `Dispatching: ${type} ┬╖ ${priority} ┬╖ ${loc}`);
+  toolLog('thought', 'Mission Commander', `Dispatching: ${type} . ${priority} . ${loc}`);
 
   let toolCallCount = 0;
 
@@ -1609,9 +1608,9 @@ async function runDispatch() {
       throw new Error(`Proxy returned ${res.status}: ${errText.slice(0, 200)}`);
     }
 
-    if (!res.body) throw new Error('Response body is null ΓÇö SSE not supported by this browser');
+    if (!res.body) throw new Error('Response body is null - SSE not supported by this browser');
 
-    // ΓöÇΓöÇ Stream SSE ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    // ── Stream SSE ─────────────────────────────────────────
     const reader  = res.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let   buf     = '';
@@ -1633,13 +1632,13 @@ async function runDispatch() {
         let ev;
         try { ev = JSON.parse(raw); } catch { continue; }
 
-        // ΓöÇΓöÇ Route each event type ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+        // ── Route each event type ────────────────────────
         switch (ev.type) {
 
           case 'thought': {
             const content = String(ev.content || '');
             toolLog('thought', 'Mission Commander', content);
-            // Proxy path probing messages appear first ΓÇö keep a1 animated
+            // Proxy path probing messages appear first - keep a1 animated
             if (content.startsWith('[proxy]')) {
               setAgentState('a1', 'run', 'Reaching Mission Commander...');
             } else {
@@ -1656,8 +1655,8 @@ async function runDispatch() {
 
             // Mark intake agent done on first real tool call
             if (toolCallCount === 1) {
-              setAgentState('a1', 'done', 'Incident classified', `SOP assigned ┬╖ ${priority}`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
-              setAgentState('a2', 'done', 'Intake report generated', `${loc} ┬╖ ${count} patient(s)`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
+              setAgentState('a1', 'done', 'Incident classified', `SOP assigned . ${priority}`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
+              setAgentState('a2', 'done', 'Intake report generated', `${loc} . ${count} patient(s)`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               setPipelineStep(0, 'done'); setPipelineStep(1, 'done');
             }
             // Advance pipeline tile for this tool
@@ -1678,7 +1677,7 @@ async function runDispatch() {
               'traffic_assessment':               'Assessing traffic conditions...',
               'find_nearest_available_ambulance': 'Finding nearest ALS ambulance...',
               'select_hospital':                  'Scoring hospitals for best match...',
-              'calculate_route':                  toolCallCount >= 4 ? 'Computing Leg B: incident ΓåÆ hospital...' : 'Computing Leg A: ambulance ΓåÆ incident...',
+              'calculate_route':                  toolCallCount >= 4 ? 'Computing Leg B: incident -> hospital...' : 'Computing Leg A: ambulance -> incident...',
             };
             setAgentState(agId, 'tool', stepNames[tName] || `Calling ${tName}...`);
 
@@ -1693,7 +1692,7 @@ async function runDispatch() {
             const tName = ev.tool_name || 'tool';
             const agId  = TOOL_AGENT_MAP[tName] || 'a4';
             const out   = typeof ev.output === 'string' ? ev.output : JSON.stringify(ev.output || {}, null, 2);
-            toolLog('resp', tName + ' ΓåÆ result', out);
+            toolLog('resp', tName + ' -> result', out);
 
             // Parse result snippet for agent status line
             let snippet = '';
@@ -1701,11 +1700,11 @@ async function runDispatch() {
               const parsed = JSON.parse(out);
               if (tName === 'find_nearest_available_ambulance') {
                 const a = parsed.ambulance || parsed;
-                snippet = `${a.ambulance_id || a.id || ''} ┬╖ ${a.type || ''} ┬╖ ETA ${a.eta_minutes || '?'} min`;
+                snippet = `${a.ambulance_id || a.id || ''} . ${a.type || ''} . ETA ${a.eta_minutes || '?'} min`;
                 setAgentState('a3', 'done', 'Ambulance dispatched', snippet, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               } else if (tName === 'select_hospital') {
                 const h = parsed.hospital || parsed;
-                snippet = `${h.name || ''} ┬╖ ${h.available_beds ?? '?'} beds`;
+                snippet = `${h.name || ''} . ${h.available_beds ?? '?'} beds`;
                 setAgentState('a6', 'done', 'Hospital selected', snippet, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               } else if (tName === 'traffic_assessment') {
                 const t = parsed.traffic || parsed;
@@ -1718,7 +1717,7 @@ async function runDispatch() {
                   sigCount > 0 ? `${sigCount} preemptible signal(s) found` : 'No preemption needed');
               } else if (tName === 'calculate_route') {
                 const route = parsed.recommended_route || parsed.route || parsed;
-                snippet = `ETA ${route.eta_minutes || '?'} min ┬╖ ${route.road_name || ''}`;
+                snippet = `ETA ${route.eta_minutes || '?'} min . ${route.road_name || ''}`;
                 setAgentState('a4', 'done', 'Routes calculated', snippet, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
                 setAgentState('a5', 'done', 'Signal preemption advisory ready', '', `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               }
@@ -1732,12 +1731,12 @@ async function runDispatch() {
             catch { result = null; }
 
             if (result) {
-              toolLog('resp', 'Γ£à  MISSION DEPLOYMENT READY',
+              toolLog('resp', '✅  MISSION DEPLOYMENT READY',
                 JSON.stringify(result, null, 2).slice(0, 1200) + (JSON.stringify(result).length > 1200 ? '\n...(truncated)' : ''));
 
               // Mark specialist agent done (Orchestrate handles specialists internally)
               setAgentState('a7', 'done', 'Specialists notified',
-                (result.specialists || []).slice(0, 2).map(s => s.specialty || s.name).join(' ┬╖ ') || 'On-call team alerted',
+                (result.specialists || []).slice(0, 2).map(s => s.specialty || s.name).join(' . ') || 'On-call team alerted',
                 `${((Date.now()-startTs)/1000).toFixed(1)}s`);
 
               // Mark Mission Commander synthesis done
@@ -1746,7 +1745,7 @@ async function runDispatch() {
 
               renderFromResponse(result, formInputs);
 
-              // ΓöÇΓöÇ Populate bottom panel ΓÇö Orchestrate result + KB fallback ΓöÇΓöÇ
+              // ── Populate bottom panel - Orchestrate result + KB fallback ──
               setPipelineStep(6, 'done'); setPipelineStep(7, 'done'); updatePipelineBadge(8, 8);
 
               // Ambulances: primary from result + backups; pad with KB nearest if <2
@@ -1819,11 +1818,11 @@ async function runDispatch() {
             toolLog('error', 'Mission Commander Error', msg);
             // If it's a proxy-candidate-exhaustion error, fall back to simulation
             if (msg.includes('exhausted') || msg.includes('404') || msg.includes('401') || msg.includes('403')) {
-              toolLog('thought', 'Fallback', 'Orchestrate unreachable ΓÇö running local simulation');
+              toolLog('thought', 'Fallback', 'Orchestrate unreachable - running local simulation');
               await runSimulation(formInputs, true /* skipReset */);
             } else {
               document.getElementById('sys-badge').className = 'badge b-red';
-              document.getElementById('sys-badge').textContent = 'ΓùÅ ERROR';
+              document.getElementById('sys-badge').textContent = '● ERROR';
             }
             done = true;
             break;
@@ -1833,9 +1832,9 @@ async function runDispatch() {
     }
 
   } catch (err) {
-    // Network error, CORS failure, etc. ΓÇö fall back to simulation
+    // Network error, CORS failure, etc. - fall back to simulation
     toolLog('error', 'Network / Proxy Error', String(err));
-    toolLog('thought', 'Fallback', 'Live dispatch unavailable ΓÇö running local simulation');
+    toolLog('thought', 'Fallback', 'Live dispatch unavailable - running local simulation');
     await runSimulation(formInputs, true /* skipReset */);
   } finally {
     running = false;
@@ -1844,20 +1843,20 @@ async function runDispatch() {
   }
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // BOTTOM PANEL RENDER FUNCTIONS
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 
 // Pipeline step definitions (mirrors AGENTS array)
 const PIPELINE_STEPS = [
-  {icon:'≡ƒÄ»', name:'Mission Cmd',    sub:'Orchestrator'},
-  {icon:'≡ƒ⌐║', name:'Triage',         sub:'Medical Eval'},
-  {icon:'≡ƒÜæ', name:'Dispatch',       sub:'Ambulance'},
-  {icon:'≡ƒÜª', name:'Traffic Intel',  sub:'Congestion'},
-  {icon:'≡ƒÅÑ', name:'Hospital Re...', sub:'ICU & Beds'},
-  {icon:'≡ƒôí', name:'Route Opt',      sub:'Best Path'},
-  {icon:'≡ƒƒó', name:'Green Corri...', sub:'Signal Sync'},
-  {icon:'Γ¡É', name:'Decision A...',  sub:'Final Command'},
+  {icon:'1', name:'Mission Cmd',    sub:'Orchestrator'},
+  {icon:'2', name:'Triage',         sub:'Medical Eval'},
+  {icon:'3', name:'Dispatch',       sub:'Ambulance'},
+  {icon:'4', name:'Traffic Intel',  sub:'Congestion'},
+  {icon:'5', name:'Hospital Re...', sub:'ICU & Beds'},
+  {icon:'6', name:'Route Opt',      sub:'Best Path'},
+  {icon:'7', name:'Green Corri...', sub:'Signal Sync'},
+  {icon:'8', name:'Decision A...',  sub:'Final Command'},
 ];
 
 function buildPipelineSteps() {
@@ -1907,11 +1906,11 @@ function resetBottomPanel() {
     '<div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0;grid-column:1/-1">Awaiting selection...</div>';
   document.getElementById('specialist-list').innerHTML =
     '<div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting specialist assignment...</div>';
-  document.getElementById('stat-casualties').textContent = 'ΓÇö';
-  document.getElementById('stat-ambulances').textContent = 'ΓÇö';
-  document.getElementById('stat-hospitals').textContent = 'ΓÇö';
-  document.getElementById('stat-corridors').textContent = 'ΓÇö';
-  document.getElementById('stat-saved').textContent = 'ΓÇö';
+  document.getElementById('stat-casualties').textContent = '-';
+  document.getElementById('stat-ambulances').textContent = '-';
+  document.getElementById('stat-hospitals').textContent = '-';
+  document.getElementById('stat-corridors').textContent = '-';
+  document.getElementById('stat-saved').textContent = '-';
   document.getElementById('amb-status-badge').textContent = 'STANDBY';
   document.getElementById('spec-status-badge').textContent = 'STANDBY';
   document.getElementById('pipeline-step-badge').textContent = 'Awaiting dispatch';
@@ -1925,8 +1924,8 @@ function renderAmbulances(ambList) {
     <div class="amb-row">
       <span class="amb-badge ${i === 0 ? 'amb-primary' : 'amb-backup'}">${i === 0 ? 'PRIMARY' : 'BACKUP'}</span>
       <div class="amb-info">
-        <div class="amb-id">${a.id || a.ambulance_id || 'ΓÇö'} ┬╖ ${a.call_sign || a.sign || 'ΓÇö'}</div>
-        <div class="amb-detail">${a.type || 'ALS'} ┬╖ ${a.locality || a.current_locality || 'ΓÇö'} ┬╖ Crew: ${a.paramedic || (a.crew && a.crew[0]) || 'ΓÇö'}</div>
+        <div class="amb-id">${a.id || a.ambulance_id || '-'} . ${a.call_sign || a.sign || '-'}</div>
+        <div class="amb-detail">${a.type || 'ALS'} . ${a.locality || a.current_locality || '-'} . Crew: ${a.paramedic || (a.crew && a.crew[0]) || '-'}</div>
       </div>
       <div class="amb-eta">${a.eta_minutes || a.eta || '?'} min<br/><span style="font-size:9px;color:var(--muted);font-weight:400">${(a.distance_km || a.dist || '?')} km</span></div>
     </div>`).join('');
@@ -1943,13 +1942,13 @@ function renderHospitals(hospList) {
   if (!hospList || !hospList.length) return;
   el.innerHTML = hospList.map((h, i) => `
     <div class="hosp-card ${i === 0 ? 'primary' : ''}">
-      <div class="hosp-name">${h.name || h.hospital_name || 'ΓÇö'}</div>
+      <div class="hosp-name">${h.name || h.hospital_name || '-'}</div>
       <div class="hosp-score">${h.readiness ? h.readiness + '% SCORE' : (i === 0 ? 'PRIMARY' : 'ALT')}</div>
-      <div class="hosp-dist">Distance: ${h.distance_km || h.dist || '?'} km ┬╖ ETA: ${h.eta || '?'} min</div>
+      <div class="hosp-dist">Distance: ${h.distance_km || h.dist || '?'} km . ETA: ${h.eta || '?'} min</div>
       <div class="hosp-stats">
         <div class="hosp-stat">
           <div class="hosp-stat-lbl">Trauma Bays</div>
-          <div class="hosp-stat-val">${h.trauma_bays || (h.trauma_level ? 'L' + h.trauma_level : 'ΓÇö')}</div>
+          <div class="hosp-stat-val">${h.trauma_bays || (h.trauma_level ? 'L' + h.trauma_level : '-')}</div>
         </div>
         <div class="hosp-stat">
           <div class="hosp-stat-lbl">ICU Beds Free</div>
@@ -1966,11 +1965,11 @@ function renderSpecialists(specList) {
   const statusClass = s => s === 'En Route' ? 'spec-enroute' : s === 'On Call' ? 'spec-oncall' : 'spec-available';
   el.innerHTML = specList.map(s => `
     <div class="spec-row">
-      <div class="spec-avatar">≡ƒæ¿ΓÇìΓÜò∩╕Å</div>
+      <div class="spec-avatar">Dr</div>
       <div class="spec-info">
-        <div class="spec-role">${s.specialty || s.role || 'ΓÇö'}</div>
-        <div class="spec-name">${s.name || 'ΓÇö'}</div>
-        <div class="spec-station">${s.hospital || s.station || 'ΓÇö'} ┬╖ ETA: ${s.eta || '?'} min</div>
+        <div class="spec-role">${s.specialty || s.role || '-'}</div>
+        <div class="spec-name">${s.name || '-'}</div>
+        <div class="spec-station">${s.hospital || s.station || '-'} . ETA: ${s.eta || '?'} min</div>
       </div>
       <span class="spec-status ${statusClass(s.status || (s.on_call ? 'On Call' : 'Available'))}">${s.status || (s.on_call ? 'On Call' : 'Available')}</span>
     </div>`).join('');
@@ -1983,19 +1982,19 @@ function renderSpecialists(specList) {
 
 function populateBottomPanel(opts) {
   const { count, ambulances, hospitals, specialists, corridor, saved } = opts;
-  document.getElementById('stat-casualties').textContent = count || 'ΓÇö';
+  document.getElementById('stat-casualties').textContent = count || '-';
   if (corridor) {
     document.getElementById('stat-corridors').textContent = corridor;
-    document.getElementById('stat-saved').textContent = (saved || 'ΓÇö') + ' min';
+    document.getElementById('stat-saved').textContent = (saved || '-') + ' min';
   }
   if (ambulances && ambulances.length) renderAmbulances(ambulances);
   if (hospitals  && hospitals.length)  renderHospitals(hospitals);
   if (specialists && specialists.length) renderSpecialists(specialists);
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
-// ADK / watsonx Orchestrate ΓÇö Mission Commander integration
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
+// ADK / watsonx Orchestrate - Mission Commander integration
+// ═══════════════════════════════════════════════════════════
 
 const WXO_AGENT_ID   = 'f5bb4d34-12e0-466b-9858-6304e52bc4b7';
 const WXO_INSTANCE_ID= '9291f63d-e948-4929-9c62-56eecfb515ad';
@@ -2008,7 +2007,7 @@ function buildIncidentMessage() {
   const loc   = document.getElementById('f-loc')   ? document.getElementById('f-loc').value    : 'Silk Board Junction';
   const count = document.getElementById('f-count') ? document.getElementById('f-count').value  : '2';
   const notes = document.getElementById('f-notes') ? document.getElementById('f-notes').value  : '';
-  return `EMERGENCY DISPATCH REQUEST ΓÇö PulseRoute AI\n` +
+  return `EMERGENCY DISPATCH REQUEST - PulseRoute AI\n` +
          `Incident Type: ${type}\nSeverity: ${sev}\nLocation: ${loc}, Bengaluru\n` +
          `Casualties: ${count}\nAdditional: ${notes || 'None'}\n` +
          `Request: Dispatch nearest ALS unit, select optimal hospital, activate green corridor.`;
@@ -2018,7 +2017,7 @@ function buildIncidentMessage() {
 // If the ADK extension is installed it will intercept this URL
 function openMissionCommander(prefillMessage) {
   const msg = prefillMessage || buildIncidentMessage();
-  // Deep-link to the agent's chat UI ΓÇö ADK extension or browser will open it
+  // Deep-link to the agent's chat UI - ADK extension or browser will open it
   const chatUrl = `https://${WXO_HOST}/chat`
     + `?agentId=${encodeURIComponent(WXO_AGENT_ID)}`
     + `&message=${encodeURIComponent(msg)}`;
@@ -2028,7 +2027,7 @@ function openMissionCommander(prefillMessage) {
   const btn = document.getElementById('adk-btn');
   if (btn) {
     const orig = btn.innerHTML;
-    btn.innerHTML = '<span style="font-size:13px">Γ£à</span> Agent Opened';
+    btn.innerHTML = '<span style="font-size:13px">✅</span> Agent Opened';
     btn.style.background = 'rgba(57,211,83,.15)';
     btn.style.color = 'var(--green)';
     btn.style.borderColor = 'rgba(57,211,83,.3)';
@@ -2041,17 +2040,16 @@ function openMissionCommander(prefillMessage) {
   }
 
   // Also surface the URL in the tool console so it's visible
-  toolLog('thought', '≡ƒñû Mission Commander ADK',
+  toolLog('thought', '🤖 Mission Commander ADK',
     `Opening agent in watsonx Orchestrate ADK:\n${chatUrl}\n\nAgent ID: ${WXO_AGENT_ID}\nInstance: ${WXO_INSTANCE_ID}`);
 }
 
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 // INIT
-// ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+// ═══════════════════════════════════════════════════════════
 buildAgentList();
 buildPipelineSteps();
 document.getElementById('run-btn').addEventListener('click', runDispatch);
 </script>
 </body>
 </html>
-
