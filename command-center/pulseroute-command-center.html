@@ -1,9 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>PulseRoute AI — Emergency Operations Command Center</title>
+<title>PulseRoute AI â€” Emergency Operations Command Center</title>
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,7 +17,7 @@
 }
 html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px}
 
-/* ── TOPBAR ── */
+/* â”€â”€ TOPBAR â”€â”€ */
 #topbar{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
 .brand{display:flex;align-items:center;gap:12px}
 .brand-pulse{width:28px;height:28px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;animation:pulseRing 1.6s infinite;font-size:14px}
@@ -32,19 +34,19 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .b-purple{background:rgba(188,140,255,.15);color:var(--purple);border-color:rgba(188,140,255,.3)}
 .b-cyan{background:rgba(57,197,207,.15);color:var(--cyan);border-color:rgba(57,197,207,.3)}
 #clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-/* ── ADK / Mission Commander button ── */
+/* â”€â”€ ADK / Mission Commander button â”€â”€ */
 #adk-btn{display:flex;align-items:center;gap:5px;padding:5px 11px;background:rgba(188,140,255,.12);color:var(--purple);border:1px solid rgba(188,140,255,.35);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;letter-spacing:.3px;transition:background .18s,box-shadow .18s;white-space:nowrap}
 #adk-btn:hover{background:rgba(188,140,255,.22);box-shadow:0 0 0 3px rgba(188,140,255,.15)}
 
-/* ── LAYOUT ── */
+/* â”€â”€ LAYOUT â”€â”€ */
 #layout{display:grid;grid-template-columns:300px 1fr 300px;height:calc(100vh - 52px);gap:1px;background:var(--border)}
 #layout>*{background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
 
-/* ── PANEL HEADER ── */
+/* â”€â”€ PANEL HEADER â”€â”€ */
 .ph{padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;display:flex;align-items:center;gap:7px;flex-shrink:0}
 .ph-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 
-/* ── LEFT PANEL ── */
+/* â”€â”€ LEFT PANEL â”€â”€ */
 #left{overflow-y:auto}
 #input-section{padding:14px;border-bottom:1px solid var(--border);flex-shrink:0}
 .field{margin-bottom:10px}
@@ -61,7 +63,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 #run-btn .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── AGENT TIMELINE ── */
+/* â”€â”€ AGENT TIMELINE â”€â”€ */
 #agent-list{padding:14px;flex-shrink:0}
 .agent-row{display:flex;gap:10px;position:relative;padding-bottom:10px}
 .agent-row:last-child{padding-bottom:0}
@@ -78,25 +80,37 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .state-done .ag-icon{background:rgba(57,211,83,.2);color:var(--green)}
 .state-tool .ag-icon{background:rgba(188,140,255,.2);color:var(--purple)}
 
-/* ── CENTER MAP ── */
+/* â”€â”€ CENTER MAP â”€â”€ */
 #map-wrap{flex:1;position:relative;min-height:0;overflow:hidden}
-#bmap{width:100%;height:100%}
-.map-overlay-badges{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:7px}
-.map-badge{background:rgba(17,19,24,.88);border:1px solid var(--border);border-radius:6px;padding:6px 11px;font-size:11px;backdrop-filter:blur(4px);font-variant-numeric:tabular-nums}
-#map-legend{position:absolute;bottom:14px;left:14px;background:rgba(17,19,24,.88);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:11px;backdrop-filter:blur(4px)}
+#leaflet-map{width:100%;height:100%;background:#0d1117}
+.map-overlay-badges{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:7px;z-index:1000;pointer-events:none}
+.map-badge{background:rgba(17,19,24,.92);border:1px solid var(--border);border-radius:6px;padding:6px 11px;font-size:11px;backdrop-filter:blur(4px);font-variant-numeric:tabular-nums}
+#map-legend{position:absolute;bottom:60px;left:14px;background:rgba(17,19,24,.92);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-size:11px;backdrop-filter:blur(4px);z-index:1000;pointer-events:none}
 .leg-row{display:flex;align-items:center;gap:7px;margin-bottom:5px;color:var(--muted)}
 .leg-row:last-child{margin-bottom:0}
 .leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .leg-line{width:18px;height:3px;border-radius:2px;flex-shrink:0}
+/* Leaflet dark tile filter */
+.leaflet-tile{filter:brightness(0.7) saturate(0.8) hue-rotate(190deg) invert(0) contrast(1.1)}
+/* Custom marker pulse animation */
+@keyframes ambPulse{0%,100%{box-shadow:0 0 0 0 rgba(47,129,247,.7)}50%{box-shadow:0 0 0 10px rgba(47,129,247,0)}}
+@keyframes incidentPulse{0%,100%{box-shadow:0 0 0 0 rgba(248,81,73,.7)}50%{box-shadow:0 0 0 12px rgba(248,81,73,0)}}
+@keyframes greenPulse{0%,100%{box-shadow:0 0 0 0 rgba(63,185,80,.7)}50%{box-shadow:0 0 0 8px rgba(63,185,80,0)}}
+.amb-marker-div{width:32px;height:32px;border-radius:50%;background:#0d1117;border:2px solid #2f81f7;display:flex;align-items:center;justify-content:center;font-size:17px;animation:ambPulse 1.6s infinite;cursor:pointer}
+.amb-anim-div{width:20px;height:20px;border-radius:50%;background:#2f81f7;border:2px solid #58a6ff;animation:ambPulse 1s infinite;box-shadow:0 0 12px #2f81f7}
+.incident-marker-div{width:34px;height:34px;border-radius:50%;background:rgba(248,81,73,.15);border:2px solid #f85149;display:flex;align-items:center;justify-content:center;font-size:17px;animation:incidentPulse 1.4s infinite}
+.hosp-marker-div{width:30px;height:30px;border-radius:6px;background:rgba(63,185,80,.15);border:2px solid #3fb950;display:flex;align-items:center;justify-content:center;font-size:15px;animation:greenPulse 2s infinite}
+.signal-red-div{width:14px;height:14px;border-radius:50%;background:#f85149;border:1px solid #ff8880;box-shadow:0 0 6px #f85149}
+.signal-green-div{width:14px;height:14px;border-radius:50%;background:#3fb950;border:1px solid #56d364;box-shadow:0 0 8px #3fb950;animation:greenPulse .8s infinite}
 
-/* ── ETA BAR ── */
+/* â”€â”€ ETA BAR â”€â”€ */
 #eta-bar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);flex-shrink:0}
 .eta-cell{background:var(--surface);padding:12px 14px;text-align:center}
 .eta-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
 .eta-val{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .eta-unit{font-size:11px;color:var(--muted);margin-left:3px}
 
-/* ── RIGHT PANEL ── */
+/* â”€â”€ RIGHT PANEL â”€â”€ */
 #right{overflow:hidden}
 #tool-console{flex:1;overflow-y:auto;padding:10px 12px;font-family:'Consolas','Courier New',monospace;font-size:11px;line-height:1.7;min-height:0}
 .tc-entry{margin-bottom:10px;border-left:2px solid var(--border);padding-left:10px}
@@ -112,7 +126,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .tc-lbl.err{color:var(--red)}
 .tc-body{color:#c9d1d9;white-space:pre-wrap;word-break:break-all;margin-top:2px;font-size:11px}
 
-/* ── MISSION SUMMARY ── */
+/* â”€â”€ MISSION SUMMARY â”€â”€ */
 #mission-summary{flex-shrink:0;padding:14px;border-top:1px solid var(--border);background:var(--surface)}
 .ms-title{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -121,7 +135,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .ms-card-val{font-size:12px;font-weight:600}
 .ms-card-sub{font-size:10px;color:var(--muted);margin-top:2px}
 
-/* ── CONFIDENCE RING ── */
+/* â”€â”€ CONFIDENCE RING â”€â”€ */
 #confidence-wrap{text-align:center;padding:12px 14px;border-top:1px solid var(--border)}
 .conf-ring{position:relative;width:80px;height:80px;margin:0 auto}
 .conf-ring svg{transform:rotate(-90deg)}
@@ -130,7 +144,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .conf-pct{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
 .conf-label{font-size:10px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
 
-/* ── BEFORE/AFTER WIDGET ── */
+/* â”€â”€ BEFORE/AFTER WIDGET â”€â”€ */
 #ba-widget{padding:12px 14px;border-top:1px solid var(--border)}
 .ba-title{font-size:11px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
 .ba-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
@@ -140,7 +154,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 .ba-arrow{color:var(--green);font-size:18px;flex-shrink:0;margin:0 8px}
 .ba-saving{text-align:center;font-size:12px;font-weight:700;color:var(--teal);margin-top:4px}
 
-/* ── BOTTOM PANEL ── */
+/* â”€â”€ BOTTOM PANEL â”€â”€ */
 #bottom-panel{overflow-y:auto;max-height:420px}
 .stat-cell{background:var(--surface);padding:14px 18px;display:flex;align-items:center;gap:12px}
 .stat-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
@@ -198,36 +212,36 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 </head>
 <body>
 
-<!-- ═══ TOPBAR ═══ -->
+<!-- â•â•â• TOPBAR â•â•â• -->
 <div id="topbar">
   <div class="brand">
-    <div class="brand-pulse">🚨</div>
+    <div class="brand-pulse">ðŸš¨</div>
     <div>
       <h1>PulseRoute AI <span>/ Emergency Operations Command Center</span></h1>
-      <div class="brand-sub">Bengaluru Emergency Dispatch Intelligence · watsonx Orchestrate · pulseroute-mcp v1.1.0</div>
+      <div class="brand-sub">Bengaluru Emergency Dispatch Intelligence Â· watsonx Orchestrate Â· pulseroute-mcp v1.1.0</div>
     </div>
   </div>
   <div class="top-status">
-    <span id="sys-badge" class="badge b-green">● SYSTEM READY</span>
+    <span id="sys-badge" class="badge b-green">â— SYSTEM READY</span>
     <span id="mcp-badge" class="badge b-blue">MCP ONLINE</span>
-    <span id="mci-badge" class="badge b-red" style="display:none">⚠ MCI ACTIVE</span>
-    <span id="corridor-badge" class="badge b-green" style="display:none">🟢 GREEN CORRIDOR</span>
+    <span id="mci-badge" class="badge b-red" style="display:none">âš  MCI ACTIVE</span>
+    <span id="corridor-badge" class="badge b-green" style="display:none">ðŸŸ¢ GREEN CORRIDOR</span>
     <!-- ADK / watsonx Orchestrate Mission Commander button -->
     <button id="adk-btn" onclick="openMissionCommander()" title="Open PulseRoute Mission Commander in watsonx Orchestrate">
-      <span style="font-size:13px">🤖</span> Mission Commander
+      <span style="font-size:13px">ðŸ¤–</span> Mission Commander
     </button>
     <span id="clock">--:--:-- IST</span>
   </div>
 </div>
 
-<!-- ═══ MAIN LAYOUT ═══ -->
+<!-- â•â•â• MAIN LAYOUT â•â•â• -->
 <div id="layout">
 
-  <!-- ── LEFT: INPUT + AGENT TIMELINE ── -->
+  <!-- â”€â”€ LEFT: INPUT + AGENT TIMELINE â”€â”€ -->
   <div id="left">
     <div class="ph"><div class="ph-dot" style="background:var(--red)"></div>Incident Input</div>
     <div id="input-section">
-      <button id="demo-btn">⚡ Load Demo Scenario</button>
+      <button id="demo-btn">âš¡ Load Demo Scenario</button>
       <div class="field">
         <label>Incident Description</label>
         <textarea id="f-desc" placeholder="Describe the emergency..."></textarea>
@@ -269,7 +283,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <input id="f-notes" type="text" placeholder="Multiple trauma..."/>
         </div>
       </div>
-      <button id="run-btn"><span>▶ ACTIVATE DISPATCH</span><div class="spin" id="btn-spin"></div></button>
+      <button id="run-btn"><span>â–¶ ACTIVATE DISPATCH</span><div class="spin" id="btn-spin"></div></button>
     </div>
 
     <div class="ph"><div class="ph-dot" style="background:var(--accent)"></div>Agent Execution Timeline</div>
@@ -278,306 +292,15 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     </div>
   </div>
 
-  <!-- ── CENTER: MAP + ETA ── -->
+  <!-- â”€â”€ CENTER: MAP + ETA â”€â”€ -->
   <div id="center" style="display:flex;flex-direction:column">
     <div class="ph"><div class="ph-dot" style="background:var(--cyan)"></div>Bengaluru Tactical Operations Map</div>
     <div id="map-wrap">
-      <svg id="bmap" viewBox="0 0 780 520" preserveAspectRatio="xMidYMid slice">
-        <defs>
-          <!-- Google Maps dark-style base gradient -->
-          <linearGradient id="mapBg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#1a1f2e"/>
-            <stop offset="100%" stop-color="#141820"/>
-          </linearGradient>
-          <!-- Road shadows / depth -->
-          <filter id="road-shadow" x="-10%" y="-10%" width="120%" height="120%">
-            <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity=".6"/>
-          </filter>
-          <!-- Glow filters -->
-          <filter id="glow-g" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3.5" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glow-r" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="5" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glow-b" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <filter id="glow-y" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="3" result="b"/>
-            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-          <!-- Arrow markers -->
-          <marker id="arr-r" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <path d="M0,0 L0,7 L7,3.5 z" fill="#f85149"/>
-          </marker>
-          <marker id="arr-g" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <path d="M0,0 L0,7 L7,3.5 z" fill="#3fb950"/>
-          </marker>
-          <marker id="arr-b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <path d="M0,0 L0,7 L7,3.5 z" fill="#2f81f7"/>
-          </marker>
-          <!-- Ambulance marker -->
-          <marker id="arr-amb" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
-            <path d="M0,0 L0,7 L7,3.5 z" fill="#56b4f7"/>
-          </marker>
-        </defs>
+      <!-- Leaflet real-streets map replaces SVG -->
+      <div id="leaflet-map"></div>
 
-        <!-- ═══ MAP BASE — Google Maps dark style ═══ -->
-        <rect width="780" height="520" fill="url(#mapBg)"/>
-
-        <!-- Water bodies (Bellandur lake area, Ulsoor lake) -->
-        <ellipse cx="498" cy="348" rx="28" ry="14" fill="#1b2d3e" opacity=".7"/>
-        <text x="498" y="352" fill="#2d6a8c" font-size="7" text-anchor="middle" opacity=".8">Bellandur Lake</text>
-        <ellipse cx="430" cy="192" rx="14" ry="7" fill="#1b2d3e" opacity=".6"/>
-        <text x="430" y="195" fill="#2d6a8c" font-size="6" text-anchor="middle" opacity=".7">Ulsoor</text>
-
-        <!-- Parks / green areas -->
-        <rect x="298" y="246" width="22" height="16" rx="3" fill="#1a2b1a" opacity=".6"/>
-        <text x="309" y="257" fill="#2d5a2d" font-size="6" text-anchor="middle" opacity=".7">Lalbagh</text>
-        <rect x="350" y="170" width="18" height="12" rx="2" fill="#1a2b1a" opacity=".5"/>
-        <text x="359" y="179" fill="#2d5a2d" font-size="6" text-anchor="middle" opacity=".6">Cubbon</text>
-
-        <!-- ═══ ROAD NETWORK — proper Google Maps style ═══ -->
-
-        <!-- TIER-3: Fine local roads (background, darkest) -->
-        <line x1="280" y1="180" x2="310" y2="260" stroke="#232a38" stroke-width="2"/>
-        <line x1="310" y1="260" x2="290" y2="320" stroke="#232a38" stroke-width="2"/>
-        <line x1="350" y1="160" x2="380" y2="240" stroke="#232a38" stroke-width="2"/>
-        <line x1="380" y1="240" x2="400" y2="310" stroke="#232a38" stroke-width="2"/>
-        <line x1="450" y1="170" x2="440" y2="250" stroke="#232a38" stroke-width="2"/>
-        <line x1="440" y1="250" x2="430" y2="320" stroke="#232a38" stroke-width="2"/>
-        <line x1="490" y1="200" x2="480" y2="270" stroke="#232a38" stroke-width="2"/>
-        <line x1="250" y1="210" x2="300" y2="260" stroke="#232a38" stroke-width="2"/>
-        <line x1="320" y1="310" x2="360" y2="370" stroke="#232a38" stroke-width="2"/>
-        <line x1="420" y1="290" x2="460" y2="340" stroke="#232a38" stroke-width="2"/>
-        <line x1="260" y1="300" x2="310" y2="340" stroke="#232a38" stroke-width="2"/>
-        <line x1="470" y1="280" x2="500" y2="330" stroke="#232a38" stroke-width="2"/>
-
-        <!-- TIER-2: Secondary roads (medium, grey-blue) -->
-        <!-- Sarjapur Road -->
-        <line x1="420" y1="300" x2="500" y2="400" stroke="#2d3748" stroke-width="3.5"/>
-        <!-- Koramangala Inner Ring -->
-        <path d="M370,260 Q410,270 420,300 Q428,326 410,350" fill="none" stroke="#2d3748" stroke-width="3.5"/>
-        <!-- Bannerghatta Road -->
-        <line x1="390" y1="260" x2="385" y2="400" stroke="#2d3748" stroke-width="3.5"/>
-        <!-- MG Road / Brigade Road area -->
-        <line x1="350" y1="210" x2="420" y2="210" stroke="#2d3748" stroke-width="3.5"/>
-        <line x1="380" y1="195" x2="380" y2="240" stroke="#2d3748" stroke-width="3.5"/>
-        <!-- Shivajinagar / Cunningham Rd -->
-        <line x1="340" y1="175" x2="400" y2="185" stroke="#2d3748" stroke-width="3.5"/>
-        <!-- Airport road / HAL area -->
-        <line x1="430" y1="160" x2="470" y2="230" stroke="#2d3748" stroke-width="3.5"/>
-        <!-- Whitefield road -->
-        <line x1="500" y1="200" x2="570" y2="240" stroke="#2d3748" stroke-width="3"/>
-        <!-- Electronic City approach -->
-        <line x1="400" y1="390" x2="420" y2="460" stroke="#2d3748" stroke-width="3"/>
-        <!-- Tumkur Rd approach -->
-        <line x1="310" y1="155" x2="280" y2="100" stroke="#2d3748" stroke-width="3"/>
-        <!-- Mysore Rd -->
-        <line x1="270" y1="260" x2="175" y2="310" stroke="#2d3748" stroke-width="3.5"/>
-        <!-- Rajajinagar area -->
-        <line x1="290" y1="190" x2="245" y2="230" stroke="#2d3748" stroke-width="3"/>
-
-        <!-- TIER-1: Primary arterials (bright, labelled) -->
-        <!-- Hosur Road NH44 — vertical south corridor -->
-        <line x1="420" y1="300" x2="422" y2="480" stroke="#3a4a60" stroke-width="5"/>
-        <text x="436" y="420" fill="#5a7090" font-size="7.5" font-weight="bold" transform="rotate(86,436,420)">HOSUR RD NH44</text>
-
-        <!-- Bellary Rd NH44 north -->
-        <line x1="390" y1="138" x2="390" y2="60" stroke="#3a4a60" stroke-width="5"/>
-        <text x="404" y="100" fill="#5a7090" font-size="7.5" font-weight="bold" transform="rotate(90,404,100)">BELLARY RD NH44</text>
-
-        <!-- Old Madras Road NH75 — northeast diagonal -->
-        <line x1="430" y1="192" x2="570" y2="130" stroke="#3a4a60" stroke-width="4.5"/>
-        <text x="505" y="151" fill="#5a7090" font-size="7" font-weight="bold" transform="rotate(-22,505,151)">OLD MADRAS RD NH75</text>
-
-        <!-- Mysore Rd NH275 west -->
-        <line x1="300" y1="258" x2="160" y2="310" stroke="#3a4a60" stroke-width="4.5"/>
-        <text x="225" y="276" fill="#5a7090" font-size="7" font-weight="bold" transform="rotate(-18,225,276)">MYSORE RD NH275</text>
-
-        <!-- ORR — Outer Ring Road (thickest, most prominent) -->
-        <!-- Casing (dark outline for road feel) -->
-        <path d="M282,90 Q382,68 472,90 Q552,114 582,180 Q608,252 604,322 Q596,384 554,420 Q510,454 448,466 Q382,474 320,458 Q258,440 224,402 Q192,362 182,300 Q176,236 196,180 Q218,130 282,90"
-              fill="none" stroke="#1a2535" stroke-width="10"/>
-        <!-- Road surface -->
-        <path id="orr-path" d="M282,90 Q382,68 472,90 Q552,114 582,180 Q608,252 604,322 Q596,384 554,420 Q510,454 448,466 Q382,474 320,458 Q258,440 224,402 Q192,362 182,300 Q176,236 196,180 Q218,130 282,90"
-              fill="none" stroke="#3d5070" stroke-width="6"/>
-        <!-- Centre dashes -->
-        <path d="M282,90 Q382,68 472,90 Q552,114 582,180 Q608,252 604,322 Q596,384 554,420 Q510,454 448,466 Q382,474 320,458 Q258,440 224,402 Q192,362 182,300 Q176,236 196,180 Q218,130 282,90"
-              fill="none" stroke="#4a6080" stroke-width="1" stroke-dasharray="8,6" opacity=".5"/>
-        <!-- ORR label -->
-        <text font-size="8" font-weight="bold" fill="#6080a0" opacity=".8">
-          <textPath href="#orr-path" startOffset="10%">OUTER RING ROAD (ORR)</textPath>
-        </text>
-
-        <!-- NICE Road (Peripheral Ring Road) — outermost -->
-        <path id="nice-path" d="M178,188 Q150,268 164,355 Q184,428 250,465 Q320,492 398,492 Q472,486 534,455 Q608,410 638,338 Q662,262 640,192 Q616,120 560,84 Q500,50 432,44 Q354,40 292,64 Q232,87 197,132"
-              fill="none" stroke="#1f2d1f" stroke-width="4.5"/>
-        <!-- NICE label -->
-        <text font-size="7" font-weight="bold" fill="#3a6040" opacity=".7">
-          <textPath href="#nice-path" startOffset="5%">NICE ROAD (PERIPHERAL RING ROAD)</textPath>
-        </text>
-
-        <!-- TIER-0: Expressway / KIAL Bypass -->
-        <line x1="388" y1="60" x2="388" y2="15" stroke="#2a3d55" stroke-width="7"/>
-        <text x="403" y="38" fill="#4a6890" font-size="7" font-weight="bold" transform="rotate(90,403,38)">KIAL BYPASS</text>
-
-        <!-- ═══ COMPASS ═══ -->
-        <g transform="translate(742,42)">
-          <circle r="22" fill="rgba(20,24,32,.92)" stroke="#2d3748" stroke-width="1.5"/>
-          <polygon points="0,-16 -4,-4 0,-8 4,-4" fill="#2f81f7"/>
-          <polygon points="0,16 -4,4 0,8 4,4" fill="#4a5568"/>
-          <text y="-18" fill="#e6edf3" font-size="8.5" text-anchor="middle" font-weight="700">N</text>
-          <text y="24" fill="#4a5568" font-size="7" text-anchor="middle">S</text>
-          <text x="-20" y="4" fill="#4a5568" font-size="7" text-anchor="middle">W</text>
-          <text x="20" y="4" fill="#4a5568" font-size="7" text-anchor="middle">E</text>
-        </g>
-
-        <!-- ═══ SCALE BAR ═══ -->
-        <g transform="translate(570,504)">
-          <rect x="-2" y="-6" width="76" height="10" rx="2" fill="rgba(20,24,32,.7)"/>
-          <line x1="0" y1="0" x2="72" y2="0" stroke="#8899aa" stroke-width="1.5"/>
-          <line x1="0" y1="-3" x2="0" y2="3" stroke="#8899aa" stroke-width="1.5"/>
-          <line x1="36" y1="-2" x2="36" y2="2" stroke="#8899aa" stroke-width="1"/>
-          <line x1="72" y1="-3" x2="72" y2="3" stroke="#8899aa" stroke-width="1.5"/>
-          <text x="36" y="-8" fill="#8899aa" font-size="7.5" text-anchor="middle">5 km</text>
-        </g>
-
-        <!-- ═══ DISTRICT / AREA LABELS ═══ -->
-        <text x="310" y="130" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">RAJAJINAGAR</text>
-        <text x="395" y="160" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">SHIVAJINAGAR</text>
-        <text x="460" y="175" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">HAL</text>
-        <text x="370" y="285" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">KORAMANGALA</text>
-        <text x="260" y="295" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">JAYANAGAR</text>
-        <text x="490" y="290" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">WHITEFIELD</text>
-        <text x="280" y="370" fill="#2a3d52" font-size="8" font-weight="700" text-anchor="middle" letter-spacing="1">JP NAGAR</text>
-        <text x="460" y="390" fill="#2a3d52" font-size="8" font-weight="700" text-anchor="middle" letter-spacing="1">ELECTRONIC CITY</text>
-        <text x="390" y="110" fill="#2a3d52" font-size="9" font-weight="700" text-anchor="middle" letter-spacing="1">HEBBAL</text>
-        <text x="540" y="220" fill="#2a3d52" font-size="8" font-weight="700" text-anchor="middle" letter-spacing="1">MARATHAHALLI</text>
-
-        <!-- ═══ HOSPITALS (Google Maps style pins) ═══ -->
-        <g id="hospitals-layer">
-          <!-- Manipal OAR x:470 y:212 -->
-          <g id="hm-manipal">
-            <rect x="455" y="197" width="30" height="22" rx="4" fill="#0d1f0f" stroke="#3fb950" stroke-width="1.5"/>
-            <rect x="455" y="197" width="30" height="5" rx="2" fill="#1a4020"/>
-            <text x="470" y="212" fill="#3fb950" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
-            <text x="470" y="231" fill="#4ecf68" font-size="7.5" text-anchor="middle" font-weight="600">MANIPAL</text>
-            <text x="470" y="239" fill="#3a5a3a" font-size="6.5" text-anchor="middle">87 beds · L1</text>
-          </g>
-          <!-- Apollo BG Rd x:390 y:300 -->
-          <g id="hm-apollo">
-            <rect x="375" y="287" width="30" height="22" rx="4" fill="#0d1f0f" stroke="#3fb950" stroke-width="1.5"/>
-            <rect x="375" y="287" width="30" height="5" rx="2" fill="#1a4020"/>
-            <text x="390" y="302" fill="#3fb950" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
-            <text x="390" y="321" fill="#4ecf68" font-size="7.5" text-anchor="middle" font-weight="600">APOLLO</text>
-            <text x="390" y="329" fill="#3a5a3a" font-size="6.5" text-anchor="middle">104 beds · L1</text>
-          </g>
-          <!-- Victoria Majestic x:328 y:188 -->
-          <g id="hm-victoria">
-            <rect x="313" y="175" width="30" height="22" rx="4" fill="#0d2a0f" stroke="#56d364" stroke-width="2"/>
-            <rect x="313" y="175" width="30" height="5" rx="2" fill="#1a4d20"/>
-            <text x="328" y="190" fill="#56d364" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
-            <text x="328" y="209" fill="#70e080" font-size="7.5" text-anchor="middle" font-weight="700">VICTORIA</text>
-            <text x="328" y="217" fill="#3a5a3a" font-size="6.5" text-anchor="middle">210 beds · MCI-80</text>
-          </g>
-          <!-- St Johns Koramangala x:444 y:258 -->
-          <g id="hm-stjohns">
-            <rect x="429" y="245" width="30" height="22" rx="4" fill="#0d1f0f" stroke="#3fb950" stroke-width="1.5"/>
-            <rect x="429" y="245" width="30" height="5" rx="2" fill="#1a4020"/>
-            <text x="444" y="260" fill="#3fb950" font-size="11" text-anchor="middle" font-weight="bold">H+</text>
-            <text x="444" y="279" fill="#4ecf68" font-size="7.5" text-anchor="middle" font-weight="600">ST JOHN'S</text>
-            <text x="444" y="287" fill="#3a5a3a" font-size="6.5" text-anchor="middle">178 beds · L1</text>
-          </g>
-        </g>
-
-        <!-- ═══ TRAFFIC LIGHT COMPONENTS ═══
-             Each signal has:
-               - A pole (rect stem)
-               - A housing (rounded rect with 3 circles: R / Y / G)
-               - id suffixes: -r -y -g for the bulb circles
-             Initial state: RED on, Y/G dim
-             After corridor activation: GREEN on, R/Y dim
-        ═══ -->
-        <g id="signals-layer">
-
-          <!-- TS001 Silk Board Junction x:424 y:302 (HIGH CONGESTION 9.8) -->
-          <g id="tl-sb" transform="translate(424,302)">
-            <!-- pole -->
-            <rect x="-1.5" y="-18" width="3" height="18" fill="#3a4558"/>
-            <!-- housing -->
-            <rect x="-9" y="-50" width="18" height="36" rx="3" fill="#1a1f2a" stroke="#4a5568" stroke-width="1.2"/>
-            <!-- red bulb -->
-            <circle id="ts-sb-r" cx="0" cy="-42" r="5.5" fill="#f85149" filter="url(#glow-r)"/>
-            <!-- yellow bulb -->
-            <circle id="ts-sb-y" cx="0" cy="-32" r="5.5" fill="#2a2a1a" opacity=".35"/>
-            <!-- green bulb -->
-            <circle id="ts-sb-g" cx="0" cy="-22" r="5.5" fill="#1a2a1a" opacity=".25"/>
-            <!-- label -->
-            <text x="0" y="6" fill="#f8a84a" font-size="6.5" text-anchor="middle" font-weight="700">SILK BOARD</text>
-            <text x="0" y="14" fill="#c0603a" font-size="5.5" text-anchor="middle">9.8/10 CRITICAL</text>
-          </g>
-
-          <!-- TS004 Marathahalli Bridge x:508 y:215 (HIGH 9.5) -->
-          <g id="tl-mara" transform="translate(508,215)">
-            <rect x="-1.5" y="-18" width="3" height="18" fill="#3a4558"/>
-            <rect x="-9" y="-50" width="18" height="36" rx="3" fill="#1a1f2a" stroke="#4a5568" stroke-width="1.2"/>
-            <circle id="ts-mara-r" cx="0" cy="-42" r="5.5" fill="#f85149" filter="url(#glow-r)"/>
-            <circle id="ts-mara-y" cx="0" cy="-32" r="5.5" fill="#2a2a1a" opacity=".35"/>
-            <circle id="ts-mara-g" cx="0" cy="-22" r="5.5" fill="#1a2a1a" opacity=".25"/>
-            <text x="0" y="6" fill="#f8a84a" font-size="6" text-anchor="middle" font-weight="700">MARATHAHALLI</text>
-            <text x="0" y="13" fill="#c0603a" font-size="5.5" text-anchor="middle">9.5/10 SEVERE</text>
-          </g>
-
-          <!-- TS002 Hebbal Flyover x:392 y:138 (HIGH 9.2) -->
-          <g id="tl-heb" transform="translate(392,138)">
-            <rect x="-1.5" y="-18" width="3" height="18" fill="#3a4558"/>
-            <rect x="-9" y="-50" width="18" height="36" rx="3" fill="#1a1f2a" stroke="#4a5568" stroke-width="1.2"/>
-            <circle id="ts-heb-r" cx="0" cy="-42" r="5.5" fill="#f85149" filter="url(#glow-r)"/>
-            <circle id="ts-heb-y" cx="0" cy="-32" r="5.5" fill="#2a2a1a" opacity=".35"/>
-            <circle id="ts-heb-g" cx="0" cy="-22" r="5.5" fill="#1a2a1a" opacity=".25"/>
-            <text x="0" y="6" fill="#f8a84a" font-size="6" text-anchor="middle" font-weight="700">HEBBAL JN</text>
-            <text x="0" y="13" fill="#c0603a" font-size="5.5" text-anchor="middle">9.2/10 SEVERE</text>
-          </g>
-
-          <!-- TS020 Trinity Circle x:404 y:200 (PREEMPTIBLE ✓) -->
-          <g id="tl-trinity" transform="translate(404,200)">
-            <rect x="-1.5" y="-18" width="3" height="18" fill="#3a4558"/>
-            <rect x="-9" y="-50" width="18" height="36" rx="3" fill="#1a1f2a" stroke="#39c5cf" stroke-width="1.5"/>
-            <circle id="ts-trinity-r" cx="0" cy="-42" r="5.5" fill="#f85149" filter="url(#glow-r)"/>
-            <circle id="ts-trinity-y" cx="0" cy="-32" r="5.5" fill="#2a2a1a" opacity=".35"/>
-            <circle id="ts-trinity-g" cx="0" cy="-22" r="5.5" fill="#1a2a1a" opacity=".25"/>
-            <!-- Preemptible indicator -->
-            <rect x="-9" y="-52" width="18" height="4" rx="1" fill="#39c5cf" opacity=".5"/>
-            <text x="0" y="6" fill="#39c5cf" font-size="6" text-anchor="middle" font-weight="700">TRINITY</text>
-            <text x="0" y="13" fill="#2a9090" font-size="5.5" text-anchor="middle">PREEMPTIBLE</text>
-          </g>
-
-          <!-- TS023 Domlur Flyover x:454 y:228 (PREEMPTIBLE ✓) -->
-          <g id="tl-domlur" transform="translate(454,228)">
-            <rect x="-1.5" y="-18" width="3" height="18" fill="#3a4558"/>
-            <rect x="-9" y="-50" width="18" height="36" rx="3" fill="#1a1f2a" stroke="#39c5cf" stroke-width="1.5"/>
-            <circle id="ts-domlur-r" cx="0" cy="-42" r="5.5" fill="#f85149" filter="url(#glow-r)"/>
-            <circle id="ts-domlur-y" cx="0" cy="-32" r="5.5" fill="#2a2a1a" opacity=".35"/>
-            <circle id="ts-domlur-g" cx="0" cy="-22" r="5.5" fill="#1a2a1a" opacity=".25"/>
-            <rect x="-9" y="-52" width="18" height="4" rx="1" fill="#39c5cf" opacity=".5"/>
-            <text x="0" y="6" fill="#39c5cf" font-size="6" text-anchor="middle" font-weight="700">DOMLUR</text>
-            <text x="0" y="13" fill="#2a9090" font-size="5.5" text-anchor="middle">PREEMPTIBLE</text>
-          </g>
-
-        </g><!-- end signals-layer -->
-
-        <!-- ═══ DYNAMIC LAYERS ═══ -->
-        <g id="route-layer"></g>
-        <g id="corridor-layer"></g>
-        <g id="incident-layer"></g>
-        <g id="ambulance-layer"></g>
-        <g id="anim-layer"></g>
-      </svg>
+      <!-- removed SVG road network â€” replaced by Leaflet OSM tiles above -->
+      
 
       <!-- Map overlays -->
       <div class="map-overlay-badges" id="map-badges"></div>
@@ -596,26 +319,26 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div id="eta-bar">
       <div class="eta-cell">
         <div class="eta-lbl">ETA Before Corridor</div>
-        <div class="eta-val" id="eta-before" style="color:var(--amber)">—</div>
+        <div class="eta-val" id="eta-before" style="color:var(--amber)">â€”</div>
       </div>
       <div class="eta-cell">
         <div class="eta-lbl">ETA After Corridor</div>
-        <div class="eta-val" id="eta-after" style="color:var(--green)">—</div>
+        <div class="eta-val" id="eta-after" style="color:var(--green)">â€”</div>
       </div>
       <div class="eta-cell" style="background:rgba(57,197,207,.04)">
         <div class="eta-lbl" style="color:var(--cyan)">Time Saved</div>
-        <div class="eta-val" id="eta-saved" style="color:var(--cyan)">—</div>
+        <div class="eta-val" id="eta-saved" style="color:var(--cyan)">â€”</div>
       </div>
     </div>
   </div>
 
-  <!-- ── RIGHT: TOOL CONSOLE + SUMMARY ── -->
+  <!-- â”€â”€ RIGHT: TOOL CONSOLE + SUMMARY â”€â”€ -->
   <div id="right">
     <div class="ph"><div class="ph-dot" style="background:var(--green)"></div>MCP Tool Invocation Console</div>
     <div id="tool-console">
       <div style="color:var(--muted);font-size:11px;padding:20px 0;text-align:center;line-height:1.8">
         Awaiting dispatch activation...<br/>
-        <span style="font-size:10px;opacity:.5">pulseroute-mcp v1.1.0 — http transport</span>
+        <span style="font-size:10px;opacity:.5">pulseroute-mcp v1.1.0 â€” http transport</span>
       </div>
     </div>
 
@@ -626,7 +349,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
           <circle class="conf-ring-bg" cx="40" cy="40" r="32"/>
           <circle id="conf-arc" class="conf-ring-fill" cx="40" cy="40" r="32" stroke-dasharray="201" stroke-dashoffset="201" stroke="var(--green)"/>
         </svg>
-        <div class="conf-pct" id="conf-pct" style="color:var(--green)">—</div>
+        <div class="conf-pct" id="conf-pct" style="color:var(--green)">â€”</div>
       </div>
       <div class="conf-label" id="conf-label">pending</div>
     </div>
@@ -636,12 +359,12 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
       <div class="ba-row">
         <div class="ba-side">
           <div class="lbl">Standard ETA</div>
-          <div class="val" id="ba-before" style="color:var(--red)">—</div>
+          <div class="val" id="ba-before" style="color:var(--red)">â€”</div>
         </div>
-        <div class="ba-arrow">→</div>
+        <div class="ba-arrow">â†’</div>
         <div class="ba-side">
           <div class="lbl">With PulseRoute</div>
-          <div class="val" id="ba-after" style="color:var(--green)">—</div>
+          <div class="val" id="ba-after" style="color:var(--green)">â€”</div>
         </div>
       </div>
       <div class="ba-saving" id="ba-saving"></div>
@@ -656,22 +379,22 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
   </div>
 </div><!-- end layout -->
 
-<!-- ═══════════════════════════════════════════════════════════
-     BOTTOM PANEL — Pipeline · Ambulances · Hospitals · Specialists
+<!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+     BOTTOM PANEL â€” Pipeline Â· Ambulances Â· Hospitals Â· Specialists
      Hidden until dispatch runs, then revealed section by section
-═══════════════════════════════════════════════════════════ -->
+â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div id="bottom-panel" style="display:none;background:var(--bg);border-top:1px solid var(--border)">
 
-  <!-- ── ROW 1: stat bar ── -->
+  <!-- â”€â”€ ROW 1: stat bar â”€â”€ -->
   <div id="stat-bar" style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border)">
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(248,81,73,.15);color:var(--red)">🚨</div><div><div class="stat-lbl">Total Casualties</div><div class="stat-val" id="stat-casualties" style="color:var(--red)">—</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,197,207,.15);color:var(--cyan)">🚑</div><div><div class="stat-lbl">Ambulances Fleet</div><div class="stat-val" id="stat-ambulances" style="color:var(--cyan)">—</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,211,83,.15);color:var(--green)">🏥</div><div><div class="stat-lbl">Allocated Hospitals</div><div class="stat-val" id="stat-hospitals" style="color:var(--green)">—</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(227,179,65,.15);color:var(--amber)">⚡</div><div><div class="stat-lbl">Green Corridors</div><div class="stat-val" id="stat-corridors" style="color:var(--amber)">—</div></div></div>
-    <div class="stat-cell"><div class="stat-icon" style="background:rgba(188,140,255,.15);color:var(--purple)">⏱</div><div><div class="stat-lbl">Time Saved</div><div class="stat-val" id="stat-saved" style="color:var(--purple)">—</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(248,81,73,.15);color:var(--red)">ðŸš¨</div><div><div class="stat-lbl">Total Casualties</div><div class="stat-val" id="stat-casualties" style="color:var(--red)">â€”</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,197,207,.15);color:var(--cyan)">ðŸš‘</div><div><div class="stat-lbl">Ambulances Fleet</div><div class="stat-val" id="stat-ambulances" style="color:var(--cyan)">â€”</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(57,211,83,.15);color:var(--green)">ðŸ¥</div><div><div class="stat-lbl">Allocated Hospitals</div><div class="stat-val" id="stat-hospitals" style="color:var(--green)">â€”</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(227,179,65,.15);color:var(--amber)">âš¡</div><div><div class="stat-lbl">Green Corridors</div><div class="stat-val" id="stat-corridors" style="color:var(--amber)">â€”</div></div></div>
+    <div class="stat-cell"><div class="stat-icon" style="background:rgba(188,140,255,.15);color:var(--purple)">â±</div><div><div class="stat-lbl">Time Saved</div><div class="stat-val" id="stat-saved" style="color:var(--purple)">â€”</div></div></div>
   </div>
 
-  <!-- ── ROW 2: agent pipeline ── -->
+  <!-- â”€â”€ ROW 2: agent pipeline â”€â”€ -->
   <div style="padding:16px 20px 14px;border-bottom:1px solid var(--border)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <div style="font-size:12px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">AI Multi-Agent Execution Pipeline</div>
@@ -680,14 +403,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div id="pipeline-steps" style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px"></div>
   </div>
 
-  <!-- ── ROW 3: ambulances + hospitals + specialists ── -->
+  <!-- â”€â”€ ROW 3: ambulances + hospitals + specialists â”€â”€ -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
 
     <!-- Ambulances -->
     <div style="padding:16px 18px;background:var(--bg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">🚑</span>
+          <span style="font-size:15px">ðŸš‘</span>
           <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Ambulance Fleet Dispatch</span>
         </div>
         <span id="amb-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,197,207,.15);color:var(--cyan);border:1px solid rgba(57,197,207,.3)">STANDBY</span>
@@ -701,7 +424,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div style="padding:16px 18px;background:var(--bg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">🏥</span>
+          <span style="font-size:15px">ðŸ¥</span>
           <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Hospital Readiness & ER</span>
         </div>
         <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(57,211,83,.12);color:var(--green);border:1px solid rgba(57,211,83,.25)">LIVE BED RESERVATION</span>
@@ -715,7 +438,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
     <div style="padding:16px 18px;background:var(--bg)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:15px">👨‍⚕️</span>
+          <span style="font-size:15px">ðŸ‘¨â€âš•ï¸</span>
           <span style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase">Specialist On-Call Dispatch</span>
         </div>
         <span id="spec-status-badge" style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:8px;background:rgba(88,166,255,.12);color:var(--accent);border:1px solid rgba(88,166,255,.25)">STANDBY</span>
@@ -729,16 +452,16 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);fon
 </div><!-- end bottom-panel -->
 
 <script>
-// ═══════════════════════════════════════════════════════════
-// PROXY CONFIG — points at the Railway MCP server.
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// PROXY CONFIG â€” points at the Railway MCP server.
 // When this HTML is served by the MCP server itself at /demo,
 // the server rewrites this to '' (relative) automatically.
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const ORCHESTRATE_PROXY_URL = 'https://pulseroute-ai-production-3f9f.up.railway.app';
 
-// ═══════════════════════════════════════════════════════════
-// KB DATA — embedded from PulseRoute_Bengaluru_KB.json
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// KB DATA â€” embedded from PulseRoute_Bengaluru_KB.json
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const KB = {
   hospitals: [
     {id:"hosp_001",name:"Manipal Hospital",locality:"Old Airport Road",lat:12.9592,lng:77.6484,beds_available:87,trauma_level:1,specialties:["Cardiology","Cardiac Surgery","Neurology","Neurosurgery","Trauma & Critical Care"],phone:"+91-80-25023456",readiness:94},
@@ -774,45 +497,45 @@ const KB = {
   ]
 };
 
-// Map coordinate helpers (WGS84 → SVG viewBox 0,0,780,520)
-// Bengaluru bounds: lat 12.83–13.11, lng 77.46–77.77
+// Map coordinate helpers (WGS84 â†’ SVG viewBox 0,0,780,520)
+// Bengaluru bounds: lat 12.83â€“13.11, lng 77.46â€“77.77
 const MAP = {
   latMin:12.83, latMax:13.11, lngMin:77.46, lngMax:77.77, W:780, H:520,
   x(lng){ return Math.round((lng-this.lngMin)/(this.lngMax-this.lngMin)*this.W); },
   y(lat){ return Math.round((1-(lat-this.latMin)/(this.latMax-this.latMin))*this.H); }
 };
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // AGENT DEFINITIONS
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const AGENTS = [
   {id:"a1",num:1,name:"Mission Commander",sub:"Incident classification & SOP assignment",color:"red"},
-  {id:"a2",num:2,name:"Emergency Intake Agent",sub:"Priority · Category · Units required",color:"blue"},
+  {id:"a2",num:2,name:"Emergency Intake Agent",sub:"Priority Â· Category Â· Units required",color:"blue"},
   {id:"a3",num:3,name:"Ambulance Coordination",sub:"Nearest ALS + backup selection",color:"purple"},
-  {id:"a4",num:4,name:"Route Intelligence Agent",sub:"Initial ETA → optimised ETA",color:"cyan"},
-  {id:"a5",num:5,name:"Green Corridor Agent",sub:"Signal overrides · ERSS-112 preemption",color:"teal"},
+  {id:"a4",num:4,name:"Route Intelligence Agent",sub:"Initial ETA â†’ optimised ETA",color:"cyan"},
+  {id:"a5",num:5,name:"Green Corridor Agent",sub:"Signal overrides Â· ERSS-112 preemption",color:"teal"},
   {id:"a6",num:6,name:"Hospital Readiness Agent",sub:"Top-3 hospitals with readiness %",color:"amber"},
   {id:"a7",num:7,name:"Specialist Coordination",sub:"On-call specialists by incident type",color:"orange"},
-  {id:"a8",num:8,name:"Mission Commander",sub:"Final synthesis · Confidence score",color:"green"}
+  {id:"a8",num:8,name:"Mission Commander",sub:"Final synthesis Â· Confidence score",color:"green"}
 ];
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DEMO SCENARIO (from spec: Road Accident, Silk Board, 4 patients)
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const DEMO = {
   desc:"Road accident involving 2 vehicles at Silk Board Junction. 4 patients with multiple trauma injuries. One unconscious, one trapped. Heavy traffic.",
   type:"Road Accident", sev:"Critical (S1)", loc:"Silk Board Junction, Outer Ring Road",
   count:"4", notes:"Multiple trauma injuries, one patient trapped in vehicle"
 };
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // STATE
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 let running = false;
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CLOCK
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function tick(){
   const n=new Date();
   const ist=new Date(n.getTime()+5.5*3600000);
@@ -820,9 +543,9 @@ function tick(){
 }
 setInterval(tick,1000); tick();
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // RENDER AGENT LIST
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function buildAgentList(){
   const el=document.getElementById('agent-list');
   el.innerHTML=AGENTS.map(a=>`
@@ -852,9 +575,9 @@ function setAgentState(id, state, status, result, timing){
   }
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MCP CONSOLE
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function toolLog(type, label, body){
   const con=document.getElementById('tool-console');
   const ts=new Date(new Date().getTime()+5.5*3600000).toISOString().slice(11,19);
@@ -868,92 +591,149 @@ function toolLog(type, label, body){
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ═══════════════════════════════════════════════════════════
-// SVG MAP HELPERS
+// LEAFLET MAP HELPERS
 // ═══════════════════════════════════════════════════════════
-function clearLayer(id){ document.getElementById(id).innerHTML=''; }
-function svgEl(tag,attrs){
-  const el=document.createElementNS('http://www.w3.org/2000/svg',tag);
-  for(const [k,v] of Object.entries(attrs)) el.setAttribute(k,v);
-  return el;
-}
+// Global Leaflet map instance + layer registries
+let _map = null;
+const _mapLayers = {}; // id -> array of L.Layer
 
-function plotIncident(x,y){
-  const g=svgEl('g',{filter:'url(#glow-r)'});
-  g.appendChild(svgEl('circle',{cx:x,cy:y,r:'14',fill:'rgba(248,81,73,.18)',stroke:'#f85149','stroke-width':'1.5'}));
-  g.appendChild(svgEl('circle',{cx:x,cy:y,r:'7',fill:'#f85149'}));
-  const t=svgEl('text',{x:x,y:y-20,fill:'#f85149','font-size':'9','text-anchor':'middle','font-weight':'700'});
-  t.textContent='INCIDENT'; g.appendChild(t);
-  document.getElementById('incident-layer').appendChild(g);
-}
-
-function plotAmbulance(x,y,id){
-  const g=svgEl('g',{filter:'url(#glow-b)'});
-  g.appendChild(svgEl('circle',{cx:x,cy:y,r:'9',fill:'rgba(47,129,247,.25)',stroke:'#2f81f7','stroke-width':'1.5'}));
-  const t=svgEl('text',{x:x,y:y+4,fill:'#2f81f7','font-size':'10','text-anchor':'middle'});
-  t.textContent='🚑'; g.appendChild(t);
-  const lbl=svgEl('text',{x:x,y:y-14,fill:'#2f81f7','font-size':'8','text-anchor':'middle','font-weight':'700'});
-  lbl.textContent=id; g.appendChild(lbl);
-  document.getElementById('ambulance-layer').appendChild(g);
-}
-
-function drawRoute(x1,y1,x2,y2,color,markerId){
-  const mid_x=(x1+x2)/2, mid_y=(y1+y2)/2-30;
-  const p=svgEl('path',{
-    d:`M${x1},${y1} Q${mid_x},${mid_y} ${x2},${y2}`,
-    fill:'none',stroke:color,'stroke-width':'2.5','stroke-dasharray':'6,4',
-    'marker-end':`url(#${markerId})`,'opacity':'0.85'
+function _initMap() {
+  if (_map) return;
+  _map = L.map('leaflet-map', { zoomControl: true, attributionControl: false })
+           .setView([12.9716, 77.5946], 13);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19, subdomains: 'abcd'
+  }).addTo(_map);
+  // Attribution tiny bottom right
+  L.control.attribution({prefix:false}).addTo(_map);
+  // Draw standing hospital markers from KB
+  KB.hospitals.forEach(h => {
+    const icon = L.divIcon({className:'',html:'<div class="hosp-marker-div">🏥</div>',iconSize:[30,30],iconAnchor:[15,15]});
+    const m = L.marker([h.lat,h.lng],{icon,zIndexOffset:100})
+      .bindTooltip(`<b>${h.name}</b><br>${h.locality}<br>${h.beds_available||'?'} beds · L${h.trauma_level||'?'}`,{className:'leaflet-tooltip-dark',direction:'top'})
+      .addTo(_map);
+    _addToLayer('hospitals', m);
   });
-  document.getElementById('route-layer').appendChild(p);
-}
-
-function drawCorridor(x1,y1,x2,y2){
-  const mid_x=(x1+x2)/2, mid_y=(y1+y2)/2-20;
-  const p=svgEl('path',{
-    d:`M${x1},${y1} Q${mid_x},${mid_y} ${x2},${y2}`,
-    fill:'none',stroke:'#3fb950','stroke-width':'3',
-    'stroke-dasharray':'none','marker-end':'url(#arr-g)','opacity':'0.9',
-    filter:'url(#glow-g)'
+  // Draw standing signal markers from KB
+  KB.signals.forEach(sig => {
+    const html = `<div class="${sig.preemptible?'signal-red-div':'signal-red-div'}" id="sig-${sig.id}"></div>`;
+    const icon = L.divIcon({className:'',html,iconSize:[14,14],iconAnchor:[7,7]});
+    const m = L.marker([sig.lat,sig.lng],{icon,zIndexOffset:50})
+      .bindTooltip(`${sig.name}<br>Congestion: ${sig.congestion}/10${sig.preemptible?' · PREEMPTIBLE':''}`,{className:'leaflet-tooltip-dark',direction:'top'})
+      .addTo(_map);
+    _addToLayer('signals', m);
   });
-  document.getElementById('corridor-layer').appendChild(p);
 }
 
-function flashSignal(id,color){
-  const el=document.getElementById(id);
-  if(!el) return;
-  el.setAttribute('fill',color);
-  el.setAttribute('r','7');
-  setTimeout(()=>{ el.setAttribute('r','5.5'); el.setAttribute('fill','#3fb950'); },600);
+function _addToLayer(id, layer) {
+  if (!_mapLayers[id]) _mapLayers[id] = [];
+  _mapLayers[id].push(layer);
 }
 
-function animateAmbulance(ax,ay,ix,iy,hx,hy){
-  // Animate ambulance dot along: amb → incident → hospital
-  const anim=document.getElementById('anim-layer');
-  anim.innerHTML='';
-  const dot=svgEl('circle',{cx:ax,cy:ay,r:'6',fill:'#2f81f7',filter:'url(#glow-b)'});
-  anim.appendChild(dot);
-  const steps=[ [ax,ay,ix,iy,1200], [ix,iy,hx,hy,2000] ];
-  let i=0;
-  function move(){
-    if(i>=steps.length){ return; }
-    const [x1,y1,x2,y2,dur]=steps[i++];
-    const start=performance.now();
-    function frame(now){
-      const t=Math.min((now-start)/dur,1);
-      const ease=t<0.5?2*t*t:-1+(4-2*t)*t;
-      dot.setAttribute('cx',x1+(x2-x1)*ease);
-      dot.setAttribute('cy',y1+(y2-y1)*ease);
-      if(t<1) requestAnimationFrame(frame);
-      else{ setTimeout(move,200); }
+function clearLayer(id) {
+  (_mapLayers[id] || []).forEach(l => { if (_map && l) _map.removeLayer(l); });
+  _mapLayers[id] = [];
+}
+
+// plotIncident: lat=y, lng=x  (MAP.x returns lng, MAP.y returns lat)
+function plotIncident(lng, lat) {
+  _initMap();
+  const icon = L.divIcon({className:'',html:'<div class="incident-marker-div">🚨</div>',iconSize:[34,34],iconAnchor:[17,17]});
+  const m = L.marker([lat,lng],{icon,zIndexOffset:900})
+    .bindTooltip('<b>⚠ INCIDENT SITE</b>',{permanent:true,className:'leaflet-tooltip-dark incident-tip',direction:'top',offset:[0,-20]})
+    .addTo(_map);
+  _map.setView([lat,lng],14,{animate:true,duration:1.2});
+  _addToLayer('incident-layer', m);
+  // Pulse circle
+  const pulse = L.circle([lat,lng],{radius:200,color:'#f85149',fillColor:'#f85149',fillOpacity:0.08,weight:2,dashArray:'6,4'}).addTo(_map);
+  _addToLayer('incident-layer', pulse);
+}
+
+function plotAmbulance(lng, lat, label) {
+  _initMap();
+  const icon = L.divIcon({className:'',html:`<div class="amb-marker-div" title="${label}">🚑</div>`,iconSize:[32,32],iconAnchor:[16,16]});
+  const m = L.marker([lat,lng],{icon,zIndexOffset:800})
+    .bindTooltip(`<b>🚑 ${label}</b><br>DISPATCHED`,{className:'leaflet-tooltip-dark',direction:'top'})
+    .addTo(_map);
+  _addToLayer('ambulance-layer', m);
+}
+
+function drawRoute(lng1,lat1,lng2,lat2,color) {
+  _initMap();
+  const line = L.polyline([[lat1,lng1],[lat2,lng2]],{
+    color, weight:4, opacity:0.85, dashArray:'8,5',
+    className:'route-line'
+  }).addTo(_map);
+  _addToLayer('route-layer', line);
+}
+
+function drawCorridor(lng1,lat1,lng2,lat2) {
+  _initMap();
+  // Glowing green corridor polyline
+  const glow = L.polyline([[lat1,lng1],[lat2,lng2]],{color:'#3fb950',weight:10,opacity:0.18}).addTo(_map);
+  const line = L.polyline([[lat1,lng1],[lat2,lng2]],{color:'#3fb950',weight:4,opacity:0.95,className:'corridor-line'}).addTo(_map);
+  _addToLayer('corridor-layer', glow);
+  _addToLayer('corridor-layer', line);
+  // Flash all preemptible signals GREEN along the route
+  KB.signals.filter(s=>s.preemptible).forEach(sig => flashSignal(`sig-${sig.id}`, '#3fb950'));
+}
+
+function flashSignal(domId, color) {
+  // Find the div and toggle class
+  const el = document.getElementById(domId);
+  if (el) {
+    el.className = color === '#3fb950' ? 'signal-green-div' : 'signal-red-div';
+  }
+  // Also update any Leaflet marker by matching id in _mapLayers.signals
+  (_mapLayers.signals || []).forEach(m => {
+    const div = m.getElement && m.getElement();
+    if (div) {
+      const inner = div.querySelector(`#${domId}`);
+      if (inner) inner.className = color === '#3fb950' ? 'signal-green-div' : 'signal-red-div';
+    }
+  });
+}
+
+function animateAmbulance(lng1,lat1,lng2,lat2,lng3,lat3) {
+  _initMap();
+  clearLayer('anim-layer');
+  const icon = L.divIcon({className:'',html:'<div class="amb-anim-div"></div>',iconSize:[20,20],iconAnchor:[10,10]});
+  const marker = L.marker([lat1,lng1],{icon,zIndexOffset:1000}).addTo(_map);
+  _addToLayer('anim-layer', marker);
+  // Animate: pos1 -> pos2 -> pos3
+  const waypoints = [[lat1,lng1],[lat2,lng2],[lat3,lng3]];
+  const durations = [1400, 2200];
+  let step = 0;
+  function animStep() {
+    if (step >= durations.length) return;
+    const [sLat,sLng] = waypoints[step];
+    const [eLat,eLng] = waypoints[step+1];
+    const dur = durations[step]; step++;
+    const start = performance.now();
+    function frame(now) {
+      const t = Math.min((now-start)/dur, 1);
+      const ease = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+      marker.setLatLng([sLat+(eLat-sLat)*ease, sLng+(eLng-sLng)*ease]);
+      if (t<1) requestAnimationFrame(frame);
+      else setTimeout(animStep, 300);
     }
     requestAnimationFrame(frame);
   }
-  move();
+  animStep();
 }
 
-// ═══════════════════════════════════════════════════════════
+// Leaflet tooltip dark style (injected once)
+(function injectLeafletStyles(){
+  const s = document.createElement('style');
+  s.textContent = `.leaflet-tooltip-dark{background:#111318;border:1px solid #21262d;color:#e6edf3;font-size:11px;font-family:'Segoe UI',system-ui,sans-serif;padding:4px 8px;border-radius:5px;box-shadow:0 2px 8px rgba(0,0,0,.5)}.leaflet-tooltip-dark.incident-tip{background:rgba(248,81,73,.18);border-color:#f85149;color:#f85149;font-weight:700}.route-line{stroke-dasharray:8,5}.leaflet-control-zoom{border:1px solid #21262d !important}.leaflet-control-zoom a{background:#111318 !important;color:#e6edf3 !important;border-bottom:1px solid #21262d !important}`;
+  document.head.appendChild(s);
+})();
+
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CONFIDENCE RING
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function setConfidence(pct){
   const arc=document.getElementById('conf-arc');
   const pctEl=document.getElementById('conf-pct');
@@ -973,21 +753,21 @@ function setConfidence(pct){
   lbl.textContent=pct>=85?'HIGH CONFIDENCE':pct>=65?'MODERATE':'LOW CONFIDENCE';
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // BEFORE/AFTER
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function setBa(before, after){
   const w=document.getElementById('ba-widget');
   w.style.display='block';
   document.getElementById('ba-before').textContent=before+'m';
   document.getElementById('ba-after').textContent=after+'m';
   const saved=before-after;
-  document.getElementById('ba-saving').textContent=`${saved} minutes saved · ${Math.round(saved/before*100)}% faster`;
+  document.getElementById('ba-saving').textContent=`${saved} minutes saved Â· ${Math.round(saved/before*100)}% faster`;
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MISSION SUMMARY CARDS
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function showMissionSummary(cards){
   const ms=document.getElementById('mission-summary');
   ms.style.display='block';
@@ -1000,18 +780,18 @@ function showMissionSummary(cards){
     </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ETA BAR
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function setEta(before,after){
   document.getElementById('eta-before').innerHTML=before+'<span class="eta-unit">min</span>';
   document.getElementById('eta-after').innerHTML=after+'<span class="eta-unit">min</span>';
   document.getElementById('eta-saved').innerHTML=(before-after)+'<span class="eta-unit">min</span>';
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAP BADGE
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function addMapBadge(text,color){
   const div=document.createElement('div');
   div.className='map-badge';
@@ -1020,9 +800,9 @@ function addMapBadge(text,color){
   document.getElementById('map-badges').appendChild(div);
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DEMO LOAD
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 document.getElementById('demo-btn').addEventListener('click',()=>{
   document.getElementById('f-desc').value=DEMO.desc;
   document.getElementById('f-type').value=DEMO.type;
@@ -1032,19 +812,19 @@ document.getElementById('demo-btn').addEventListener('click',()=>{
   document.getElementById('f-notes').value=DEMO.notes;
 });
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DELAY HELPER
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // MAIN SIMULATION ENGINE
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // runSimulation can be called standalone (skipReset=false, default) or as a
 // fallback from runDispatch (skipReset=true, formInputs already provided).
 async function runSimulation(formInputs, skipReset){
   // When called as fallback from runDispatch, running is already true and
-  // the button is already disabled — don't touch those.
+  // the button is already disabled â€” don't touch those.
   if(!skipReset){
     if(running) return;
     running=true;
@@ -1065,7 +845,7 @@ async function runSimulation(formInputs, skipReset){
     AGENTS.forEach(a=>setAgentState(a.id,'idle',a.sub,''));
   }
 
-  // Get form inputs — prefer passed-in values (fallback path), else read DOM
+  // Get form inputs â€” prefer passed-in values (fallback path), else read DOM
   const type =(formInputs&&formInputs.type) ||document.getElementById('f-type').value ||'Road Accident';
   const sev  =(formInputs&&formInputs.sev)  ||document.getElementById('f-sev').value  ||'Critical (S1)';
   const loc  =(formInputs&&formInputs.loc)  ||document.getElementById('f-loc').value  ||'Silk Board Junction';
@@ -1075,7 +855,7 @@ async function runSimulation(formInputs, skipReset){
   const isMCI=parseInt(count)>=10;
   if(isMCI){ document.getElementById('mci-badge').style.display=''; }
 
-  // Incident coordinates — pick Silk Board for demo, else city centre
+  // Incident coordinates â€” pick Silk Board for demo, else city centre
   const iLoc=loc.toLowerCase().includes('silk board')?{lat:12.9176,lng:77.6237}:
               loc.toLowerCase().includes('hebbal')?{lat:13.045,lng:77.5946}:
               loc.toLowerCase().includes('koramangala')?{lat:12.9352,lng:77.6245}:
@@ -1085,33 +865,33 @@ async function runSimulation(formInputs, skipReset){
 
   const startTs=Date.now();
 
-  // ── AGENT 1: Mission Commander ──────────────────────────
+  // â”€â”€ AGENT 1: Mission Commander â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   setAgentState('a1','run','Classifying incident and assigning SOP...');
-  toolLog('thought','Mission Commander Agent','Analysing incident description: '+type+' · '+sev+' · '+loc);
+  toolLog('thought','Mission Commander Agent','Analysing incident description: '+type+' Â· '+sev+' Â· '+loc);
   await wait(900);
   const sopCode=type==='Cardiac Arrest'?'CA-P1-BLR':type==='Acute Stroke'?'STR-P1-BLR':type==='Major Burns'?'BURN-MJR-P1-BLR':type==='Mass Casualty (MCI)'?'MCI-P1-BLR':'TR-MJR-P1-BLR';
-  const priority=parseInt(count)>=10?'P1 — Immediate (MCI Override)':'Critical (S1)'===sev?'P1 — Immediate':'P2 — Urgent';
+  const priority=parseInt(count)>=10?'P1 â€” Immediate (MCI Override)':'Critical (S1)'===sev?'P1 â€” Immediate':'P2 â€” Urgent';
   const incidentId='PRBLR-'+new Date(Date.now()+5.5*3600000).toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(Math.random()*900+100);
   toolLog('resp','Incident Classified',`ID: ${incidentId}\nSOP: ${sopCode}\nPriority: ${priority}\nLocation verified: ${loc}`);
-  setAgentState('a1','done','Complete',`SOP: ${sopCode} · ${priority}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  setAgentState('a1','done','Complete',`SOP: ${sopCode} Â· ${priority}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   plotIncident(ix,iy);
   await wait(400);
 
-  // ── AGENT 2: Emergency Intake Agent ─────────────────────
-  setAgentState('a2','run','Processing intake — extracting structured data...');
-  toolLog('thought','Emergency Intake Agent',`Extracting: location · casualties · severity · hazards`);
+  // â”€â”€ AGENT 2: Emergency Intake Agent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  setAgentState('a2','run','Processing intake â€” extracting structured data...');
+  toolLog('thought','Emergency Intake Agent',`Extracting: location Â· casualties Â· severity Â· hazards`);
   await wait(1100);
   const highCongestion=loc.toLowerCase().includes('silk board')||loc.toLowerCase().includes('marathahalli')||loc.toLowerCase().includes('hebbal');
   const congestionFlag=highCongestion?'HIGH (9.8/10)':'MODERATE';
-  toolLog('resp','Intake Report',`Casualties: ${count} patients · Severity: ${sev}\nLocation: ${loc} [verified]\nCongestion: ${congestionFlag}\nSOP: ${sopCode} · Required unit: ALS`);
-  setAgentState('a2','done','Structured report generated',`${count} patients · ${sev} · SOP ${sopCode}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+  toolLog('resp','Intake Report',`Casualties: ${count} patients Â· Severity: ${sev}\nLocation: ${loc} [verified]\nCongestion: ${congestionFlag}\nSOP: ${sopCode} Â· Required unit: ALS`);
+  setAgentState('a2','done','Structured report generated',`${count} patients Â· ${sev} Â· SOP ${sopCode}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   await wait(300);
 
-  // ── HELPERS: sort available units by distance to incident ─
+  // â”€â”€ HELPERS: sort available units by distance to incident â”€
   function distKm(a){ return Math.hypot(a.lat-iLoc.lat,a.lng-iLoc.lng)*111; }
   function etaMin(a){ return Math.round(distKm(a)*2.2)+3; } // ~27 km/h avg with lights
 
-  // ── SPEC MATCHING: map incident type → required specialties ──
+  // â”€â”€ SPEC MATCHING: map incident type â†’ required specialties â”€â”€
   const SPEC_MAP = {
     'Cardiac Arrest':     ['Cardiologist','Critical Care Specialist'],
     'Acute Stroke':       ['Neurologist','Neurosurgeon'],
@@ -1126,7 +906,7 @@ async function runSimulation(formInputs, skipReset){
   };
   const requiredSpecs = SPEC_MAP[type] || ['Trauma Surgeon','Critical Care Specialist'];
 
-  // ── HOSPITAL SCORING: matches Orchestrate select_hospital logic ──
+  // â”€â”€ HOSPITAL SCORING: matches Orchestrate select_hospital logic â”€â”€
   const HOSP_SPEC_MAP = {
     'Cardiac Arrest':     ['Cardiology','Cardiac Surgery'],
     'Acute Stroke':       ['Neurology','Neurosurgery'],
@@ -1161,17 +941,17 @@ async function runSimulation(formInputs, skipReset){
     return score;
   }
 
-  // NOTE: KB hospitals may not have emergency_dept field — treat all as eligible
+  // NOTE: KB hospitals may not have emergency_dept field â€” treat all as eligible
   const scoredHospitals = KB.hospitals
     .filter(h => h.beds_available >= (isMCI?15:3))
     .map(h => ({ ...h, _score: scoreHospital(h), _dist: distKm(h) }))
     .sort((a,b) => b._score - a._score);
 
-  // Always have at least 3 — if filter produced fewer, use all and sort anyway
+  // Always have at least 3 â€” if filter produced fewer, use all and sort anyway
   const top3 = (scoredHospitals.length >= 3 ? scoredHospitals : KB.hospitals.map(h=>({...h,_score:0,_dist:distKm(h)})).sort((a,b)=>a._dist-b._dist)).slice(0,3);
   const h1   = top3[0] || KB.hospitals[0]; // absolute fallback: first hospital in KB
 
-  // ── AMBULANCE DISPATCH: scale count to casualty load ─────
+  // â”€â”€ AMBULANCE DISPATCH: scale count to casualty load â”€â”€â”€â”€â”€
   // MCI: 1 unit per 3 casualties; non-MCI: always primary + 1 backup
   const ambsNeeded = isMCI ? Math.max(2, Math.ceil(parseInt(count)/3)) : 2;
   const availAmbs  = KB.ambulances
@@ -1199,21 +979,21 @@ async function runSimulation(formInputs, skipReset){
   const nearest = dispatchedAmbs[0];
   const ambEta  = nearest._eta;
 
-  // ── AGENT 3: Ambulance Coordination ─────────────────────
+  // â”€â”€ AGENT 3: Ambulance Coordination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   setAgentState('a3','run',`Dispatching ${dispatchedAmbs.length} unit(s)...`);
   toolLog('call','find_nearest_available_ambulance',
     `{\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng},\n  ambulance_type: "ALS"${isMCI?',\n  count_needed: '+ambsNeeded:''}\n}`);
   await wait(1300);
   toolLog('resp','Ambulances Dispatched',
-    dispatchedAmbs.map((a,i)=>`${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign})\n  Type: ${a.type} · ${a.locality} · ETA ~${a._eta} min · ${a._dist.toFixed(1)} km`).join('\n'));
+    dispatchedAmbs.map((a,i)=>`${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign})\n  Type: ${a.type} Â· ${a.locality} Â· ETA ~${a._eta} min Â· ${a._dist.toFixed(1)} km`).join('\n'));
   setAgentState('a3','done',`${dispatchedAmbs.length} unit(s) dispatched`,
-    dispatchedAmbs.slice(0,2).map(a=>`${a.id}·${a.type}`).join(' + '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    dispatchedAmbs.slice(0,2).map(a=>`${a.id}Â·${a.type}`).join(' + '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   // Plot all ambulances on map
   dispatchedAmbs.forEach((a,i)=>{ const ax=MAP.x(a.lng),ay=MAP.y(a.lat); plotAmbulance(ax,ay,a.call_sign); });
   const ax=MAP.x(nearest.lng), ay=MAP.y(nearest.lat);
   await wait(300);
 
-  // ── AGENT 4: Route Intelligence ──────────────────────────
+  // â”€â”€ AGENT 4: Route Intelligence â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   setAgentState('a4','run','Invoking traffic_assessment + calculate_route...');
   toolLog('call','traffic_assessment',
     `{\n  incident_location: { locality: "${loc}", lat: ${iLoc.lat}, lng: ${iLoc.lng} },\n  radius_km: 10\n}`);
@@ -1230,14 +1010,14 @@ async function runSimulation(formInputs, skipReset){
   await wait(900);
   const etaBefore = ambEta+delay+(highCongestion?8:2);
   toolLog('resp','Route Leg A',
-    `${nearest.locality} → ${loc}\nRoad: ORR (RD001) · ${(ambEta*0.7).toFixed(1)} km\nETA: ${ambEta} min · Emergency route: YES`);
+    `${nearest.locality} â†’ ${loc}\nRoad: ORR (RD001) Â· ${(ambEta*0.7).toFixed(1)} km\nETA: ${ambEta} min Â· Emergency route: YES`);
   setAgentState('a4','done','Routes computed',
-    `Leg A: ${ambEta} min · Congestion: ${congLevel}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `Leg A: ${ambEta} min Â· Congestion: ${congLevel}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   drawRoute(ax,ay,ix,iy,'#f0883e','arr-r');
   await wait(300);
 
-  // ── AGENT 5: Green Corridor ──────────────────────────────
-  setAgentState('a5','run','Activating green corridor — ERSS-112 preemption...');
+  // â”€â”€ AGENT 5: Green Corridor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  setAgentState('a5','run','Activating green corridor â€” ERSS-112 preemption...');
   toolLog('thought','Green Corridor Agent',
     `Identifying preemptible signals on route...\nTriggering: Trinity Circle (TS020), Domlur Flyover Jn (TS023)`);
   await wait(700);
@@ -1251,27 +1031,27 @@ async function runSimulation(formInputs, skipReset){
   await wait(700);
   const legBeta=etaAfter-ambEta;
   toolLog('resp','Green Corridor Activated',
-    `Signals preempted: TS020 (Trinity Circle), TS023 (Domlur Jn)\nCorridor: ${loc} → ${h1.name}\nLeg B ETA: ${legBeta} min\nETA reduction: 32%`);
+    `Signals preempted: TS020 (Trinity Circle), TS023 (Domlur Jn)\nCorridor: ${loc} â†’ ${h1.name}\nLeg B ETA: ${legBeta} min\nETA reduction: 32%`);
   setAgentState('a5','done','GREEN CORRIDOR ACTIVE',
-    `TS020+TS023 preempted · ETA −${etaBefore-etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `TS020+TS023 preempted Â· ETA âˆ’${etaBefore-etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   document.getElementById('corridor-badge').style.display='';
   setEta(etaBefore,etaAfter);
-  addMapBadge(`${loc} → ${h1.name}: ${etaAfter} min`,'#3fb950');
+  addMapBadge(`${loc} â†’ ${h1.name}: ${etaAfter} min`,'#3fb950');
   await wait(300);
 
-  // ── AGENT 6: Hospital Readiness ──────────────────────────
-  setAgentState('a6','run','Scoring hospitals — readiness & specialty match...');
+  // â”€â”€ AGENT 6: Hospital Readiness â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  setAgentState('a6','run','Scoring hospitals â€” readiness & specialty match...');
   toolLog('call','select_hospital',
     `{\n  emergency_type: "${type}",\n  required_specialties: ${JSON.stringify(needSpecs)},\n  latitude: ${iLoc.lat},\n  longitude: ${iLoc.lng}${isMCI?',\n  min_bed_capacity: '+minBedsForMCI:''}\n}`);
   await wait(1200);
   toolLog('resp','Hospital Selection',
-    top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds avail: ${h.beds_available||'?'} · Score: ${h._score!=null?h._score.toFixed(0):'—'} · Dist: ${h._dist!=null?h._dist.toFixed(1):'?'} km · Trauma L${h.trauma_level}`).join('\n'));
+    top3.map((h,i)=>`${i+1}. ${h.name} (${h.locality})\n   Beds avail: ${h.beds_available||'?'} Â· Score: ${h._score!=null?h._score.toFixed(0):'â€”'} Â· Dist: ${h._dist!=null?h._dist.toFixed(1):'?'} km Â· Trauma L${h.trauma_level}`).join('\n'));
   setAgentState('a6','done','Hospitals ranked',
-    `1. ${top3[0].name} · 2. ${top3[1]?.name||'—'}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `1. ${top3[0].name} Â· 2. ${top3[1]?.name||'â€”'}`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   addMapBadge(`Destination: ${top3[0].name}`,'#2f81f7');
   await wait(300);
 
-  // ── AGENT 7: Specialist Coordination ────────────────────
+  // â”€â”€ AGENT 7: Specialist Coordination â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   setAgentState('a7','run','Matching on-call specialists by incident type...');
   toolLog('thought','Specialist Coordination',
     `Incident: ${type}\nRequired specialties: ${requiredSpecs.join(', ')}`);
@@ -1291,12 +1071,12 @@ async function runSimulation(formInputs, skipReset){
   }
   const onCall = matchedSpecs.slice(0, isMCI?6:3);
   toolLog('resp','Specialists Notified',
-    onCall.map(s=>`${s.name} · ${s.specialty}\n   ${s.hospital} · ${s.on_call?'ON CALL 🟢':'Available'}`).join('\n\n'));
+    onCall.map(s=>`${s.name} Â· ${s.specialty}\n   ${s.hospital} Â· ${s.on_call?'ON CALL ðŸŸ¢':'Available'}`).join('\n\n'));
   setAgentState('a7','done','Teams notified',
-    onCall.slice(0,3).map(s=>s.specialty).join(' · '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    onCall.slice(0,3).map(s=>s.specialty).join(' Â· '),`${((Date.now()-startTs)/1000).toFixed(1)}s`);
   await wait(300);
 
-  // ── AGENT 8: Mission Commander Final ────────────────────
+  // â”€â”€ AGENT 8: Mission Commander Final â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   setAgentState('a8','run','Synthesising final deployment recommendation...');
   toolLog('thought','Mission Commander (Synthesis)',
     'Consolidating all agent outputs...\nComputing deployment confidence score...');
@@ -1307,16 +1087,16 @@ async function runSimulation(formInputs, skipReset){
   toolLog('resp','MISSION DEPLOYMENT READY',
     `Deployment ID: ${deployId}\nIncident: ${incidentId}\nPriority: ${priority}\nStatus: ${isMCI?'MCI_ACTIVE':'READY_WITH_WARNINGS'}\n\n` +
     `Units dispatched: ${dispatchedAmbs.length}\n`+
-    dispatchedAmbs.map((a,i)=>`  ${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign}) · ${a.type} · ETA ~${a._eta} min`).join('\n')+'\n\n'+
-    `Primary Hospital: ${h1.name} (${h1.locality}) · Score: ${h1._score.toFixed(0)}\n`+
-    `Alternate: ${top3[1]?.name||'—'}\n`+
+    dispatchedAmbs.map((a,i)=>`  ${i===0?'PRIMARY':'BACKUP '+(i)}: ${a.id} (${a.call_sign}) Â· ${a.type} Â· ETA ~${a._eta} min`).join('\n')+'\n\n'+
+    `Primary Hospital: ${h1.name} (${h1.locality}) Â· Score: ${h1._score.toFixed(0)}\n`+
+    `Alternate: ${top3[1]?.name||'â€”'}\n`+
     `Total ETA: ${etaAfter} min (with green corridor)\nWithout PulseRoute: ${etaBefore} min\nTime saved: ${etaBefore-etaAfter} min\n\n`+
     `Specialists notified: ${onCall.length}\n${onCall.map(s=>`  ${s.specialty}: ${s.name}`).join('\n')}\n\n`+
-    `Green corridor: ACTIVE · TS020+TS023 preempted\nDeployment Confidence: ${confidence}% (${confLabel})`);
+    `Green corridor: ACTIVE Â· TS020+TS023 preempted\nDeployment Confidence: ${confidence}% (${confLabel})`);
   setAgentState('a8','done','DEPLOYMENT READY',
-    `Confidence: ${confidence}% · ETA: ${etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
+    `Confidence: ${confidence}% Â· ETA: ${etaAfter} min`,`${((Date.now()-startTs)/1000).toFixed(1)}s`);
 
-  // ── Bottom panel ──────────────────────────────────────────
+  // â”€â”€ Bottom panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   showBottomPanel();
   for(let i=0;i<8;i++) setPipelineStep(i,'done');
   updatePipelineBadge(8,8);
@@ -1351,20 +1131,20 @@ async function runSimulation(formInputs, skipReset){
   setBa(etaBefore,etaAfter);
   showMissionSummary([
     {label:'Units Dispatched',val:dispatchedAmbs.length+' Ambulances',
-     sub:dispatchedAmbs.map(a=>a.call_sign).join(' · '),color:'var(--accent)'},
+     sub:dispatchedAmbs.map(a=>a.call_sign).join(' Â· '),color:'var(--accent)'},
     {label:'Primary Hospital',val:h1.name,
-     sub:`${h1.locality} · ${h1.beds_available||h1.beds_total||'?'} beds · Score ${h1._score!=null?h1._score.toFixed(0):'—'}`,color:'var(--green)'},
+     sub:`${h1.locality} Â· ${h1.beds_available||h1.beds_total||'?'} beds Â· Score ${h1._score!=null?h1._score.toFixed(0):'â€”'}`,color:'var(--green)'},
     {label:'Total ETA',val:etaAfter+' min',
      sub:`Saved ${etaBefore-etaAfter} min vs standard`,color:'var(--green)'},
     {label:'Priority',val:sopCode,sub:priority,color:'var(--red)'},
     {label:'Green Corridor',val:'ACTIVE',sub:'TS020 + TS023 preempted',color:'var(--cyan)'},
     {label:'Confidence',val:confidence+'%',
-     sub:confLabel+' · '+onCall.length+' specialists notified',
+     sub:confLabel+' Â· '+onCall.length+' specialists notified',
      color:confidence>=85?'var(--green)':confidence>=65?'var(--amber)':'var(--red)'}
   ]);
 
   document.getElementById('sys-badge').className='badge b-amber';
-  document.getElementById('sys-badge').textContent='● MISSION ACTIVE';
+  document.getElementById('sys-badge').textContent='â— MISSION ACTIVE';
 
   if(!skipReset){
     running=false;
@@ -1373,11 +1153,11 @@ async function runSimulation(formInputs, skipReset){
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// TOOL → AGENT STEP MAPPING
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// TOOL â†’ AGENT STEP MAPPING
 // Maps the MCP tool names Mission Commander calls to the agent
 // row that should light up in the left-panel timeline.
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const TOOL_AGENT_MAP = {
   'traffic_assessment':               'a4',
   'find_nearest_available_ambulance': 'a3',
@@ -1385,42 +1165,42 @@ const TOOL_AGENT_MAP = {
   'calculate_route':                  'a4',
 };
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // RENDER FROM ORCHESTRATE RESPONSE
 // Receives the parsed OrchestrateResponse object that arrives
 // in the SSE "final" event and populates every UI widget.
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderFromResponse(r, formInputs) {
   const { loc, count, iLoc, startTs } = formInputs;
   const ix = MAP.x(iLoc.lng), iy = MAP.y(iLoc.lat);
 
-  // ── Incident pin ─────────────────────────────────────────
+  // â”€â”€ Incident pin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   clearLayer('incident-layer');
   plotIncident(ix, iy);
 
-  // ── Ambulance pin ─────────────────────────────────────────
+  // â”€â”€ Ambulance pin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   clearLayer('ambulance-layer');
   if (r.ambulance) {
     const ax = MAP.x(r.ambulance.longitude), ay = MAP.y(r.ambulance.latitude);
     plotAmbulance(ax, ay, r.ambulance.call_sign);
 
-    // ── Route Leg A: ambulance → incident ─────────────────
+    // â”€â”€ Route Leg A: ambulance â†’ incident â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (r.route && r.route.leg_a) {
       drawRoute(ax, ay, ix, iy, '#f0883e', 'arr-r');
     }
 
-    // ── Animate ambulance movement ─────────────────────────
+    // â”€â”€ Animate ambulance movement â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const hosp = r.hospital;
     if (hosp) {
       const hx = MAP.x(hosp.longitude), hy = MAP.y(hosp.latitude);
       animateAmbulance(ax, ay, ix, iy, hx, hy);
 
-      // ── Route Leg B: incident → hospital ──────────────────
+      // â”€â”€ Route Leg B: incident â†’ hospital â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (r.route && r.route.leg_b) {
         drawRoute(ix, iy, hx, hy, '#2f81f7', 'arr-b');
       }
 
-      // ── Green corridor overlay ─────────────────────────────
+      // â”€â”€ Green corridor overlay â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       if (r.corridor && r.corridor.active) {
         drawCorridor(ix, iy, hx, hy);
         document.getElementById('corridor-badge').style.display = '';
@@ -1439,7 +1219,7 @@ function renderFromResponse(r, formInputs) {
         });
       }
 
-      // ── ETA bar ────────────────────────────────────────────
+      // â”€â”€ ETA bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
       const corridor = r.corridor;
       const etaBefore = corridor && corridor.active ? corridor.eta_before_minutes
                       : (r.route ? r.route.total_eta_minutes + 6 : 22);
@@ -1447,26 +1227,26 @@ function renderFromResponse(r, formInputs) {
                       : (r.route ? r.route.total_eta_minutes : 18);
       setEta(etaBefore, etaAfter);
       setBa(etaBefore, etaAfter);
-      addMapBadge(`${loc} → ${hosp.name}: ${etaAfter} min`, '#3fb950');
+      addMapBadge(`${loc} â†’ ${hosp.name}: ${etaAfter} min`, '#3fb950');
       addMapBadge(`Destination: ${hosp.name}`, '#2f81f7');
     }
   }
 
-  // ── Confidence ring ────────────────────────────────────────
+  // â”€â”€ Confidence ring â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const confPct = Math.round((r.confidence || 0) * 100);
   setConfidence(confPct);
 
-  // ── MCI badge ─────────────────────────────────────────────
+  // â”€â”€ MCI badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (parseInt(count) >= 10) {
     document.getElementById('mci-badge').style.display = '';
   }
 
-  // ── System badge ──────────────────────────────────────────
+  // â”€â”€ System badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const statusBadge = document.getElementById('sys-badge');
   statusBadge.className = 'badge b-amber';
-  statusBadge.textContent = '● MISSION ACTIVE';
+  statusBadge.textContent = 'â— MISSION ACTIVE';
 
-  // ── Mission summary cards ──────────────────────────────────
+  // â”€â”€ Mission summary cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const ambulance = r.ambulance;
   const hospital  = r.hospital;
   const traffic   = r.traffic;
@@ -1477,15 +1257,15 @@ function renderFromResponse(r, formInputs) {
   const cards = [];
   if (ambulance) {
     cards.push({ label: 'Ambulance',  val: ambulance.ambulance_id,
-      sub: `${ambulance.call_sign} · ${ambulance.type} · ${ambulance.locality}`, color: 'var(--accent)' });
+      sub: `${ambulance.call_sign} Â· ${ambulance.type} Â· ${ambulance.locality}`, color: 'var(--accent)' });
   }
   if (hospital) {
     cards.push({ label: 'Hospital', val: hospital.name,
-      sub: `${hospital.locality} · ${hospital.available_beds} beds`, color: 'var(--green)' });
+      sub: `${hospital.locality} Â· ${hospital.available_beds} beds`, color: 'var(--green)' });
   }
   if (route) {
     cards.push({ label: 'Total ETA', val: route.total_eta_minutes + ' min',
-      sub: corridor && corridor.active ? `Saved ${corridor.time_saved_minutes} min · green corridor` : 'Optimised route',
+      sub: corridor && corridor.active ? `Saved ${corridor.time_saved_minutes} min Â· green corridor` : 'Optimised route',
       color: 'var(--green)' });
   }
   if (r.sop_code) {
@@ -1498,32 +1278,32 @@ function renderFromResponse(r, formInputs) {
   }
   if (traffic) {
     cards.push({ label: 'Traffic', val: traffic.congestion_level,
-      sub: `Score ${traffic.congestion_score} · delay ${traffic.expected_delay_minutes} min`,
+      sub: `Score ${traffic.congestion_score} Â· delay ${traffic.expected_delay_minutes} min`,
       color: traffic.congestion_level === 'CRITICAL' ? 'var(--red)' : traffic.congestion_level === 'SEVERE' ? 'var(--amber)' : 'var(--green)' });
   }
   cards.push({ label: 'Confidence', val: confPct + '%',
-    sub: confLabel + ' — ' + (r.notes ? r.notes.slice(0, 60) : ''),
+    sub: confLabel + ' â€” ' + (r.notes ? r.notes.slice(0, 60) : ''),
     color: confPct >= 85 ? 'var(--green)' : confPct >= 65 ? 'var(--amber)' : 'var(--red)' });
 
   if (cards.length) showMissionSummary(cards);
 
-  // ── Agent 8 final state ────────────────────────────────────
+  // â”€â”€ Agent 8 final state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const elapsed = ((Date.now() - startTs) / 1000).toFixed(1);
   setAgentState('a8', 'done', 'DEPLOYMENT READY',
-    `Confidence: ${confPct}% · ETA: ${route ? route.total_eta_minutes : '?'} min`, `${elapsed}s`);
+    `Confidence: ${confPct}% Â· ETA: ${route ? route.total_eta_minutes : '?'} min`, `${elapsed}s`);
 
-  // ── Coordinator note in console ────────────────────────────
+  // â”€â”€ Coordinator note in console â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   if (r.notes) {
     toolLog('resp', 'Coordinator Note', r.notes);
   }
 }
 
-// ═══════════════════════════════════════════════════════════
-// LIVE DISPATCH — POST /api/dispatch → SSE stream
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// LIVE DISPATCH â€” POST /api/dispatch â†’ SSE stream
 // Sends the incident payload to the MCP server proxy, which
 // forwards it to watsonx Orchestrate Mission Commander and
 // streams SSE events back in real time.
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 async function runDispatch() {
   if (running) return;
   running = true;
@@ -1533,7 +1313,7 @@ async function runDispatch() {
   btn.disabled = true;
   spin.style.display = 'inline-block';
 
-  // ── Reset UI ───────────────────────────────────────────────
+  // â”€â”€ Reset UI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   document.getElementById('tool-console').innerHTML = '';
   document.getElementById('map-badges').innerHTML = '';
   clearLayer('route-layer'); clearLayer('corridor-layer');
@@ -1545,12 +1325,12 @@ async function runDispatch() {
   document.getElementById('mci-badge').style.display = 'none';
   document.getElementById('corridor-badge').style.display = 'none';
   document.getElementById('sys-badge').className = 'badge b-blue';
-  document.getElementById('sys-badge').textContent = '● CONNECTING...';
+  document.getElementById('sys-badge').textContent = 'â— CONNECTING...';
   AGENTS.forEach(a => setAgentState(a.id, 'idle', a.sub, ''));
   resetBottomPanel();
   showBottomPanel();
 
-  // ── Read form inputs ───────────────────────────────────────
+  // â”€â”€ Read form inputs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const desc  = document.getElementById('f-desc').value.trim()  || 'Emergency incident reported';
   const type  = document.getElementById('f-type').value         || 'Road Accident';
   const sev   = document.getElementById('f-sev').value          || 'Critical (S1)';
@@ -1590,9 +1370,9 @@ async function runDispatch() {
     reported_at:     new Date().toISOString(),
   };
 
-  // ── Mark Stage 1 agents as running ────────────────────────
+  // â”€â”€ Mark Stage 1 agents as running â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   setAgentState('a1', 'run', 'Connecting to Mission Commander...');
-  toolLog('thought', 'Mission Commander', `Dispatching: ${type} · ${priority} · ${loc}`);
+  toolLog('thought', 'Mission Commander', `Dispatching: ${type} Â· ${priority} Â· ${loc}`);
 
   let toolCallCount = 0;
 
@@ -1608,9 +1388,9 @@ async function runDispatch() {
       throw new Error(`Proxy returned ${res.status}: ${errText.slice(0, 200)}`);
     }
 
-    if (!res.body) throw new Error('Response body is null — SSE not supported by this browser');
+    if (!res.body) throw new Error('Response body is null â€” SSE not supported by this browser');
 
-    // ── Stream SSE ─────────────────────────────────────────
+    // â”€â”€ Stream SSE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     const reader  = res.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let   buf     = '';
@@ -1632,13 +1412,13 @@ async function runDispatch() {
         let ev;
         try { ev = JSON.parse(raw); } catch { continue; }
 
-        // ── Route each event type ────────────────────────
+        // â”€â”€ Route each event type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         switch (ev.type) {
 
           case 'thought': {
             const content = String(ev.content || '');
             toolLog('thought', 'Mission Commander', content);
-            // Proxy path probing messages appear first — keep a1 animated
+            // Proxy path probing messages appear first â€” keep a1 animated
             if (content.startsWith('[proxy]')) {
               setAgentState('a1', 'run', 'Reaching Mission Commander...');
             } else {
@@ -1655,8 +1435,8 @@ async function runDispatch() {
 
             // Mark intake agent done on first real tool call
             if (toolCallCount === 1) {
-              setAgentState('a1', 'done', 'Incident classified', `SOP assigned · ${priority}`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
-              setAgentState('a2', 'done', 'Intake report generated', `${loc} · ${count} patient(s)`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
+              setAgentState('a1', 'done', 'Incident classified', `SOP assigned Â· ${priority}`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
+              setAgentState('a2', 'done', 'Intake report generated', `${loc} Â· ${count} patient(s)`, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               setPipelineStep(0, 'done'); setPipelineStep(1, 'done');
             }
             // Advance pipeline tile for this tool
@@ -1677,7 +1457,7 @@ async function runDispatch() {
               'traffic_assessment':               'Assessing traffic conditions...',
               'find_nearest_available_ambulance': 'Finding nearest ALS ambulance...',
               'select_hospital':                  'Scoring hospitals for best match...',
-              'calculate_route':                  toolCallCount >= 4 ? 'Computing Leg B: incident → hospital...' : 'Computing Leg A: ambulance → incident...',
+              'calculate_route':                  toolCallCount >= 4 ? 'Computing Leg B: incident â†’ hospital...' : 'Computing Leg A: ambulance â†’ incident...',
             };
             setAgentState(agId, 'tool', stepNames[tName] || `Calling ${tName}...`);
 
@@ -1692,7 +1472,7 @@ async function runDispatch() {
             const tName = ev.tool_name || 'tool';
             const agId  = TOOL_AGENT_MAP[tName] || 'a4';
             const out   = typeof ev.output === 'string' ? ev.output : JSON.stringify(ev.output || {}, null, 2);
-            toolLog('resp', tName + ' → result', out);
+            toolLog('resp', tName + ' â†’ result', out);
 
             // Parse result snippet for agent status line
             let snippet = '';
@@ -1700,11 +1480,11 @@ async function runDispatch() {
               const parsed = JSON.parse(out);
               if (tName === 'find_nearest_available_ambulance') {
                 const a = parsed.ambulance || parsed;
-                snippet = `${a.ambulance_id || a.id || ''} · ${a.type || ''} · ETA ${a.eta_minutes || '?'} min`;
+                snippet = `${a.ambulance_id || a.id || ''} Â· ${a.type || ''} Â· ETA ${a.eta_minutes || '?'} min`;
                 setAgentState('a3', 'done', 'Ambulance dispatched', snippet, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               } else if (tName === 'select_hospital') {
                 const h = parsed.hospital || parsed;
-                snippet = `${h.name || ''} · ${h.available_beds ?? '?'} beds`;
+                snippet = `${h.name || ''} Â· ${h.available_beds ?? '?'} beds`;
                 setAgentState('a6', 'done', 'Hospital selected', snippet, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               } else if (tName === 'traffic_assessment') {
                 const t = parsed.traffic || parsed;
@@ -1717,7 +1497,7 @@ async function runDispatch() {
                   sigCount > 0 ? `${sigCount} preemptible signal(s) found` : 'No preemption needed');
               } else if (tName === 'calculate_route') {
                 const route = parsed.recommended_route || parsed.route || parsed;
-                snippet = `ETA ${route.eta_minutes || '?'} min · ${route.road_name || ''}`;
+                snippet = `ETA ${route.eta_minutes || '?'} min Â· ${route.road_name || ''}`;
                 setAgentState('a4', 'done', 'Routes calculated', snippet, `${((Date.now()-startTs)/1000).toFixed(1)}s`);
                 setAgentState('a5', 'done', 'Signal preemption advisory ready', '', `${((Date.now()-startTs)/1000).toFixed(1)}s`);
               }
@@ -1731,12 +1511,12 @@ async function runDispatch() {
             catch { result = null; }
 
             if (result) {
-              toolLog('resp', '✅  MISSION DEPLOYMENT READY',
+              toolLog('resp', 'âœ…  MISSION DEPLOYMENT READY',
                 JSON.stringify(result, null, 2).slice(0, 1200) + (JSON.stringify(result).length > 1200 ? '\n...(truncated)' : ''));
 
               // Mark specialist agent done (Orchestrate handles specialists internally)
               setAgentState('a7', 'done', 'Specialists notified',
-                (result.specialists || []).slice(0, 2).map(s => s.specialty || s.name).join(' · ') || 'On-call team alerted',
+                (result.specialists || []).slice(0, 2).map(s => s.specialty || s.name).join(' Â· ') || 'On-call team alerted',
                 `${((Date.now()-startTs)/1000).toFixed(1)}s`);
 
               // Mark Mission Commander synthesis done
@@ -1745,7 +1525,7 @@ async function runDispatch() {
 
               renderFromResponse(result, formInputs);
 
-              // ── Populate bottom panel — Orchestrate result + KB fallback ──
+              // â”€â”€ Populate bottom panel â€” Orchestrate result + KB fallback â”€â”€
               setPipelineStep(6, 'done'); setPipelineStep(7, 'done'); updatePipelineBadge(8, 8);
 
               // Ambulances: primary from result + backups; pad with KB nearest if <2
@@ -1818,11 +1598,11 @@ async function runDispatch() {
             toolLog('error', 'Mission Commander Error', msg);
             // If it's a proxy-candidate-exhaustion error, fall back to simulation
             if (msg.includes('exhausted') || msg.includes('404') || msg.includes('401') || msg.includes('403')) {
-              toolLog('thought', 'Fallback', 'Orchestrate unreachable — running local simulation');
+              toolLog('thought', 'Fallback', 'Orchestrate unreachable â€” running local simulation');
               await runSimulation(formInputs, true /* skipReset */);
             } else {
               document.getElementById('sys-badge').className = 'badge b-red';
-              document.getElementById('sys-badge').textContent = '● ERROR';
+              document.getElementById('sys-badge').textContent = 'â— ERROR';
             }
             done = true;
             break;
@@ -1832,9 +1612,9 @@ async function runDispatch() {
     }
 
   } catch (err) {
-    // Network error, CORS failure, etc. — fall back to simulation
+    // Network error, CORS failure, etc. â€” fall back to simulation
     toolLog('error', 'Network / Proxy Error', String(err));
-    toolLog('thought', 'Fallback', 'Live dispatch unavailable — running local simulation');
+    toolLog('thought', 'Fallback', 'Live dispatch unavailable â€” running local simulation');
     await runSimulation(formInputs, true /* skipReset */);
   } finally {
     running = false;
@@ -1843,20 +1623,20 @@ async function runDispatch() {
   }
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // BOTTOM PANEL RENDER FUNCTIONS
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 // Pipeline step definitions (mirrors AGENTS array)
 const PIPELINE_STEPS = [
-  {icon:'🎯', name:'Mission Cmd',    sub:'Orchestrator'},
-  {icon:'🩺', name:'Triage',         sub:'Medical Eval'},
-  {icon:'🚑', name:'Dispatch',       sub:'Ambulance'},
-  {icon:'🚦', name:'Traffic Intel',  sub:'Congestion'},
-  {icon:'🏥', name:'Hospital Re...', sub:'ICU & Beds'},
-  {icon:'📡', name:'Route Opt',      sub:'Best Path'},
-  {icon:'🟢', name:'Green Corri...', sub:'Signal Sync'},
-  {icon:'⭐', name:'Decision A...',  sub:'Final Command'},
+  {icon:'ðŸŽ¯', name:'Mission Cmd',    sub:'Orchestrator'},
+  {icon:'ðŸ©º', name:'Triage',         sub:'Medical Eval'},
+  {icon:'ðŸš‘', name:'Dispatch',       sub:'Ambulance'},
+  {icon:'ðŸš¦', name:'Traffic Intel',  sub:'Congestion'},
+  {icon:'ðŸ¥', name:'Hospital Re...', sub:'ICU & Beds'},
+  {icon:'ðŸ“¡', name:'Route Opt',      sub:'Best Path'},
+  {icon:'ðŸŸ¢', name:'Green Corri...', sub:'Signal Sync'},
+  {icon:'â­', name:'Decision A...',  sub:'Final Command'},
 ];
 
 function buildPipelineSteps() {
@@ -1906,11 +1686,11 @@ function resetBottomPanel() {
     '<div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0;grid-column:1/-1">Awaiting selection...</div>';
   document.getElementById('specialist-list').innerHTML =
     '<div style="color:var(--muted);font-size:11px;text-align:center;padding:12px 0">Awaiting specialist assignment...</div>';
-  document.getElementById('stat-casualties').textContent = '—';
-  document.getElementById('stat-ambulances').textContent = '—';
-  document.getElementById('stat-hospitals').textContent = '—';
-  document.getElementById('stat-corridors').textContent = '—';
-  document.getElementById('stat-saved').textContent = '—';
+  document.getElementById('stat-casualties').textContent = 'â€”';
+  document.getElementById('stat-ambulances').textContent = 'â€”';
+  document.getElementById('stat-hospitals').textContent = 'â€”';
+  document.getElementById('stat-corridors').textContent = 'â€”';
+  document.getElementById('stat-saved').textContent = 'â€”';
   document.getElementById('amb-status-badge').textContent = 'STANDBY';
   document.getElementById('spec-status-badge').textContent = 'STANDBY';
   document.getElementById('pipeline-step-badge').textContent = 'Awaiting dispatch';
@@ -1924,8 +1704,8 @@ function renderAmbulances(ambList) {
     <div class="amb-row">
       <span class="amb-badge ${i === 0 ? 'amb-primary' : 'amb-backup'}">${i === 0 ? 'PRIMARY' : 'BACKUP'}</span>
       <div class="amb-info">
-        <div class="amb-id">${a.id || a.ambulance_id || '—'} · ${a.call_sign || a.sign || '—'}</div>
-        <div class="amb-detail">${a.type || 'ALS'} · ${a.locality || a.current_locality || '—'} · Crew: ${a.paramedic || (a.crew && a.crew[0]) || '—'}</div>
+        <div class="amb-id">${a.id || a.ambulance_id || 'â€”'} Â· ${a.call_sign || a.sign || 'â€”'}</div>
+        <div class="amb-detail">${a.type || 'ALS'} Â· ${a.locality || a.current_locality || 'â€”'} Â· Crew: ${a.paramedic || (a.crew && a.crew[0]) || 'â€”'}</div>
       </div>
       <div class="amb-eta">${a.eta_minutes || a.eta || '?'} min<br/><span style="font-size:9px;color:var(--muted);font-weight:400">${(a.distance_km || a.dist || '?')} km</span></div>
     </div>`).join('');
@@ -1942,13 +1722,13 @@ function renderHospitals(hospList) {
   if (!hospList || !hospList.length) return;
   el.innerHTML = hospList.map((h, i) => `
     <div class="hosp-card ${i === 0 ? 'primary' : ''}">
-      <div class="hosp-name">${h.name || h.hospital_name || '—'}</div>
+      <div class="hosp-name">${h.name || h.hospital_name || 'â€”'}</div>
       <div class="hosp-score">${h.readiness ? h.readiness + '% SCORE' : (i === 0 ? 'PRIMARY' : 'ALT')}</div>
-      <div class="hosp-dist">Distance: ${h.distance_km || h.dist || '?'} km · ETA: ${h.eta || '?'} min</div>
+      <div class="hosp-dist">Distance: ${h.distance_km || h.dist || '?'} km Â· ETA: ${h.eta || '?'} min</div>
       <div class="hosp-stats">
         <div class="hosp-stat">
           <div class="hosp-stat-lbl">Trauma Bays</div>
-          <div class="hosp-stat-val">${h.trauma_bays || (h.trauma_level ? 'L' + h.trauma_level : '—')}</div>
+          <div class="hosp-stat-val">${h.trauma_bays || (h.trauma_level ? 'L' + h.trauma_level : 'â€”')}</div>
         </div>
         <div class="hosp-stat">
           <div class="hosp-stat-lbl">ICU Beds Free</div>
@@ -1965,11 +1745,11 @@ function renderSpecialists(specList) {
   const statusClass = s => s === 'En Route' ? 'spec-enroute' : s === 'On Call' ? 'spec-oncall' : 'spec-available';
   el.innerHTML = specList.map(s => `
     <div class="spec-row">
-      <div class="spec-avatar">👨‍⚕️</div>
+      <div class="spec-avatar">ðŸ‘¨â€âš•ï¸</div>
       <div class="spec-info">
-        <div class="spec-role">${s.specialty || s.role || '—'}</div>
-        <div class="spec-name">${s.name || '—'}</div>
-        <div class="spec-station">${s.hospital || s.station || '—'} · ETA: ${s.eta || '?'} min</div>
+        <div class="spec-role">${s.specialty || s.role || 'â€”'}</div>
+        <div class="spec-name">${s.name || 'â€”'}</div>
+        <div class="spec-station">${s.hospital || s.station || 'â€”'} Â· ETA: ${s.eta || '?'} min</div>
       </div>
       <span class="spec-status ${statusClass(s.status || (s.on_call ? 'On Call' : 'Available'))}">${s.status || (s.on_call ? 'On Call' : 'Available')}</span>
     </div>`).join('');
@@ -1982,19 +1762,19 @@ function renderSpecialists(specList) {
 
 function populateBottomPanel(opts) {
   const { count, ambulances, hospitals, specialists, corridor, saved } = opts;
-  document.getElementById('stat-casualties').textContent = count || '—';
+  document.getElementById('stat-casualties').textContent = count || 'â€”';
   if (corridor) {
     document.getElementById('stat-corridors').textContent = corridor;
-    document.getElementById('stat-saved').textContent = (saved || '—') + ' min';
+    document.getElementById('stat-saved').textContent = (saved || 'â€”') + ' min';
   }
   if (ambulances && ambulances.length) renderAmbulances(ambulances);
   if (hospitals  && hospitals.length)  renderHospitals(hospitals);
   if (specialists && specialists.length) renderSpecialists(specialists);
 }
 
-// ═══════════════════════════════════════════════════════════
-// ADK / watsonx Orchestrate — Mission Commander integration
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+// ADK / watsonx Orchestrate â€” Mission Commander integration
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 const WXO_AGENT_ID   = 'f5bb4d34-12e0-466b-9858-6304e52bc4b7';
 const WXO_INSTANCE_ID= '9291f63d-e948-4929-9c62-56eecfb515ad';
@@ -2007,7 +1787,7 @@ function buildIncidentMessage() {
   const loc   = document.getElementById('f-loc')   ? document.getElementById('f-loc').value    : 'Silk Board Junction';
   const count = document.getElementById('f-count') ? document.getElementById('f-count').value  : '2';
   const notes = document.getElementById('f-notes') ? document.getElementById('f-notes').value  : '';
-  return `EMERGENCY DISPATCH REQUEST — PulseRoute AI\n` +
+  return `EMERGENCY DISPATCH REQUEST â€” PulseRoute AI\n` +
          `Incident Type: ${type}\nSeverity: ${sev}\nLocation: ${loc}, Bengaluru\n` +
          `Casualties: ${count}\nAdditional: ${notes || 'None'}\n` +
          `Request: Dispatch nearest ALS unit, select optimal hospital, activate green corridor.`;
@@ -2017,7 +1797,7 @@ function buildIncidentMessage() {
 // If the ADK extension is installed it will intercept this URL
 function openMissionCommander(prefillMessage) {
   const msg = prefillMessage || buildIncidentMessage();
-  // Deep-link to the agent's chat UI — ADK extension or browser will open it
+  // Deep-link to the agent's chat UI â€” ADK extension or browser will open it
   const chatUrl = `https://${WXO_HOST}/chat`
     + `?agentId=${encodeURIComponent(WXO_AGENT_ID)}`
     + `&message=${encodeURIComponent(msg)}`;
@@ -2027,7 +1807,7 @@ function openMissionCommander(prefillMessage) {
   const btn = document.getElementById('adk-btn');
   if (btn) {
     const orig = btn.innerHTML;
-    btn.innerHTML = '<span style="font-size:13px">✅</span> Agent Opened';
+    btn.innerHTML = '<span style="font-size:13px">âœ…</span> Agent Opened';
     btn.style.background = 'rgba(57,211,83,.15)';
     btn.style.color = 'var(--green)';
     btn.style.borderColor = 'rgba(57,211,83,.3)';
@@ -2040,16 +1820,17 @@ function openMissionCommander(prefillMessage) {
   }
 
   // Also surface the URL in the tool console so it's visible
-  toolLog('thought', '🤖 Mission Commander ADK',
+  toolLog('thought', 'ðŸ¤– Mission Commander ADK',
     `Opening agent in watsonx Orchestrate ADK:\n${chatUrl}\n\nAgent ID: ${WXO_AGENT_ID}\nInstance: ${WXO_INSTANCE_ID}`);
 }
 
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // INIT
-// ═══════════════════════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 buildAgentList();
 buildPipelineSteps();
 document.getElementById('run-btn').addEventListener('click', runDispatch);
 </script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </body>
 </html>
